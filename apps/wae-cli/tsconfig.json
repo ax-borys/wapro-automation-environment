@@ -7,6 +7,13 @@
       "emitDeclarationOnly": true,
       "declarationMap": true
    },
-   "references": [{ "path": "../../packages/calls/wapro-mag-create-receipt" }],
+   "references": [
+      {
+         "path": "../../packages/calls/wapro-mag-create-receipt"
+      },
+      {
+         "path": "../../packages/db"
+      }
+   ],
    "include": ["src"]
 }

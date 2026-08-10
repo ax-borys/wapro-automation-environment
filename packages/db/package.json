@@ -7,6 +7,12 @@
    "scripts": {
       "build": "tsc -b && tsdown"
    },
-   "dependencies": {},
-   "packageManager": "pnpm@10.33.0"
+   "dependencies": {
+      "drizzle-orm": "rc",
+      "mssql": "^12.7.0"
+   },
+   "packageManager": "pnpm@10.33.0",
+   "devDependencies": {
+      "drizzle-kit": "rc"
+   }
 }
