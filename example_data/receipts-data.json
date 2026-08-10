@@ -27,5 +27,63 @@
             "discount": 0
          }
       ]
+   },
+   {
+      "companyId": 1,
+      "cashRegisterId": 1,
+      "counterPartyId": 1,
+      "userId": 3000001,
+      "deposit": 0,
+      "paymentDeadline": "2026-08-10T00:00:00.000Z",
+      "paymentFormat": "przelew",
+      "pricingType": "Brutto",
+      "stockId": 1,
+      "positions": [
+         {
+            "productId": 412,
+            "quantity": 3,
+            "priceNetto": 244,
+            "priceBrutto": 300.12,
+            "vatCode": "23",
+            "discount": 0
+         },
+         {
+            "productId": 412,
+            "quantity": 1,
+            "priceNetto": 300,
+            "priceBrutto": 369,
+            "vatCode": "23",
+            "discount": 0
+         }
+      ]
+   },
+   {
+      "companyId": 1,
+      "cashRegisterId": 1,
+      "counterPartyId": 1,
+      "userId": 3000001,
+      "deposit": 0,
+      "paymentDeadline": "2026-08-10T00:00:00.000Z",
+      "paymentFormat": "przelew",
+      "pricingType": "Brutto",
+      "stockId": 1,
+      "positions": [
+         {
+            "productId": 412,
+            "quantity": 1,
+            "priceNetto": 244,
+            "priceBrutto": 300.12,
+            "vatCode": "23",
+            "discount": 0
+         },
+         {
+            "productId": 412,
+            "quantity": 1,
+            "priceNetto": 300,
+            "priceBrutto": 369,
+            "vatCode": "23",
+            "discount": 0
+         }
+      ]
    }
 ]
