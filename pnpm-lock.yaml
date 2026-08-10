@@ -231,15 +231,32 @@ importers:
         version: link:../../packages/db
       '@wae/wapro-mag-create-receipt':
         specifier: workspace:*
-        version: link:../../packages/template
+        version: link:../../packages/calls/wapro-mag-create-receipt
 
-  packages/calls/wapro-mag-create-receipt: {}
+  packages/calls/wapro-mag-create-receipt:
+    dependencies:
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../../db
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../../types
+    devDependencies:
+      '@types/mssql':
+        specifier: ^12.3.0
+        version: 12.3.0
+      mssql:
+        specifier: ^12.7.0
+        version: 12.7.0
 
   packages/db:
     dependencies:
+      '@types/mssql':
+        specifier: ^12.3.0
+        version: 12.3.0
       drizzle-orm:
         specifier: rc
-        version: 1.0.0-rc.4(mssql@12.7.0)
+        version: 1.0.0-rc.4(@types/mssql@12.3.0)(mssql@12.7.0)
       mssql:
         specifier: ^12.7.0
         version: 12.7.0
@@ -248,7 +265,20 @@ importers:
         specifier: rc
         version: 1.0.0-rc.4
 
-  packages/template: {}
+  packages/template:
+    devDependencies:
+      '@types/mssql':
+        specifier: ^12.3.0
+        version: 12.3.0
+      mssql:
+        specifier: ^12.7.0
+        version: 12.7.0
+
+  packages/types:
+    dependencies:
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../db
 
 packages:
 
@@ -739,6 +769,9 @@ packages:
 
   '@tediousjs/connection-string@1.1.0':
     resolution: {integrity: sha512-z9ZBWEG+8pIB5V1zYzlRPXx0oRJ5H7coPnMQK8EZOw03UTPI9Umn6viL36f5w+CuqkKsnCM50RVStpjZmR0Bng==}
+
+  '@types/mssql@12.3.0':
+    resolution: {integrity: sha512-+jy+AJtfuTDI5+nhh0hDNcir1p8P+pf+qsHXpUpYvg7EikxUUePBe+a+Kr6j/Xs89o4EbHlVzrh0HOxbqWM31Q==}
 
   '@types/node@26.2.0':
     resolution: {integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==}
@@ -1879,6 +1912,14 @@ snapshots:
 
   '@tediousjs/connection-string@1.1.0': {}
 
+  '@types/mssql@12.3.0':
+    dependencies:
+      '@types/node': 26.2.0
+      tarn: 3.1.2
+      tedious: 20.0.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@types/node@26.2.0':
     dependencies:
       undici-types: 8.3.0
@@ -2086,8 +2127,9 @@ snapshots:
       get-tsconfig: 4.14.1
       jiti: 2.7.0
 
-  drizzle-orm@1.0.0-rc.4(mssql@12.7.0):
+  drizzle-orm@1.0.0-rc.4(@types/mssql@12.3.0)(mssql@12.7.0):
     optionalDependencies:
+      '@types/mssql': 12.3.0
       mssql: 12.7.0
 
   dts-resolver@3.0.0: {}

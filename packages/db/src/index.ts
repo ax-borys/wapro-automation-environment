@@ -8,3 +8,9 @@ export async function health_check() {
       console.log('Database is dead!/n', err);
    }
 }
+
+export function test() {
+   return 'tst';
+}
+
+export { db };

@@ -1,5 +1,5 @@
 {
-   "name": "@wae/template",
+   "name": "@wae/types",
    "private": true,
    "main": "./dist/index.mjs",
    "types": "./dist/index.d.ts",
@@ -7,9 +7,8 @@
    "scripts": {
       "build": "tsc -b && tsdown"
    },
-   "packageManager": "pnpm@10.33.0",
-   "devDependencies": {
-      "@types/mssql": "^12.3.0",
-      "mssql": "^12.7.0"
-   }
+   "dependencies": {
+      "@wae/db": "workspace:*"
+   },
+   "packageManager": "pnpm@10.33.0"
 }
