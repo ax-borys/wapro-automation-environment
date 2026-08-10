@@ -1,0 +1,30 @@
+{
+   "name": "wapro-automation-environment",
+   "version": "1.0.0",
+   "description": "",
+   "main": "index.js",
+   "scripts": {
+      "build": "pnpm -r build",
+      "test": "echo \"Error: no test specified\" && exit 1"
+   },
+   "keywords": [],
+   "author": "Alex Borysiuk",
+   "license": "ISC",
+   "devEngines": {
+      "packageManager": {
+         "name": "pnpm",
+         "version": "^11.3.0",
+         "onFail": "download"
+      }
+   },
+   "type": "module",
+   "devDependencies": {
+      "@types/node": "^26.2.0",
+      "tsdown": "^0.22.14",
+      "tsx": "^4.23.11",
+      "typescript": "^7.0.2"
+   },
+   "dependencies": {
+      "dotenv": "^17.4.2"
+   }
+}

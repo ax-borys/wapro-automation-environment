@@ -1,0 +1,12 @@
+{
+   "name": "@wae/wapro-mag-create-receipt",
+   "private": true,
+   "main": "./dist/index.mjs",
+   "types": "./dist/index.d.ts",
+   "type": "module",
+   "scripts": {
+      "build": "tsc -b && tsdown"
+   },
+   "dependencies": {},
+   "packageManager": "pnpm@10.33.0"
+}

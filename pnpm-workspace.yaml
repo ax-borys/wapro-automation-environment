@@ -1,0 +1,6 @@
+allowBuilds:
+  esbuild: false
+packages:
+  - "apps/*"
+  - "packages/calls/*"
+  - "packages/*"
