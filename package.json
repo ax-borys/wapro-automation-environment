@@ -22,7 +22,8 @@
       "@types/node": "^26.2.0",
       "tsdown": "^0.22.14",
       "tsx": "^4.23.11",
-      "typescript": "^7.0.2"
+      "typescript": "^7.0.2",
+      "@wae/cli": "workspace:*"
    },
    "dependencies": {
       "dotenv": "^17.4.2"

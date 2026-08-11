@@ -4,6 +4,9 @@
    "main": "./dist/index.mjs",
    "types": "./dist/index.d.ts",
    "type": "module",
+   "bin": {
+      "wae-cli": "./dist/index.mjs"
+   },
    "scripts": {
       "build": "tsc -b && tsdown"
    },
