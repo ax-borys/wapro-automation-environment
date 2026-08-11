@@ -1,0 +1,23 @@
+[
+   {
+      "companyId": 1,
+      "cashRegisterId": 1,
+      "counterPartyId": 1,
+      "userId": 3000001,
+      "deposit": 0,
+      "paymentDeadline": "2026-08-10T00:00:00.000Z",
+      "paymentFormat": "przelew",
+      "pricingType": "Brutto",
+      "stockId": 1,
+      "positions": [
+         {
+            "productId": 1,
+            "quantity": 2,
+            "priceNetto": 23000,
+            "priceBrutto": 28290.0,
+            "vatCode": "23",
+            "discount": 0
+         }
+      ]
+   }
+]
