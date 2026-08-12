@@ -1,3 +1,3 @@
-import { db } from '../../db/src/db';
+import { db } from '@wae/db';
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
