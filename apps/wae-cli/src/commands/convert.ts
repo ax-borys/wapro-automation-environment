@@ -53,5 +53,4 @@ type Receipt = {
    };
 };
 
-export function convert(data: Orders) {}
-
+export function convert(data: Order) {}
