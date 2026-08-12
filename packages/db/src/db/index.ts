@@ -11,10 +11,24 @@ dotenv.config({
    path: envPath,
 });
 
+import mssql from 'mssql';
 import { drizzle } from 'drizzle-orm/node-mssql';
 
 if (!process.env.DATABASE_URL) {
    throw new Error('DATABASE_URL is not set');
 }
 
-export const db = drizzle(process.env.DATABASE_URL!);
+const pool = await mssql.connect({
+   server: '127.0.0.1', 
+   user: 'sa', 
+   password: 'qwerty', 
+   database: 'WAPRO_DEMO', 
+   options: {
+      encrypt: false, 
+      trustServerCertificate: true
+   },
+   requestTimeout: 120_000,
+   connectionTimeout: 60_000,
+})
+
+export const db = drizzle({client: pool});
