@@ -32,4 +32,4 @@ lerna-debug.log*
 # rest
 dist/
 out/
-
+tmp/
