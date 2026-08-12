@@ -17,6 +17,22 @@
             "priceBrutto": 28290.0,
             "vatCode": "23",
             "discount": 0
+         },
+                 {
+            "productId": 2,
+            "quantity": 1,
+            "priceNetto": 4878.05,
+            "priceBrutto": 6000,
+            "vatCode": "23",
+            "discount": 0
+         },
+                 {
+            "productId": 3,
+            "quantity": 1,
+            "priceNetto": 3739.84,
+            "priceBrutto": 4600,
+            "vatCode": "23",
+            "discount": 0
          }
       ]
    }

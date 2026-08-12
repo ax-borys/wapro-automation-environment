@@ -33,3 +33,5 @@ lerna-debug.log*
 dist/
 out/
 tmp/
+**/sensetive/
+**/sensitive/
