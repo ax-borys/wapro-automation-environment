@@ -1,0 +1,59 @@
+[
+   {
+      "buyer": {
+         "id": "1",
+         "firstName": "Alex",
+         "lastName": "Alexios",
+         "email": "alex@example.com",
+         "login": "alexios123",
+         "phoneNumber": "+48 123 456 678"
+      },
+      "buyerNote": null,
+      "lineItems": [
+         {
+            "offer": {
+               "id": "1",
+               "name": "Geforce RTX 5090"
+            },
+            "quantity": 1,
+            "price": {
+               "amount": "25123",
+               "currency": "PLN"
+            }
+         },
+         {
+            "offer": {
+               "id": "2",
+               "name": "Geforce RTX 5080"
+            },
+            "quantity": 1,
+            "price": {
+               "amount": "6000",
+               "currency": "PLN"
+            }
+         },
+         {
+            "offer": {
+               "id": "3",
+               "name": "ZESTAW x3!!! RTX 5080"
+            },
+            "quantity": 1,
+            "price": {
+               "amount": "10000",
+               "currency": "PLN"
+            }
+         }
+      ],
+      "summary": {
+         "paymentStatus": "PAID",
+         "totalToPay": {
+            "amount": "25000",
+            "currency": "PLN"
+         },
+         "totalPaid": {
+            "amount": "25000",
+            "currency": "PLN"
+         }
+      }
+   }
+]
