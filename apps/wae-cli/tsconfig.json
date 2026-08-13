@@ -11,6 +11,9 @@
       {
          "path": "../../packages/calls/wapro-mag-create-receipt"
       },
+            {
+         "path": "../../packages/core"
+      },
       {
          "path": "../../packages/db"
       }
