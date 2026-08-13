@@ -229,6 +229,9 @@ importers:
 
   apps/wae-cli:
     dependencies:
+      '@wae/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@wae/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -251,6 +254,8 @@ importers:
       mssql:
         specifier: ^12.7.0
         version: 12.7.0
+
+  packages/core: {}
 
   packages/db:
     dependencies:

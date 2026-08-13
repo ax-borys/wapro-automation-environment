@@ -5,8 +5,8 @@
       "counterPartyId": 1,
       "userId": 3000001,
       "deposit": 0,
-      "paymentDeadline": "2026-08-10T00:00:00.000Z",
-      "paymentFormat": "przelew",
+      "paymentDeadline": "2026-08-20T00:00:00.000Z",
+      "paymentFormat": "przedpłata",
       "pricingType": "Brutto",
       "stockId": 1,
       "positions": [

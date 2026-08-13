@@ -12,7 +12,8 @@
    },
    "dependencies": {
       "@wae/wapro-mag-create-receipt": "workspace:*",
-      "@wae/db": "workspace:*"
+      "@wae/db": "workspace:*",
+      "@wae/core": "workspace:*"
    },
    "packageManager": "pnpm@10.33.0"
 }
