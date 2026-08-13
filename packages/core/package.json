@@ -1,0 +1,13 @@
+{
+   "name": "@wae/core",
+   "private": true,
+   "main": "./dist/index.mjs",
+   "types": "./dist/index.d.ts",
+   "type": "module",
+   "scripts": {
+      "build": "tsc -b && tsdown"
+   },
+   "packageManager": "pnpm@10.33.0",
+   "devDependencies": {
+   }
+}
