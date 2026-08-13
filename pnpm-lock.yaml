@@ -235,9 +235,15 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@wae/types':
+        specifier: 'workspace: *'
+        version: link:../../packages/types
       '@wae/wapro-mag-create-receipt':
         specifier: workspace:*
         version: link:../../packages/calls/wapro-mag-create-receipt
+      currency.js:
+        specifier: ^2.0.4
+        version: 2.0.4
 
   packages/calls/wapro-mag-create-receipt:
     dependencies:
@@ -1081,6 +1087,10 @@ packages:
   commander@11.1.0:
     resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
     engines: {node: '>=16'}
+
+  currency.js@2.0.4:
+    resolution: {integrity: sha512-6/OplJYgJ0RUlli74d93HJ/OsKVBi8lB1+Z6eJYS1YZzBuIp4qKKHpJ7ad+GvTlWmLR/hLJOWTykN5Nm8NJ7+w==}
+    engines: {node: '>=4'}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -2109,6 +2119,8 @@ snapshots:
   cac@7.0.0: {}
 
   commander@11.1.0: {}
+
+  currency.js@2.0.4: {}
 
   debug@4.4.3:
     dependencies:
