@@ -85,7 +85,7 @@ export function generateReceipts(
                   priceNetto: currency(price.value, { fromCents: true }).divide(
                      1.23,
                   ).value,
-                  quantity: price.times,
+                  quantity: price.times * item.quantity,
                   discount: 0,
                   vatCode: product.vat,
                };
