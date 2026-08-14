@@ -1,7 +1,12 @@
+import { ThemeProvider } from "@/components/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip"
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Sidebar } from "lucide-react";
+import { AppSidebar } from "@/components/app-sidebar";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -25,8 +30,26 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={cn("h-full", "antialiased", geistSans.variable, geistMono.variable, "font-sans", inter.variable)}
+		suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+			<TooltipProvider>
+        		<ThemeProvider
+        		  attribute="class"
+        		  defaultTheme="system"
+        		  enableSystem
+        		  disableTransitionOnChange
+        		>
+					<SidebarProvider>
+						<AppSidebar/>
+					<SidebarTrigger />
+        		  		{
+        		  		children
+        		  		}
+				   </SidebarProvider>
+
+        		</ThemeProvider>
+		  </TooltipProvider></body>
     </html>
   );
 }
