@@ -17,6 +17,7 @@ import { Button } from './button';
 import { Separator } from './separator';
 import { BadgeCheck } from 'lucide-react';
 import {
+   CopyIcon,
    HandCoinsIcon,
    ReceiptIcon,
    SealCheckIcon,
@@ -33,6 +34,7 @@ import {
 } from './item';
 import { cn } from '@/lib/utils';
 import currency from 'currency.js';
+import React from 'react';
 
 export function BadgePaid({ ...props }: React.ComponentProps<typeof Badge>) {
    return (
@@ -48,6 +50,20 @@ export function BadgePickup({ ...props }: React.ComponentProps<typeof Badge>) {
       <Badge className="ml-auto p-4 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
          <HandCoinsIcon className="size-4!" />
          Pickup
+      </Badge>
+   );
+}
+
+export function BadgeReceiptNumber({
+   value,
+   ...props
+}: React.ComponentProps<typeof Badge> & {
+   value: string;
+}) {
+   return (
+      <Badge className="ml-auto p-4 underline font-medium bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+         <CopyIcon className="size-4!" />
+         {value}
       </Badge>
    );
 }
@@ -198,12 +214,11 @@ export function ReceiptCardTablePosition({
 export function ReceiptCardFooter({
    buyerFullname,
    orderProcessedAt,
-   onActionClick,
+   children,
    ...props
 }: React.ComponentProps<typeof CardFooter> & {
    buyerFullname: string;
    orderProcessedAt: string;
-   onActionClick: React.MouseEventHandler<HTMLButtonElement>;
 }) {
    return (
       <CardFooter {...props}>
@@ -215,11 +230,7 @@ export function ReceiptCardFooter({
                <ItemTitle>{buyerFullname}</ItemTitle>
                <ItemDescription>{orderProcessedAt}</ItemDescription>
             </ItemContent>
-            <ItemActions>
-               <Button onClick={onActionClick}>
-                  <ReceiptIcon /> Record a receipt
-               </Button>
-            </ItemActions>
+            <ItemActions>{children}</ItemActions>
          </Item>
       </CardFooter>
    );
