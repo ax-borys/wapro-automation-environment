@@ -10,9 +10,6 @@ export function useRecordReceipts() {
          body: JSON.stringify({ receipts: receiptsData }),
       });
 
-      if (!response.ok) {
-         return;
-      }
       return response.json();
    };
 
