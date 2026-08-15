@@ -227,6 +227,40 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
+  apps/api:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^2.1.1
+        version: 2.1.1(hono@4.13.2)
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@wae/receipt':
+        specifier: workspace:*
+        version: link:../../packages/receipt
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@wae/wapro-mag-create-receipt':
+        specifier: workspace:*
+        version: link:../../packages/calls/wapro-mag-create-receipt
+      hono:
+        specifier: ^4.13.2
+        version: 4.13.2
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
+    devDependencies:
+      '@types/node':
+        specifier: ^26.1.1
+        version: 26.2.0
+      tsx:
+        specifier: ^4.23.0
+        version: 4.23.11
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+
   apps/wae-cli:
     dependencies:
       '@wae/core':
@@ -256,6 +290,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      currency.js:
+        specifier: ^2.0.4
+        version: 2.0.4
       lucide-react:
         specifier: ^1.31.0
         version: 1.31.0(react@19.2.8)
@@ -334,7 +371,7 @@ importers:
         version: 12.3.0(supports-color@7.2.0)
       drizzle-orm:
         specifier: rc
-        version: 1.0.0-rc.4(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(zod@4.4.3)
+        version: 1.0.0-rc.4(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       mssql:
         specifier: ^12.7.0
         version: 12.7.0(supports-color@7.2.0)
@@ -342,6 +379,25 @@ importers:
       drizzle-kit:
         specifier: rc
         version: 1.0.0-rc.4
+
+  packages/receipt:
+    dependencies:
+      '@wae/core':
+        specifier: workspace:*
+        version: link:../core
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../types
+      currency.js:
+        specifier: ^2.0.4
+        version: 2.0.4
+    devDependencies:
+      '@types/mssql':
+        specifier: ^12.3.0
+        version: 12.3.0(supports-color@7.2.0)
+      mssql:
+        specifier: ^12.7.0
+        version: 12.7.0(supports-color@7.2.0)
 
   packages/template:
     devDependencies:
@@ -952,6 +1008,12 @@ packages:
 
   '@hono/node-server@2.1.0':
     resolution: {integrity: sha512-XovyyCCnBzW+zKu+z/zq8hwNs4KOR5rEMAOxo2f40Q5xoOI37IMm6MIg2COOUtUApo0i6850MTBKH2u4QLGIqg==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      hono: ^4
+
+  '@hono/node-server@2.1.1':
+    resolution: {integrity: sha512-ELuehkj5VCBdgEw9zs+ivkKwyzzUCSQuE96YmiPvn1ECBoZCczbFXJLeEGMTYjphP6gydh4pHMqEYPVMYUVgQg==}
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
@@ -5060,6 +5122,14 @@ packages:
   util-deprecate@1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
 
+  valibot@1.4.2:
+    resolution: {integrity: sha512-gjdCvJ6d3RyHAneqxMYMW9QMCwYMb3jpOO0IyHZV1bnRHFBHrX3VkIILt5XYR0WhwHiH7Mty8ovuPZ/O3gamrg==}
+    peerDependencies:
+      typescript: '>=5'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
   validate-npm-package-name@7.0.2:
     resolution: {integrity: sha512-hVDIBwsRruT73PbK7uP5ebUt+ezEtCmzZz3F59BSr2F6OVFnJ/6h8liuvdLrQ88Xmnk6/+xGGuq+pG9WwTuy3A==}
     engines: {node: ^20.17.0 || >=22.9.0}
@@ -5748,6 +5818,10 @@ snapshots:
   '@floating-ui/utils@0.2.12': {}
 
   '@hono/node-server@2.1.0(hono@4.13.2)':
+    dependencies:
+      hono: 4.13.2
+
+  '@hono/node-server@2.1.1(hono@4.13.2)':
     dependencies:
       hono: 4.13.2
 
@@ -7617,10 +7691,11 @@ snapshots:
       get-tsconfig: 4.14.1
       jiti: 2.7.0
 
-  drizzle-orm@1.0.0-rc.4(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(zod@4.4.3):
+  drizzle-orm@1.0.0-rc.4(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3):
     optionalDependencies:
       '@types/mssql': 12.3.0(supports-color@7.2.0)
       mssql: 12.7.0(supports-color@7.2.0)
+      valibot: 1.4.2(typescript@7.0.2)
       zod: 4.4.3
 
   dts-resolver@3.0.0: {}
@@ -9869,6 +9944,10 @@ snapshots:
       '@types/react': 19.2.18
 
   util-deprecate@1.0.2: {}
+
+  valibot@1.4.2(typescript@7.0.2):
+    optionalDependencies:
+      typescript: 7.0.2
 
   validate-npm-package-name@7.0.2: {}
 

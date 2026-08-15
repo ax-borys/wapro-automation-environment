@@ -1,0 +1,29 @@
+{
+   "compilerOptions": {
+      "target": "ESNext",
+      "module": "NodeNext",
+      "strict": true,
+      "verbatimModuleSyntax": true,
+      "skipLibCheck": true,
+      "types": ["node"],
+      "jsx": "react-jsx",
+      "jsxImportSource": "hono/jsx",
+      "rootDir": "./src",
+      "outDir": "./dist"
+   },
+   "references": [
+      {
+         "path": "../../packages/calls/wapro-mag-create-receipt"
+      },
+      {
+         "path": "../../packages/db"
+      },
+      {
+         "path": "../../packages/receipt/"
+      },
+      {
+         "path": "../../packages/types/"
+      }
+   ],
+   "exclude": ["node_modules"]
+}
