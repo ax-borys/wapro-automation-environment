@@ -1,4 +1,4 @@
-import { Tx } from '@wae/types';
+import { Receipt, Tx } from '@wae/types';
 import { IRecordSet } from 'mssql';
 
 export function toWaproDate(jsDate = new Date()) {
@@ -25,25 +25,7 @@ export async function createReceipt(
       paymentDeadline,
       deposit,
       positions,
-   }: {
-      pricingType: 'Netto' | 'Brutto';
-      positions: {
-         productId: Number;
-         quantity: Number;
-         priceNetto: Number;
-         priceBrutto: Number;
-         vatCode: string;
-         discount: Number;
-      }[];
-      paymentDeadline: Date;
-      companyId: Number;
-      stockId: Number;
-      userId: Number;
-      cashRegisterId: Number;
-      paymentFormat: string;
-      deposit: Number;
-      counterPartyId: Number;
-   },
+   }: Receipt,
 ): Promise<IRecordSet<{ [column: string]: any }>> {
    let result = null;
 
