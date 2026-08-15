@@ -172,7 +172,7 @@ export function ReceiptCardTablePosition({
    return (
       <TableRow className={cn(className)} {...props}>
          <TableCell className="font-medium text-sm flex items-center gap-2">
-            <Image src={imgSrc} alt="Product preview" width={20} height={30} />
+            <Image src={imgSrc} alt="Product preview" width={30} height={30} />
             <div className="overflow-scroll">{name}</div>
          </TableCell>
          <TableCell className="text-center">x{quantity}</TableCell>
@@ -196,8 +196,15 @@ export function ReceiptCardTablePosition({
 }
 
 export function ReceiptCardFooter({
+   buyerFullname,
+   orderProcessedAt,
+   onActionClick,
    ...props
-}: React.ComponentProps<typeof CardFooter>) {
+}: React.ComponentProps<typeof CardFooter> & {
+   buyerFullname: string;
+   orderProcessedAt: string;
+   onActionClick: React.MouseEventHandler<HTMLButtonElement>;
+}) {
    return (
       <CardFooter {...props}>
          <Item>
@@ -205,11 +212,11 @@ export function ReceiptCardFooter({
                <UserIcon />
             </ItemMedia>
             <ItemContent>
-               <ItemTitle>Alex Borysiuk</ItemTitle>
-               <ItemDescription>21 Sep, Wed, 12:30</ItemDescription>
+               <ItemTitle>{buyerFullname}</ItemTitle>
+               <ItemDescription>{orderProcessedAt}</ItemDescription>
             </ItemContent>
             <ItemActions>
-               <Button>
+               <Button onClick={onActionClick}>
                   <ReceiptIcon /> Record a receipt
                </Button>
             </ItemActions>

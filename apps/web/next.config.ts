@@ -7,7 +7,14 @@ const nextConfig: NextConfig = {
             protocol: 'https',
             hostname: 'a.allegroimg.com',
          },
+         {
+            protocol: 'http',
+            hostname: 'localhost',
+            pathname: '/public/**',
+            port: '8082',
+         },
       ],
+      dangerouslyAllowLocalIP: true,
    },
 };
 
