@@ -1,0 +1,17 @@
+import { AppError, businessRuleViolation } from '@wae/core';
+
+export const unsupportedPaymentMethod = (method: string) => {
+   return businessRuleViolation(`Unsuported payment method: ${method}`);
+};
+
+export const unmappedOfferId = (offerId: string) => {
+   return businessRuleViolation(
+      `Offer with id #${offerId} is not mapped with erp store`,
+   );
+};
+
+export const wrongCalculation = (total: number, calculatedTotal: number) => {
+   return businessRuleViolation(
+      `Total price ${total} from an input and total price ${calculatedTotal} in a receipt ARE NOT equal.`,
+   );
+};
