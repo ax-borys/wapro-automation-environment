@@ -113,7 +113,10 @@ export function generateReceipts(
       let total = 0;
 
       positions.forEach(
-         (i) => (total = currency(i.priceBrutto).add(total).value),
+         (i) =>
+            (total = currency(i.priceBrutto)
+               .multiply(i.quantity)
+               .add(total).value),
       );
 
       if (currency(total).intValue !== currency(receiptInput.total).intValue) {

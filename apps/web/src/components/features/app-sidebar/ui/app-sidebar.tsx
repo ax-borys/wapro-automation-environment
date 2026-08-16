@@ -4,6 +4,7 @@ import {
    CollapsibleContent,
    CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { Logo } from '@/components/ui/logo';
 import {
    Sidebar,
    SidebarContent,
@@ -29,9 +30,16 @@ export function AppSidebar() {
          <SidebarHeader className="">
             <div className="flex items-center h-8 w-full overflow-x-hidden">
                <Button className="size-8 grow-0">
-                  <AtomIcon />
+                  <Logo className="size-5" />
                </Button>
-               <h1 className="ml-2 shrink-0">Bussiness Platform</h1>
+               <div className="ml-3 h-full flex flex-col gap-3.5 justify-center space-x-3 tracking-wide">
+                  <span className="font-bold text-base leading-0">
+                     Automation
+                  </span>
+                  <span className="text-xs leading-0 text-muted-foreground self-end">
+                     platform v1.0.0
+                  </span>
+               </div>
             </div>
          </SidebarHeader>
          <SidebarContent>

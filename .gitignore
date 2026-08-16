@@ -37,3 +37,4 @@ tmp/
 **/sensitive/
 
 config.json
+local.db
