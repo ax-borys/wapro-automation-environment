@@ -18,7 +18,6 @@ const STATUS_MAP: Record<ErrorCode, number> = {
 export class AppError extends Error {
    readonly code: ErrorCode;
    readonly status: number;
-   readonly details?: unknown;
 
    constructor(code: ErrorCode, message: string) {
       super(message);
