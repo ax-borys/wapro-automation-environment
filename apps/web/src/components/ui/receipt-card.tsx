@@ -108,7 +108,7 @@ export function ReceiptCardTable({
    ...props
 }: React.ComponentProps<typeof Table>) {
    return (
-      <Table className={cn('table-fixed max-w-[75vw]', className)} {...props}>
+      <Table className={cn('table-fixed max-w-full', className)} {...props}>
          {children}
       </Table>
    );

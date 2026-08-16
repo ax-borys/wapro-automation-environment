@@ -92,7 +92,6 @@ export function Receipt() {
 
    return (
       <>
-         <Separator />
          {data.map((order) => (
             <Fragment key={order.orderId}>
                <ReceiptCard>
@@ -101,7 +100,7 @@ export function Receipt() {
                      <span className="font-medium underline">
                         Order #{order.orderId}
                      </span>
-                     <div className="ml-auto flex gap-2">
+                     <div className="ml-auto flex gap-2 h-9">
                         {receiptStatus === 'RECORDED' ? (
                            <Button
                               onClick={() => copyToClipboard(number)}
