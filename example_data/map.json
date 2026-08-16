@@ -1,22 +1,36 @@
 {
    "1": {
-      "offerName": "Super-puper Geforce RTX 5090 NOT MINED!!",
-      "products": [{
-         "sid": 1,
-         "quantity": 1,
-         "vat": "23"
-      }]
+      "offerName": "Super-puper Geforce RTX 5090",
+      "products": [
+         {
+            "sid": 1,
+            "quantity": 1,
+            "vat": "23"
+         }
+      ]
    },
    "2": {
-      "offerName": "Super-puper Geforce RTX 5080 NOT MINED!!",
-      "products": [{
-         "sid": 2,
-         "quantity": 1,
-         "vat": "23"
-      }]
+      "offerName": "Super-puper Geforce RTX 5080",
+      "products": [
+         {
+            "sid": 2,
+            "quantity": 1,
+            "vat": "23"
+         }
+      ]
    },
    "3": {
-      "offerName": "ZESTAW x3!!! RTX 5090 + RTX 5080 + RTX 5070ti",
+      "offerName": "Super-puper Geforce RTX 5080",
+      "products": [
+         {
+            "sid": 3,
+            "quantity": 1,
+            "vat": "23"
+         }
+      ]
+   },
+   "4": {
+      "offerName": "ZESTAW x3 Geforce RTX 5080",
       "products": [
          {
             "sid": 2,
