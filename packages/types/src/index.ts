@@ -73,3 +73,5 @@ export type Mapping = {
       products: { sid: number; quantity: number; vat: '23' | '8' | '0' }[];
    };
 };
+
+export type { ApiError, ApiResponse } from './api-contract.ts';

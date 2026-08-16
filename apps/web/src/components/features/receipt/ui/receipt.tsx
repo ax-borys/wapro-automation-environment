@@ -61,8 +61,6 @@ export function Receipt() {
       'RECORDED' | 'RECORDING' | 'RECORD'
    >('RECORD');
    const [number, setNumber] = useState<string>('');
-   const [recordMsg, setRecordMsg] = useState<string | null>(null);
-   const [errMsg, setErrMsg] = useState<string | null>(null);
 
    const recordReceipts = useRecordReceipts();
 
@@ -74,20 +72,17 @@ export function Receipt() {
       try {
          const result = await recordReceipts(data);
 
-         if (result.err) {
+         if (result.error) {
             setReceiptStatus('RECORD');
-            setErrMsg('Something went wrong');
-            console.log(result.err);
+            console.error(result.error);
             return;
          }
-         console.log(result);
 
          setReceiptStatus('RECORDED');
-         setNumber(result[0].number);
+         setNumber(result.data.receiptNumbers[0]);
       } catch (error) {
-         console.log(error);
+         console.error(error);
          setReceiptStatus('RECORD');
-         setErrMsg('Probably network error.');
       }
    };
 
