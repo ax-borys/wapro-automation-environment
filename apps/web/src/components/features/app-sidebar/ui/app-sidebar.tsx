@@ -21,6 +21,7 @@ import {
    SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
 import { AtomIcon, ChevronLeft, ChevronRight, Notebook } from 'lucide-react';
+import Link from 'next/link';
 
 export function AppSidebar() {
    return (
@@ -43,15 +44,17 @@ export function AppSidebar() {
                            <CollapsibleTrigger asChild>
                               <SidebarMenuButton className="flex">
                                  <Notebook />
-                                 <span>Orders</span>
+                                 <span>Receipts</span>
                                  <ChevronRight className="ml-auto" />
                               </SidebarMenuButton>
                            </CollapsibleTrigger>
                            <CollapsibleContent>
                               <SidebarMenuSub>
                                  <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton>
-                                       Allegro
+                                    <SidebarMenuSubButton asChild>
+                                       <Link href="/receipts/allegro">
+                                          Allegro
+                                       </Link>
                                     </SidebarMenuSubButton>
                                  </SidebarMenuSubItem>
                               </SidebarMenuSub>

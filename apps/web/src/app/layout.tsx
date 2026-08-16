@@ -4,8 +4,22 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Inter } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import {
+   SidebarInset,
+   SidebarProvider,
+   SidebarTrigger,
+} from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/features/app-sidebar';
+import { Separator } from '@/components/ui/separator';
+import {
+   Breadcrumb,
+   BreadcrumbItem,
+   BreadcrumbLink,
+   BreadcrumbList,
+   BreadcrumbPage,
+   BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Header } from '@/components/features/header';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -48,7 +62,10 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
                >
                   <SidebarProvider>
                      <AppSidebar />
-                     {children}
+                     <SidebarInset>
+                        <Header />
+                        {children}
+                     </SidebarInset>
                   </SidebarProvider>
                </ThemeProvider>
             </TooltipProvider>

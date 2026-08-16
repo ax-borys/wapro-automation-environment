@@ -1,4 +1,3 @@
-import type { Offer } from '@wae/db/src/db/schema.js';
 import type { Handler } from 'hono';
 import { addOffer } from './queries.js';
 import type { ApiResponse } from '@wae/types';
