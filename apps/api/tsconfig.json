@@ -23,6 +23,9 @@
       },
       {
          "path": "../../packages/types/"
+      },
+      {
+         "path": "../../packages/core/"
       }
    ],
    "exclude": ["node_modules"]

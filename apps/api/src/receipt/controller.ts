@@ -17,7 +17,6 @@ import type {
 import { createReceipt } from '@wae/wapro-mag-create-receipt';
 import { db } from '@wae/db';
 import { generateReceipts, type GenerateReceiptInput } from '@wae/receipt';
-import mssql from 'mssql';
 
 const config: Config = {
    companyId: 1,
@@ -35,50 +34,24 @@ const map: Mapping = JSON.parse(
 );
 
 export const recordReceiptHandler: Handler = async (c) => {
-   const body: { receipts: GenerateReceiptInput[] } = await c.req.json();
+   const body = await c.req.json<GenerateReceiptInput[]>();
 
-   try {
-      const receipts: Receipt[] = generateReceipts(body.receipts, map, config);
-      let results: { receiptNumber: string }[] = [];
+   const receipts: Receipt[] = generateReceipts(body, map, config);
+   let results: { receiptNumber: string }[] = [];
 
-      await db.transaction(async (tx) => {
-         for (const receipt of receipts) {
-            results.push(await createReceipt(tx, receipt));
-         }
-      });
-
-      return c.json<ApiResponse<{ receiptNumbers: string[] }>>(
-         {
-            data: {
-               receiptNumbers: results.map((i) => i.receiptNumber),
-            },
-            error: null,
-         },
-         200,
-      );
-   } catch (error) {
-      let message = null;
-      let code = null;
-
-      if (error instanceof mssql.RequestError) {
-         message = error.message;
-         code = error.name;
-      } else if (error instanceof mssql.TransactionError) {
-         message = error.message;
-         code = error.name;
-      } else {
-         console.log(error);
+   await db.transaction(async (tx) => {
+      for (const receipt of receipts) {
+         results.push(await createReceipt(tx, receipt));
       }
+   });
 
-      return c.json<ApiResponse<ApiError>>(
-         {
-            error: {
-               code: code || 'INTERNAL_ERROR',
-               message: message || 'Something went wrong',
-            },
-            data: null,
+   return c.json<ApiResponse<{ receiptNumbers: string[] }>>(
+      {
+         data: {
+            receiptNumbers: results.map((i) => i.receiptNumber),
          },
-         500,
-      );
-   }
+         error: null,
+      },
+      200,
+   );
 };

@@ -8,7 +8,9 @@
    },
    "dependencies": {
       "@hono/node-server": "^2.1.1",
+      "@hono/valibot-validator": "^0.6.1",
       "@types/mssql": "^12.3.0",
+      "@wae/core": "workspace:*",
       "@wae/db": "workspace:*",
       "@wae/receipt": "workspace:*",
       "@wae/types": "workspace:*",

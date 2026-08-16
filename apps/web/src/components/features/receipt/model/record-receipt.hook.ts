@@ -8,7 +8,7 @@ export function useRecordReceipts() {
          headers: {
             'Content-Type': 'application/json',
          },
-         body: JSON.stringify({ receipts: receiptsData }),
+         body: JSON.stringify(receiptsData),
       });
 
       return (await response.json()) as ApiResponse<{

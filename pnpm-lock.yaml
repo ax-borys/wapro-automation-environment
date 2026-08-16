@@ -232,9 +232,15 @@ importers:
       '@hono/node-server':
         specifier: ^2.1.1
         version: 2.1.1(hono@4.13.2)
+      '@hono/valibot-validator':
+        specifier: ^0.6.1
+        version: 0.6.1(hono@4.13.2)(valibot@1.4.2(typescript@7.0.2))
       '@types/mssql':
         specifier: ^12.3.0
         version: 12.3.0(supports-color@7.2.0)
+      '@wae/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@wae/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -394,6 +400,9 @@ importers:
 
   packages/receipt:
     dependencies:
+      '@hono/valibot-validator':
+        specifier: ^0.6.1
+        version: 0.6.1(hono@4.13.2)(valibot@1.4.2(typescript@7.0.2))
       '@wae/core':
         specifier: workspace:*
         version: link:../core
@@ -403,6 +412,9 @@ importers:
       currency.js:
         specifier: ^2.0.4
         version: 2.0.4
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
     devDependencies:
       '@types/mssql':
         specifier: ^12.3.0
@@ -1029,6 +1041,12 @@ packages:
     engines: {node: '>=20'}
     peerDependencies:
       hono: ^4
+
+  '@hono/valibot-validator@0.6.1':
+    resolution: {integrity: sha512-rqKhQJI8IVR8gRRNHHf2wGtIT7sKEqV1KoGL5f2SocNytl+tBNn4EtRu4zfk/D6axgWSswnaxeiuJhM5yNFrCg==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      valibot: ^1.0.0 || ^1.0.0-beta.4 || ^1.0.0-rc
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -5836,6 +5854,11 @@ snapshots:
   '@hono/node-server@2.1.1(hono@4.13.2)':
     dependencies:
       hono: 4.13.2
+
+  '@hono/valibot-validator@0.6.1(hono@4.13.2)(valibot@1.4.2(typescript@7.0.2))':
+    dependencies:
+      hono: 4.13.2
+      valibot: 1.4.2(typescript@7.0.2)
 
   '@humanfs/core@0.19.2':
     dependencies:
