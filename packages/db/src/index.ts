@@ -14,4 +14,5 @@ export function test() {
 }
 
 export { db };
-export { closeConnection } from './db';
+export { closeConnection, sqliteDb } from './db';
+export { offersTable, type Offer, type OfferInput } from './db/schema';

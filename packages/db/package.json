@@ -8,6 +8,7 @@
       "build": "tsc -b && tsdown"
    },
    "dependencies": {
+      "@libsql/client": "^0.17.4",
       "@types/mssql": "^12.3.0",
       "drizzle-orm": "rc",
       "mssql": "^12.7.0"

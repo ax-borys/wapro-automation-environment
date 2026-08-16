@@ -5,18 +5,24 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 import { serve } from '@hono/node-server';
-import { Hono } from 'hono';
+import { Hono, type Env, type Handler, type MiddlewareHandler } from 'hono';
 import { recordReceiptHandler } from './receipt/controller.js';
 
 import { serveStatic } from '@hono/node-server/serve-static';
 import { cors } from 'hono/cors';
-import { vValidator } from '@hono/valibot-validator';
+import { vValidator, type Hook } from '@hono/valibot-validator';
 import { generateReceiptsInputSchema } from '@wae/receipt/src/schema.js';
-import { ValiError } from 'valibot';
+import {
+   ValiError,
+   type GenericSchema,
+   type GenericSchemaAsync,
+} from 'valibot';
 import mssql from 'mssql';
 import type { ApiError, ApiResponse } from '@wae/types';
 import { AppError } from '@wae/core';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import { addOfferHandler } from './offer/controller.js';
+import { addOfferInputSchema } from './offer/schema.js';
 const app = new Hono();
 
 app.use(
@@ -37,14 +43,27 @@ app.get('/', (c) => {
    return c.text('Hello Hono!');
 });
 
+const valibotHook: Hook<
+   GenericSchema | GenericSchemaAsync,
+   Env,
+   string,
+   'json'
+> = async (result) => {
+   if (!result.success) {
+      throw new ValiError(result.issues);
+   }
+};
+
 app.post(
    '/record-receipts',
-   vValidator('json', generateReceiptsInputSchema, (result) => {
-      if (!result.success) {
-         throw new ValiError(result.issues);
-      }
-   }),
+   vValidator('json', generateReceiptsInputSchema, valibotHook),
    recordReceiptHandler,
+);
+
+app.post(
+   '/add-offer',
+   vValidator('json', addOfferInputSchema, valibotHook),
+   addOfferHandler,
 );
 
 app.onError((error, c) => {
