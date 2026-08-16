@@ -1,6 +1,11 @@
 import distributeNumber from '@wae/core';
 import { Config, Mapping, Order, Position, Receipt } from '@wae/types';
 import currency from 'currency.js';
+import {
+   unmappedOfferId,
+   unsupportedPaymentMethod,
+   wrongCalculation,
+} from './error';
 
 function calculatePaymentDeadline(paymentMethod: 'PREPAID' | 'POSTPAID'): Date {
    const today = new Date();
@@ -65,7 +70,7 @@ export function generateReceipts(
       const paymentMethod = receiptInput.paymentMethod;
 
       if (paymentMethod !== 'PREPAID' && paymentMethod !== 'POSTPAID') {
-         throw new Error(`Unsupported payment method: ${paymentMethod}`);
+         throw unsupportedPaymentMethod(paymentMethod);
       }
 
       const positions: Position[] = [];
@@ -74,18 +79,21 @@ export function generateReceipts(
          const mappedOffer = map[item.offerId];
 
          if (!mappedOffer) {
-            throw new Error('Offer has item that cannot be mapped');
+            throw unmappedOfferId(item.offerId);
          }
 
-         mappedOffer.products.forEach((product) => {
-            const distributedPrices = currency(item.price)
+         const productsPrices = currency(item.price).distribute(
+            mappedOffer.products.length,
+         );
+
+         mappedOffer.products.forEach((product, i) => {
+            const productPrices = currency(productsPrices[i])
                .distribute(product.quantity)
                .map((c) => c.intValue);
 
-            const shrankDistributedPrices =
-               shrinkNumbersList(distributedPrices);
+            const shrankProductPrices = shrinkNumbersList(productPrices);
 
-            shrankDistributedPrices.forEach((price) => {
+            shrankProductPrices.forEach((price) => {
                const position: Position = {
                   productId: product.sid,
                   priceBrutto: currency(price.value, { fromCents: true }).value,
@@ -109,8 +117,9 @@ export function generateReceipts(
       );
 
       if (currency(total).intValue !== currency(receiptInput.total).intValue) {
-         throw new Error(
-            `Total price ${currency(receiptInput.total)} from an input and total price ${currency(total)} in a receipt ARE NOT equal.`,
+         throw wrongCalculation(
+            currency(receiptInput.total).value,
+            currency(total).value,
          );
       }
 
