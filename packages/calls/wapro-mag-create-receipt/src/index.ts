@@ -1,17 +1,18 @@
 import { Receipt, Tx } from '@wae/types';
 import { IRecordSet, IResult } from 'mssql';
 
-export function toWaproDate(jsDate = new Date()) {
-   const base = Date.UTC(1900, 0, 1); // matches SQL Server real conversion base
-   const target = Date.UTC(
-      jsDate.getFullYear(),
-      jsDate.getMonth(),
-      jsDate.getDate(),
-   );
-   const diffDays = Math.round((target - base) / 86400000);
-   return diffDays + 36163;
-}
+function toWaproDate(date = new Date()) {
+   const sqlEpoch = Date.UTC(1900, 0, 1);
 
+   const dateOnlyUtc = Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+   );
+
+   const daysSinceSqlEpoch = (dateOnlyUtc - sqlEpoch) / 86400000;
+   return Math.round(daysSinceSqlEpoch) + 36163;
+}
 type ReceiptInfo = {
    receiptNumber: string;
 };

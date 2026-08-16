@@ -113,7 +113,7 @@ BEGIN
     BEGIN TRY
 
         -- data w wewnętrznym formacie WAPRO (jak w całej dokumentacji)
-        SELECT @data = ROUND(CONVERT(REAL, GETDATE()), 0) + 36163;
+        SELECT @data = DATEDIFF(day, '1900-01-01', CONVERT(date, GETDATE())) + 36163;
 
         -- typ dokumentu handlowego = Paragon
         SELECT @id_typu_han = id_typu
@@ -347,7 +347,7 @@ BEGIN
             'FIFO',
             0,                    -- przeliczaj_ceny
             0,                    -- id_dok_korygowanego
-            1,                    -- fiskalny_ok
+            0,                    -- fiskalny_ok
             @IdKasy,
             @IdUzytkownika,
             @id_pracownika,
