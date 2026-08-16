@@ -8,12 +8,14 @@
    },
    "dependencies": {
       "@hono/node-server": "^2.1.1",
-      "hono": "^4.13.2",
-      "valibot": "^1.4.2",
-      "@wae/wapro-mag-create-receipt": "workspace:*",
+      "@types/mssql": "^12.3.0",
       "@wae/db": "workspace:*",
       "@wae/receipt": "workspace:*",
-      "@wae/types": "workspace:*"
+      "@wae/types": "workspace:*",
+      "@wae/wapro-mag-create-receipt": "workspace:*",
+      "hono": "^4.13.2",
+      "mssql": "^12.7.0",
+      "valibot": "^1.4.2"
    },
    "devDependencies": {
       "@types/node": "^26.1.1",

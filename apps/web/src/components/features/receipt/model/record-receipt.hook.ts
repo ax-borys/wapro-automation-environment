@@ -1,4 +1,5 @@
 import { GenerateReceiptInput } from '@wae/receipt';
+import { ApiResponse } from '@wae/types';
 
 export function useRecordReceipts() {
    const recordReceipts = async (receiptsData: GenerateReceiptInput[]) => {
@@ -10,7 +11,9 @@ export function useRecordReceipts() {
          body: JSON.stringify({ receipts: receiptsData }),
       });
 
-      return response.json();
+      return (await response.json()) as ApiResponse<{
+         receiptNumbers: string[];
+      }>;
    };
 
    return recordReceipts;

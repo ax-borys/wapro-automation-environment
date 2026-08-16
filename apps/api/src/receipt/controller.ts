@@ -4,12 +4,20 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-import type { Handler } from 'hono';
-import type { Config, Mapping, Receipt } from '@wae/types';
 import fs from 'fs';
+
+import type { Handler } from 'hono';
+import type {
+   ApiError,
+   ApiResponse,
+   Config,
+   Mapping,
+   Receipt,
+} from '@wae/types';
 import { createReceipt } from '@wae/wapro-mag-create-receipt';
 import { db } from '@wae/db';
 import { generateReceipts, type GenerateReceiptInput } from '@wae/receipt';
+import mssql from 'mssql';
 
 const config: Config = {
    companyId: 1,
@@ -28,20 +36,49 @@ const map: Mapping = JSON.parse(
 
 export const recordReceiptHandler: Handler = async (c) => {
    const body: { receipts: GenerateReceiptInput[] } = await c.req.json();
-   const receipts: Receipt[] = generateReceipts(body.receipts, map, config);
-   console.log('catch');
 
    try {
-      let result = null;
+      const receipts: Receipt[] = generateReceipts(body.receipts, map, config);
+      let results: { receiptNumber: string }[] = [];
+
       await db.transaction(async (tx) => {
          for (const receipt of receipts) {
-            console.log(receipt);
-            result = await createReceipt(tx, receipt);
+            results.push(await createReceipt(tx, receipt));
          }
       });
 
-      return c.json(result, 200);
+      return c.json<ApiResponse<{ receiptNumbers: string[] }>>(
+         {
+            data: {
+               receiptNumbers: results.map((i) => i.receiptNumber),
+            },
+            error: null,
+         },
+         200,
+      );
    } catch (error) {
-      return c.json({ err: error }, 400);
+      let message = null;
+      let code = null;
+
+      if (error instanceof mssql.RequestError) {
+         message = error.message;
+         code = error.name;
+      } else if (error instanceof mssql.TransactionError) {
+         message = error.message;
+         code = error.name;
+      } else {
+         console.log(error);
+      }
+
+      return c.json<ApiResponse<ApiError>>(
+         {
+            error: {
+               code: code || 'INTERNAL_ERROR',
+               message: message || 'Something went wrong',
+            },
+            data: null,
+         },
+         500,
+      );
    }
 };

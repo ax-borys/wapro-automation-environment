@@ -1,5 +1,5 @@
 import { Receipt, Tx } from '@wae/types';
-import { IRecordSet } from 'mssql';
+import { IRecordSet, IResult } from 'mssql';
 
 export function toWaproDate(jsDate = new Date()) {
    const base = Date.UTC(1900, 0, 1); // matches SQL Server real conversion base
@@ -11,6 +11,10 @@ export function toWaproDate(jsDate = new Date()) {
    const diffDays = Math.round((target - base) / 86400000);
    return diffDays + 36163;
 }
+
+type ReceiptInfo = {
+   receiptNumber: string;
+};
 
 export async function createReceipt(
    tx: Tx,
@@ -26,15 +30,15 @@ export async function createReceipt(
       deposit,
       positions,
    }: Receipt,
-): Promise<IRecordSet<{ [column: string]: any }>> {
-   let result = null;
+): Promise<ReceiptInfo> {
+   let result: IResult<ReceiptInfo[]> | null = null;
 
    const queryPositions = positions.map((p) => {
       return `(${p.productId},${p.quantity},${p.priceNetto},${p.priceBrutto},'${p.vatCode}', ${p.discount})`;
    });
 
    try {
-      result = await tx.execute(`
+      result = await tx.execute<ReceiptInfo[]>(`
               DECLARE @poz dbo.TYP_POZYCJE_PARAGONU;
               INSERT INTO @poz (Id_Artykulu, Ilosc, Cena_Netto, Cena_Brutto, Kod_Vat, Rabat)
               VALUES ${queryPositions.join(',')};
@@ -56,12 +60,12 @@ export async function createReceipt(
                    @NumerParagonu    = @Numer OUTPUT,
                    @IdDokHandlowego  = @IdDokH OUTPUT;
 
-              SELECT @IdDokH AS handlDocId, @Numer AS number;
-   `);
+              SELECT @IdDokH AS handlDocId, @Numer AS receiptNumber;
+      `);
    } catch (error) {
       console.log('exec error: ', error);
       throw error;
    }
 
-   return result?.recordset;
+   return result.recordset[0];
 }

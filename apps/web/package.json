@@ -32,7 +32,8 @@
       "eslint": "^9",
       "eslint-config-next": "16.3.0",
       "tailwindcss": "^4",
-      "typescript": "^5"
+      "typescript": "^5",
+      "@wae/types": "workspace:*"
    },
    "packageManager": "pnpm@11.20.0"
 }
