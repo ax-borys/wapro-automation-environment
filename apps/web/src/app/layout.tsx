@@ -52,7 +52,7 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
          )}
          suppressHydrationWarning
       >
-         <body className="min-h-full flex flex-col bg-primary-foreground">
+         <body className="min-h-screen max-h-screen flex flex-col bg-primary-foreground overflow-y-hidden">
             <TooltipProvider>
                <ThemeProvider
                   attribute="class"

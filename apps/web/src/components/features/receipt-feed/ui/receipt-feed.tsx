@@ -116,7 +116,7 @@ export function ReceiptFeed() {
    };
 
    return (
-      <div>
+      <div className="h-screen">
          <div className="w-full h-12 px-6 flex items-center gap-3 text-muted-foreground text-sm">
             <div
                className="flex items-center gap-3 cursor-pointer"
@@ -150,16 +150,18 @@ export function ReceiptFeed() {
             ) : null}
          </div>
          <Separator />
-         {data.map((order, i) => (
-            <Fragment key={order.orderId}>
-               <Receipt
-                  order={order}
-                  selected={selected.has(order.orderId)}
-                  onSelect={() => selectHandler(order.orderId)}
-               />
-               {i + 1 === data.length ? null : <Separator />}
-            </Fragment>
-         ))}
+         <div className="overflow-scroll max-h-full pb-28">
+            {data.map((order, i) => (
+               <Fragment key={order.orderId}>
+                  <Receipt
+                     order={order}
+                     selected={selected.has(order.orderId)}
+                     onSelect={() => selectHandler(order.orderId)}
+                  />
+                  {i + 1 === data.length ? null : <Separator />}
+               </Fragment>
+            ))}
+         </div>
       </div>
    );
 }
