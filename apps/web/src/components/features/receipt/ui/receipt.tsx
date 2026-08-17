@@ -25,6 +25,8 @@ import {
    SpinnerIcon,
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
+import { useReceipt } from '@/entities/receipt/receipt.context';
+import { recordReceipts } from '@/entities/receipt/record-receipts';
 
 const data: (Omit<GenerateReceiptInput, 'items'> & {
    orderId: string;
@@ -95,8 +97,6 @@ async function wait(delay = 3000) {
 
 export function Receipt({
    order,
-   selected = false,
-   onSelect,
 }: {
    order: Omit<GenerateReceiptInput, 'items'> & {
       orderId: string;
@@ -105,15 +105,19 @@ export function Receipt({
       buyerFullname: string;
       orderProcessedAt: string;
    };
-   selected: boolean;
-   onSelect?: (orderId: string) => void;
 }) {
-   const [receiptStatus, setReceiptStatus] = useState<
-      'RECORDED' | 'RECORDING' | 'RECORD'
-   >('RECORD');
-   const [number, setNumber] = useState<string>('');
+   const [receipt, setReceipt] = useReceipt(order.orderId);
+   const status = receipt.status;
+   const setReceiptStatus = (status: typeof receipt.status) => {
+      setReceipt({ ...receipt, status });
+   };
 
-   const recordReceipts = useRecordReceipts();
+   const selected = receipt.selected as boolean;
+   const toggleSelect = () => {
+      setReceipt({ ...receipt, selected: receipt.selected ? false : true });
+   };
+
+   const [number, setNumber] = useState<string>('');
 
    const recordReceiptsHandler = async () => {
       setReceiptStatus('RECORDING');
@@ -145,13 +149,13 @@ export function Receipt({
             <Checkbox
                className="cursor-pointer"
                checked={selected}
-               onCheckedChange={() => onSelect?.(order.orderId)}
+               onCheckedChange={toggleSelect}
             />
             <span className="font-medium underline">
                Order #{order.orderId}
             </span>
             <div className="ml-auto flex gap-2 h-9">
-               {receiptStatus === 'RECORDED' ? (
+               {status === 'RECORDED' ? (
                   <Button
                      onClick={() => copyToClipboard(number)}
                      className="bg-transparent hover:bg-transparent cursor-pointer"
@@ -192,12 +196,12 @@ export function Receipt({
             buyerFullname={order.buyerFullname}
             orderProcessedAt={order.orderProcessedAt}
          >
-            {receiptStatus === 'RECORD' ? (
+            {status === 'RECORD' ? (
                <Button onClick={recordReceiptsHandler}>
                   <ReceiptIcon />
                   Record a receipt
                </Button>
-            ) : receiptStatus === 'RECORDING' ? (
+            ) : status === 'RECORDING' ? (
                <Button variant={'secondary'} disabled>
                   <Marker role="status">
                      <MarkerIcon className="animate-spin">

@@ -36,8 +36,8 @@ export function AppSidebar() {
                   <span className="font-bold text-base leading-0">
                      Automation
                   </span>
-                  <span className="text-xs leading-0 text-muted-foreground self-end">
-                     platform v1.0.0
+                  <span className="text-xs leading-0 text-muted-foreground self-end translate-x-2">
+                     platform v0.0.1
                   </span>
                </div>
             </div>

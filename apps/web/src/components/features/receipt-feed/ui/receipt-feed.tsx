@@ -1,112 +1,56 @@
 'use client';
 
-import { GenerateReceiptInput } from '@wae/receipt';
-import { Receipt } from '../../receipt/ui/receipt';
-import { B612, Fragment_Mono } from 'next/font/google';
 import { Fragment } from 'react/jsx-runtime';
 import { Separator } from '@/components/ui/separator';
-import { useState } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
+import {
+   useSetReceipts,
+   useReceipts,
+   type Receipt as ReceiptType,
+} from '@/entities/receipt/receipt.context';
+import { Receipt } from '@/components/features/receipt';
+import { useOrders } from '@/entities/order';
+import { useEffect } from 'react';
 
-const data: (Omit<GenerateReceiptInput, 'items'> & {
-   orderId: string;
-   imgSrc: string;
-   items: (GenerateReceiptInput['items'][number] & { name: string })[];
-   buyerFullname: string;
-   orderProcessedAt: string;
-})[] = [
-   {
-      paymentMethod: 'PREPAID',
-      items: [
-         {
-            offerId: '1',
-            price: 25000,
-            quantity: 1,
-            name: 'Geforce RTX 5090',
-         },
-      ],
-      total: 25000,
-      imgSrc: 'http://localhost:8082/public/rtx5090.jpg',
-      orderProcessedAt: new Date().toDateString(),
-      orderId: '1',
-      buyerFullname: 'Alex Borysiuk',
-   },
-   {
-      paymentMethod: 'POSTPAID',
-      items: [
-         {
-            offerId: '2',
-            price: 6000,
-            quantity: 1,
-            name: 'Geforce RTX 5080',
-         },
-      ],
-      total: 6000,
-      imgSrc: 'http://localhost:8082/public/rtx5080.png',
-      orderProcessedAt: new Date().toDateString(),
-      orderId: '2',
-      buyerFullname: 'Alex Borysiuk',
-   },
-   {
-      paymentMethod: 'PREPAID',
-      items: [
-         {
-            offerId: '1',
-            price: 20000,
-            quantity: 1,
-            name: 'Geforce RTX 5090',
-         },
-         {
-            offerId: '2',
-            price: 6000,
-            quantity: 2,
-            name: 'Geforce RTX 5080',
-         },
-      ],
-      total: 32000,
-      imgSrc: 'http://localhost:8082/public/rtx5080.png',
-      orderProcessedAt: new Date().toDateString(),
-      orderId: '3',
-      buyerFullname: 'Alex Borysiuk',
-   },
-];
+export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
+   const orders = useOrders();
+   const receipts = useReceipts();
+   const setReceipts = useSetReceipts();
 
-export function ReceiptFeed() {
-   const [selected, setSelected] = useState<Set<string>>(new Set());
+   const selected = receipts
+      .filter((receipt) => receipt.selected)
+      .map((receipt) => receipt.orderId);
 
-   const addToSelected = (orderId: string) => {
-      setSelected((s) => new Set([...s, orderId]));
-   };
-
-   const removeFromSelected = (orderId: string) => {
-      const selectedCopy = new Set(selected);
-      selectedCopy.delete(orderId);
-
-      setSelected(selectedCopy);
-   };
-
-   const selectHandler = (orderId: string) => {
-      const isSelected = selected.has(orderId);
-
-      if (!isSelected) {
-         addToSelected(orderId);
-      } else {
-         removeFromSelected(orderId);
-      }
-   };
+   useEffect(() => setReceipts(initReceipts), []);
 
    const selectAll = () => {
-      setSelected(new Set(data.map((o) => o.orderId)));
+      const receiptsCopy = [...receipts];
+      receipts.forEach((receipt, i) => {
+         receiptsCopy[i] = {
+            ...receipt,
+            selected: true,
+         };
+      });
+
+      setReceipts(receiptsCopy);
    };
 
    const removeAll = () => {
-      setSelected(new Set());
+      const receiptsCopy = [...receipts];
+      receipts.forEach((receipt, i) => {
+         receiptsCopy[i] = {
+            ...receipt,
+            selected: false,
+         };
+      });
+
+      setReceipts(receiptsCopy);
    };
 
    const selectAllHandler = () => {
-      const isSelectedAll = selected.size === data.length;
+      const isSelectedAll = selected.length === orders.length;
 
       if (isSelectedAll) {
          removeAll();
@@ -123,18 +67,18 @@ export function ReceiptFeed() {
                onClick={selectAllHandler}
             >
                <Checkbox
-                  checked={selected.size === data.length}
+                  checked={selected.length === orders.length}
                   className="cursor-pointer"
                />
                <span className="">Select all</span>
             </div>
-            {selected.size ? (
+            {selected.length ? (
                <>
                   <Separator
                      orientation="vertical"
                      className="h-4 translate-y-4"
                   />
-                  {selected.size}
+                  {selected.length}
                   <Separator
                      orientation="vertical"
                      className="h-4 translate-y-4"
@@ -151,16 +95,14 @@ export function ReceiptFeed() {
          </div>
          <Separator />
          <div className="overflow-scroll max-h-full pb-28">
-            {data.map((order, i) => (
-               <Fragment key={order.orderId}>
-                  <Receipt
-                     order={order}
-                     selected={selected.has(order.orderId)}
-                     onSelect={() => selectHandler(order.orderId)}
-                  />
-                  {i + 1 === data.length ? null : <Separator />}
-               </Fragment>
-            ))}
+            {receipts.length
+               ? orders.map((order, i) => (
+                    <Fragment key={order.orderId}>
+                       <Receipt order={order} />
+                       {i + 1 === orders.length ? null : <Separator />}
+                    </Fragment>
+                 ))
+               : null}
          </div>
       </div>
    );
