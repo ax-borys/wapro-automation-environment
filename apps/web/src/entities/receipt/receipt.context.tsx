@@ -5,6 +5,7 @@ export type Receipt = {
    orderId: string;
    status: 'RECORD' | 'RECORDING' | 'RECORDED';
    selected?: boolean;
+   number?: string | null;
 };
 
 export type ReceiptsSetter<T> = React.Dispatch<React.SetStateAction<T>>;
@@ -14,13 +15,12 @@ const setReceiptsContext = createContext<ReceiptsSetter<Receipt[]> | null>(
    null,
 );
 
-export function ReceiptProvider({ chilrden }: { chilrden: ReactNode }) {
+export function ReceiptProvider({ children }: { children: ReactNode }) {
    const [receipts, setReceipts] = useState<Receipt[]>([]);
-
    return (
       <receiptsContext.Provider value={receipts}>
          <setReceiptsContext.Provider value={setReceipts}>
-            {chilrden}
+            {children}
          </setReceiptsContext.Provider>
       </receiptsContext.Provider>
    );
@@ -28,7 +28,9 @@ export function ReceiptProvider({ chilrden }: { chilrden: ReactNode }) {
 
 export const useReceipt: (
    orderId: string,
-) => [Receipt, (receipt: Receipt) => void] = (orderId: string) => {
+) => [Receipt, (receipt: Receipt | ((prev: Receipt) => Receipt)) => void] = (
+   orderId: string,
+) => {
    const receipts = useContext(receiptsContext);
    const setReceipts = useContext(setReceiptsContext);
 
@@ -38,16 +40,27 @@ export const useReceipt: (
 
    const receipt = receipts.find((r) => r.orderId === orderId) as Receipt;
 
-   const setReceipt = (receipt: Receipt) => {
-      setReceipts([...receipts.filter((r) => r.orderId !== orderId), receipt]);
+   const setReceipt = (updater: Receipt | ((prev: Receipt) => Receipt)) => {
+      setReceipts((prev) =>
+         prev.map((r) =>
+            r.orderId === receipt.orderId
+               ? typeof updater === 'function'
+                  ? (updater as (prev: Receipt) => Receipt)(r)
+                  : updater
+               : r,
+         ),
+      );
    };
 
-   return [receipt, setReceipt];
+   return [receipt, setReceipt] as const;
 };
 
 export const useSetReceipts = () => {
    const setReceipts = useContext(setReceiptsContext);
-   return (receipts: Receipt[]) => setReceipts?.(receipts);
+   if (!setReceipts) {
+      throw new Error('Component must be inside ReceiptProvider');
+   }
+   return setReceipts;
 };
 
 export const useReceipts = () => {

@@ -28,69 +28,6 @@ import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import { useReceipt } from '@/entities/receipt/receipt.context';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
 
-const data: (Omit<GenerateReceiptInput, 'items'> & {
-   orderId: string;
-   imgSrc: string;
-   items: (GenerateReceiptInput['items'][number] & { name: string })[];
-   buyerFullname: string;
-   orderProcessedAt: string;
-})[] = [
-   {
-      paymentMethod: 'PREPAID',
-      items: [
-         {
-            offerId: '1',
-            price: 25000,
-            quantity: 1,
-            name: 'Geforce RTX 5090',
-         },
-      ],
-      total: 25000,
-      imgSrc: 'http://localhost:8082/public/rtx5090.jpg',
-      orderProcessedAt: new Date().toDateString(),
-      orderId: '1',
-      buyerFullname: 'Alex Borysiuk',
-   },
-   {
-      paymentMethod: 'POSTPAID',
-      items: [
-         {
-            offerId: '2',
-            price: 6000,
-            quantity: 1,
-            name: 'Geforce RTX 5080',
-         },
-      ],
-      total: 6000,
-      imgSrc: 'http://localhost:8082/public/rtx5080.png',
-      orderProcessedAt: new Date().toDateString(),
-      orderId: '2',
-      buyerFullname: 'Alex Borysiuk',
-   },
-   {
-      paymentMethod: 'PREPAID',
-      items: [
-         {
-            offerId: '1',
-            price: 20000,
-            quantity: 1,
-            name: 'Geforce RTX 5090',
-         },
-         {
-            offerId: '2',
-            price: 6000,
-            quantity: 2,
-            name: 'Geforce RTX 5080',
-         },
-      ],
-      total: 32000,
-      imgSrc: 'http://localhost:8082/public/rtx5080.png',
-      orderProcessedAt: new Date().toDateString(),
-      orderId: '3',
-      buyerFullname: 'Alex Borysiuk',
-   },
-];
-
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
@@ -109,15 +46,20 @@ export function Receipt({
    const [receipt, setReceipt] = useReceipt(order.orderId);
    const status = receipt.status;
    const setReceiptStatus = (status: typeof receipt.status) => {
-      setReceipt({ ...receipt, status });
+      setReceipt((prev) => ({ ...prev, status }));
    };
 
    const selected = receipt.selected as boolean;
    const toggleSelect = () => {
-      setReceipt({ ...receipt, selected: receipt.selected ? false : true });
+      setReceipt((prev) => ({
+         ...prev,
+         selected: receipt.selected ? false : true,
+      }));
    };
 
-   const [number, setNumber] = useState<string>('');
+   const number = receipt.number;
+   const setNumber = (number: string) =>
+      setReceipt((prev) => ({ ...prev, number }));
 
    const recordReceiptsHandler = async () => {
       setReceiptStatus('RECORDING');
@@ -157,10 +99,10 @@ export function Receipt({
             <div className="ml-auto flex gap-2 h-9">
                {status === 'RECORDED' ? (
                   <Button
-                     onClick={() => copyToClipboard(number)}
+                     onClick={() => copyToClipboard(number as string)}
                      className="bg-transparent hover:bg-transparent cursor-pointer"
                   >
-                     <BadgeReceiptNumber value={number} />
+                     <BadgeReceiptNumber value={number as string} />
                   </Button>
                ) : null}
                {order.paymentMethod === 'PREPAID' ? (

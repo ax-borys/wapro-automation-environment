@@ -13,6 +13,10 @@ import {
 import { Receipt } from '@/components/features/receipt';
 import { useOrders } from '@/entities/order';
 import { useEffect } from 'react';
+import { recordReceipts } from '@/entities/receipt/record-receipts';
+async function wait(delay = 3000) {
+   return await new Promise((res, rej) => setTimeout(res, delay));
+}
 
 export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
    const orders = useOrders();
@@ -23,31 +27,15 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
       .filter((receipt) => receipt.selected)
       .map((receipt) => receipt.orderId);
 
-   useEffect(() => setReceipts(initReceipts), []);
+   useEffect(() => {
+      setReceipts([...initReceipts]);
+   }, []);
 
-   const selectAll = () => {
-      const receiptsCopy = [...receipts];
-      receipts.forEach((receipt, i) => {
-         receiptsCopy[i] = {
-            ...receipt,
-            selected: true,
-         };
-      });
+   const selectAll = () =>
+      setReceipts((prev) => prev.map((r) => ({ ...r, selected: true })));
 
-      setReceipts(receiptsCopy);
-   };
-
-   const removeAll = () => {
-      const receiptsCopy = [...receipts];
-      receipts.forEach((receipt, i) => {
-         receiptsCopy[i] = {
-            ...receipt,
-            selected: false,
-         };
-      });
-
-      setReceipts(receiptsCopy);
-   };
+   const removeAll = () =>
+      setReceipts((prev) => prev.map((r) => ({ ...r, selected: false })));
 
    const selectAllHandler = () => {
       const isSelectedAll = selected.length === orders.length;
@@ -56,6 +44,65 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
          removeAll();
       } else {
          selectAll();
+      }
+   };
+   const setReceiptsStatus = (
+      receipts: ReceiptType[],
+      status: ReceiptType['status'],
+   ) =>
+      setReceipts((prev) =>
+         prev.map((r) =>
+            receipts.find((r2) => r2.orderId === r.orderId)
+               ? { ...r, status }
+               : r,
+         ),
+      );
+
+   const setReceiptsNumbers = (
+      receipts: ReceiptType[],
+      numbers: ReceiptType['number'][],
+   ) => {
+      setReceipts((prev) =>
+         prev.map((r) =>
+            receipts.find((r2) => r2.orderId === r.orderId)
+               ? {
+                    ...r,
+                    number:
+                       numbers[
+                          receipts.map((r3) => r3.orderId).indexOf(r.orderId)
+                       ],
+                 }
+               : r,
+         ),
+      );
+   };
+
+   const recordSelectedReceipts = async () => {
+      const selectedReceipts = receipts.filter(
+         (r) => r.selected && r.status === 'RECORD',
+      );
+
+      const selectedOrders = orders.filter((order) =>
+         selectedReceipts.find((r) => r.orderId === order.orderId),
+      );
+
+      if (!selectedOrders.length) return;
+
+      try {
+         setReceiptsStatus(selectedReceipts, 'RECORDING');
+         const result = await recordReceipts(selectedOrders);
+
+         if (result.error) {
+            setReceiptsStatus(selectedReceipts, 'RECORD');
+            console.error(result.error);
+            return;
+         }
+
+         setReceiptsStatus(selectedReceipts, 'RECORDED');
+         setReceiptsNumbers(selectedReceipts, result.data.receiptNumbers);
+      } catch (error) {
+         console.error(error);
+         setReceiptsStatus(selectedReceipts, 'RECORD');
       }
    };
 
@@ -87,6 +134,10 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
                      size={'sm'}
                      variant={'ghost'}
                      className="cursor-pointer"
+                     onClick={recordSelectedReceipts}
+                     disabled={
+                        receipts.find((r) => r.status === 'RECORDING') && true
+                     }
                   >
                      <ReceiptIcon /> Record selected
                   </Button>
