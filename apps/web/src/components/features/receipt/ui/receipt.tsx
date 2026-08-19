@@ -38,7 +38,7 @@ export function Receipt({
    order: Omit<GenerateReceiptInput, 'items'> & {
       orderId: string;
       imgSrc: string;
-      items: (GenerateReceiptInput['items'][number] & { name: string })[];
+      items: (GenerateReceiptInput['items'][number] & { name: string; imgSrc: string })[];
       buyerFullname: string;
       orderProcessedAt: string;
    };
@@ -119,7 +119,7 @@ export function Receipt({
                   {order.items.map((item, i) => (
                      <ReceiptCardTablePosition
                         key={order.orderId + item.offerId + i}
-                        imgSrc={order.imgSrc}
+                        imgSrc={item.imgSrc}
                         name={item.name}
                         quantity={item.quantity}
                         tax="23"

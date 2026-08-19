@@ -4,8 +4,7 @@ import { createContext, ReactNode, useContext } from 'react';
 
 export type Order = Omit<GenerateReceiptInput, 'items'> & {
    orderId: string;
-   imgSrc: string;
-   items: (GenerateReceiptInput['items'][number] & { name: string })[];
+   items: (GenerateReceiptInput['items'][number] & { name: string; imgSrc: string })[];
    buyerFullname: string;
    orderProcessedAt: string;
 };
