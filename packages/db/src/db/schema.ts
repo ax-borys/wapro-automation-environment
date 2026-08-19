@@ -1,6 +1,5 @@
 import { defineRelations } from 'drizzle-orm';
-import { text } from 'drizzle-orm/cockroach-core';
-import { int, primaryKey, sqliteTable } from 'drizzle-orm/sqlite-core';
+import { int, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const offersTable = sqliteTable('offers_table', {
    id: int().primaryKey(),
@@ -54,3 +53,8 @@ export const relations = defineRelations(
       },
    }),
 );
+
+export const receiptsTable = sqliteTable('receipts_table', {
+   id: int().primaryKey({autoIncrement: true}),
+   waproNumber: text('wapro_number'),
+})

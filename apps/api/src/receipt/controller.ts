@@ -12,7 +12,7 @@ import type {
    ApiResponse,
    Config,
    Mapping,
-   Receipt,
+   RecordReceiptWapro as Receipt,
 } from '@wae/types';
 import { createReceipt } from '@wae/wapro-mag-create-receipt';
 import { db } from '@wae/db';

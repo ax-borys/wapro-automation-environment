@@ -54,7 +54,7 @@ export type Position = {
    discount: 0;
 };
 
-export type Receipt = {
+export type RecordReceiptWapro = {
    companyId: number;
    cashRegisterId: number;
    counterPartyId: number;

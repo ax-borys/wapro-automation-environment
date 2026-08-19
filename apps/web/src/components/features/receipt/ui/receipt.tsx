@@ -37,7 +37,6 @@ export function Receipt({
 }: {
    order: Omit<GenerateReceiptInput, 'items'> & {
       orderId: string;
-      imgSrc: string;
       items: (GenerateReceiptInput['items'][number] & { name: string; imgSrc: string })[];
       buyerFullname: string;
       orderProcessedAt: string;

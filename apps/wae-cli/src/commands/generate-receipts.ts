@@ -1,5 +1,5 @@
 import distributeNumber from '@wae/core';
-import { Config, Mapping, Order, Position, Receipt } from '@wae/types';
+import { Config, Mapping, Order, Position, RecordReceiptWapro as Receipt } from '@wae/types';
 import currency from 'currency.js';
 
 function calculatePaymentDeadline(

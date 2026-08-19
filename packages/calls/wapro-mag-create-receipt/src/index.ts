@@ -1,4 +1,4 @@
-import { Receipt, Tx } from '@wae/types';
+import { RecordReceiptWapro as Receipt, Tx } from '@wae/types';
 import { IRecordSet, IResult } from 'mssql';
 
 function toWaproDate(date = new Date()) {
