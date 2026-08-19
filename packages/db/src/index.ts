@@ -9,10 +9,6 @@ export async function health_check() {
    }
 }
 
-export function test() {
-   return 'tst';
-}
-
 export { db };
 export { closeConnection, sqliteDb } from './db';
 export { offersTable, type Offer, type OfferInput } from './db/schema';
