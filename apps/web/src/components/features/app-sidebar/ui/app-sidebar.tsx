@@ -29,8 +29,10 @@ export function AppSidebar() {
       <Sidebar collapsible="icon">
          <SidebarHeader className="">
             <div className="flex items-center h-8 w-full overflow-x-hidden">
-               <Button className="size-8 grow-0">
-                  <Logo className="size-5" />
+               <Button className="size-8 grow-0" asChild>
+                  <Link href='/'>
+                     <Logo className="size-5" />
+                  </Link>
                </Button>
                <div className="ml-3 h-full flex flex-col gap-3.5 justify-center space-x-3 tracking-wide">
                   <span className="font-bold text-base leading-0">
@@ -62,6 +64,13 @@ export function AppSidebar() {
                                     <SidebarMenuSubButton asChild>
                                        <Link href="/receipts/allegro">
                                           Allegro
+                                       </Link>
+                                    </SidebarMenuSubButton>
+                                 </SidebarMenuSubItem>
+                                                                  <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild>
+                                       <Link href="/receipts/history">
+                                          History
                                        </Link>
                                     </SidebarMenuSubButton>
                                  </SidebarMenuSubItem>
