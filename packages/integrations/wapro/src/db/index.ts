@@ -1,5 +1,3 @@
-export { sqliteDb } from './sqlite';
-
 import dotenv from 'dotenv';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -7,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const envPath = path.resolve(__dirname, '../../../.env');
+const envPath = path.resolve(__dirname, '../../../../.env');
 
 dotenv.config({
    path: envPath,
@@ -16,6 +14,7 @@ dotenv.config({
 
 import mssql from 'mssql';
 import { drizzle } from 'drizzle-orm/node-mssql';
+console.log(envPath);
 
 if (!process.env.DB_HOST) {
    throw new Error('DB_HOST is not set');

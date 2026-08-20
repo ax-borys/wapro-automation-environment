@@ -250,9 +250,9 @@ importers:
       '@wae/types':
         specifier: workspace:*
         version: link:../../packages/types
-      '@wae/wapro-mag-create-receipt':
+      '@wae/wapro':
         specifier: workspace:*
-        version: link:../../packages/calls/wapro-mag-create-receipt
+        version: link:../../packages/integrations/wapro
       drizzle-orm:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
@@ -284,15 +284,16 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@wae/types':
-        specifier: 'workspace: *'
-        version: link:../../packages/types
-      '@wae/wapro-mag-create-receipt':
+      '@wae/wapro':
         specifier: workspace:*
-        version: link:../../packages/calls/wapro-mag-create-receipt
+        version: link:../../packages/integrations/wapro
       currency.js:
         specifier: ^2.0.4
         version: 2.0.4
+    devDependencies:
+      '@wae/types':
+        specifier: 'workspace: *'
+        version: link:../../packages/types
 
   apps/web:
     dependencies:
@@ -404,6 +405,28 @@ importers:
         specifier: rc
         version: 1.0.0-rc.4
 
+  packages/integrations/wapro:
+    dependencies:
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+      mssql:
+        specifier: ^12.7.0
+        version: 12.7.0(supports-color@7.2.0)
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
+    devDependencies:
+      '@types/mssql':
+        specifier: ^12.3.0
+        version: 12.3.0(supports-color@7.2.0)
+      drizzle-kit:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4
+
   packages/receipt:
     dependencies:
       '@hono/valibot-validator':
@@ -412,9 +435,15 @@ importers:
       '@wae/core':
         specifier: workspace:*
         version: link:../core
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../db
       '@wae/types':
         specifier: workspace:*
         version: link:../types
+      '@wae/wapro':
+        specifier: workspace:*
+        version: link:../integrations/wapro
       currency.js:
         specifier: ^2.0.4
         version: 2.0.4
@@ -429,14 +458,7 @@ importers:
         specifier: ^12.7.0
         version: 12.7.0(supports-color@7.2.0)
 
-  packages/template:
-    devDependencies:
-      '@types/mssql':
-        specifier: ^12.3.0
-        version: 12.3.0(supports-color@7.2.0)
-      mssql:
-        specifier: ^12.7.0
-        version: 12.7.0(supports-color@7.2.0)
+  packages/template: {}
 
   packages/types:
     dependencies:

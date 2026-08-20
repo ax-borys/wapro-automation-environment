@@ -13,7 +13,7 @@
    },
    "references": [
       {
-         "path": "../../packages/calls/wapro-mag-create-receipt"
+         "path": "../../packages/integrations/wapro"
       },
       {
          "path": "../../packages/db"
