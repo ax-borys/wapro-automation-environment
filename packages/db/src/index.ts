@@ -18,3 +18,5 @@ export const db = drizzle(
    'file:' + path.resolve(__dirname, `../../../../${process.env.DB_FILENAME}`),
    { relations },
 );
+
+export { receiptsTable } from './schemas/receipt';
