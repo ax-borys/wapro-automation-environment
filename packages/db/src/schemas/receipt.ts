@@ -8,7 +8,7 @@ export const receiptsTable = sqliteTable('receipts', {
    number: text().notNull().unique(),
    fiscalNumber: int('fiscal_number').notNull().unique(),
    recipientFirstName: text('recipient_first_name').notNull(),
-   recipientLastName: text('recipient_first_name').notNull(),
+   recipientLastName: text('recipient_last_name').notNull(),
    paymentMethod: text('payment_method').notNull(),
    totalPaid: int('total_paid').notNull(),
    packagesMade: int('packages_made').notNull(),
