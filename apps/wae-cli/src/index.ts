@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { db } from '@wae/db';
-import { createReceipt } from '@wae/wapro-mag-create-receipt';
-import { closeConnection } from '@wae/db';
+import { recordReceipt } from '@wae/wapro';
+import { closeConnection } from '@wae/wapro';
 import { Config, Mapping, Order } from '@wae/types';
 import { generateReceipts } from './commands/generate-receipts';
 
@@ -40,11 +40,11 @@ async function createReceiptsCommand(arg: string) {
    const receiptsData = JSON.parse(fs.readFileSync(arg, 'utf-8'));
 
    await db.transaction(async (tx) => {
-      const receiptsParams: Parameters<typeof createReceipt>[1][] =
+      const receiptsParams: Parameters<typeof recordReceipt>[1][] =
          receiptsData.map(
             (
                d: Omit<
-                  Parameters<typeof createReceipt>[1],
+                  Parameters<typeof recordReceipt>[1],
                   'paymentDeadline'
                > & {
                   paymentDeadline: string;
@@ -58,7 +58,7 @@ async function createReceiptsCommand(arg: string) {
       const results = [];
 
       for (const p of receiptsParams) {
-         results.push(await createReceipt(tx, p));
+         results.push(await recordReceipt(tx, p));
       }
 
       console.log('Operation succeeded.');

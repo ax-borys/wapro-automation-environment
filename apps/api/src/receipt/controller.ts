@@ -7,16 +7,9 @@ const __dirname = path.dirname(__filename);
 import fs from 'fs';
 
 import type { Handler } from 'hono';
-import type {
-   ApiError,
-   ApiResponse,
-   Config,
-   Mapping,
-   RecordReceiptWapro as Receipt,
-} from '@wae/types';
-import { createReceipt } from '@wae/wapro-mag-create-receipt';
-import { db } from '@wae/db';
+import type { ApiResponse, Config, Mapping } from '@wae/types';
 import { generateReceipts, type GenerateReceiptInput } from '@wae/receipt';
+import { dbWapro as db, recordReceipt } from '@wae/wapro';
 
 const config: Config = {
    companyId: 1,
@@ -36,12 +29,12 @@ const map: Mapping = JSON.parse(
 export const recordReceiptHandler: Handler = async (c) => {
    const body = await c.req.json<GenerateReceiptInput[]>();
 
-   const receipts: Receipt[] = generateReceipts(body, map, config);
+   const receipts = generateReceipts(body, map, config);
    let results: { receiptNumber: string }[] = [];
 
    await db.transaction(async (tx) => {
       for (const receipt of receipts) {
-         results.push(await createReceipt(tx, receipt));
+         results.push(await recordReceipt(tx, receipt));
       }
    });
 

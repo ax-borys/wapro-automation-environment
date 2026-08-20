@@ -13,9 +13,11 @@
    "dependencies": {
       "@wae/core": "workspace:*",
       "@wae/db": "workspace:*",
-      "@wae/wapro-mag-create-receipt": "workspace:*",
-      "@wae/types": "workspace: *",
+      "@wae/wapro": "workspace:*",
       "currency.js": "^2.0.4"
+   },
+   "devDependencies": {
+      "@wae/types": "workspace: *"
    },
    "packageManager": "pnpm@10.33.0"
 }

@@ -11,7 +11,9 @@
    "dependencies": {
       "@hono/valibot-validator": "^0.6.1",
       "@wae/core": "workspace:*",
+      "@wae/db": "workspace:*",
       "@wae/types": "workspace:*",
+      "@wae/wapro": "workspace:*",
       "currency.js": "^2.0.4",
       "valibot": "^1.4.2"
    },
