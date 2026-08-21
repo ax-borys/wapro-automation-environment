@@ -31,7 +31,7 @@ export const positionsTable = sqliteTable(
 
 export const productsTable = sqliteTable('products', {
    id: int().primaryKey({ autoIncrement: true }),
-   externalId: int().unique(),
+   externalId: int('external_id').unique(),
    name: text().notNull(),
    imgSrc: text('image_source'),
    tax: int().notNull(),

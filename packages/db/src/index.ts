@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { drizzle } from 'drizzle-orm/node-mssql';
+import { drizzle } from 'drizzle-orm/libsql';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { relations } from './schemas/receipt';
@@ -19,4 +19,10 @@ export const db = drizzle(
    { relations },
 );
 
-export { receiptsTable } from './schemas/receipt';
+export {
+   receiptsTable,
+   offersTable,
+   itemsTable,
+   productsTable,
+   positionsTable,
+} from './schemas/receipt';

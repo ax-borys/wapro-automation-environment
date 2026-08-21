@@ -15,3 +15,7 @@ export const wrongCalculation = (total: number, calculatedTotal: number) => {
       `Total price ${total} from an input and total price ${calculatedTotal} in a receipt ARE NOT equal.`,
    );
 };
+
+export const offerDoesntExist = (id: number) => {
+   return businessRuleViolation(`Offer with id #${id} does not exist.`);
+};
