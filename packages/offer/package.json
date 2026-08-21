@@ -1,0 +1,17 @@
+{
+   "name": "@wae/offer",
+   "private": true,
+   "main": "./dist/index.mjs",
+   "types": "./dist/index.d.ts",
+   "type": "module",
+   "scripts": {
+      "build": "tsc -b && tsdown"
+   },
+   "packageManager": "pnpm@10.33.0",
+   "dependencies": {
+      "@wae/core": "workspace:*",
+      "@wae/db": "workspace:*",
+      "drizzle-orm": "1.0.0-rc.4",
+      "valibot": "^1.4.2"
+   }
+}

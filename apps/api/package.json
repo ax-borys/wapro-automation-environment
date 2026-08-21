@@ -12,6 +12,7 @@
       "@types/mssql": "^12.3.0",
       "@wae/core": "workspace:*",
       "@wae/db": "workspace:*",
+      "@wae/offer": "workspace:*",
       "@wae/receipt": "workspace:*",
       "@wae/types": "workspace:*",
       "@wae/wapro": "workspace:*",
