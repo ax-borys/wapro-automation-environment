@@ -21,6 +21,8 @@ import mssql from 'mssql';
 import type { ApiError, ApiResponse } from '@wae/types';
 import { AppError } from '@wae/core';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import { createOfferInputSchema } from '@wae/offer';
+import { createOfferHandler, getOffersHandler } from './offer/controller.js';
 const app = new Hono();
 
 app.use(
@@ -58,6 +60,14 @@ app.post(
    recordReceiptHandler,
 );
 
+app.post(
+   '/create-offer',
+   vValidator('json', createOfferInputSchema, valibotHook),
+   createOfferHandler,
+);
+
+app.get('/get-offers', getOffersHandler);
+
 app.onError((error, c) => {
    let message = null;
    let code = null;
@@ -77,6 +87,8 @@ app.onError((error, c) => {
       message = error.message;
       code = error.code;
       status = error.status as ContentfulStatusCode;
+   } else {
+      console.error(error);
    }
 
    return c.json<ApiResponse<ApiError>>(

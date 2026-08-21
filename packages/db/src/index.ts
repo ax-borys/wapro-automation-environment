@@ -14,10 +14,11 @@ dotenv.config({
    quiet: true,
 });
 
-export const db = drizzle(
-   'file:' + path.resolve(__dirname, `../../../../${process.env.DB_FILENAME}`),
-   { relations },
-);
+const dbPath =
+   'file:' + path.resolve(__dirname, `../../../${process.env.DB_FILENAME}`);
+console.log('Path: ', dbPath);
+
+export const db = drizzle(dbPath, { relations });
 
 export {
    receiptsTable,

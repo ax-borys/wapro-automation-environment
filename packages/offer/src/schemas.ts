@@ -10,3 +10,4 @@ export const createOfferOutputSchema = offerOutputSchema;
 
 export type CreateOfferInput = v.InferInput<typeof createOfferInputSchema>;
 export type CreateOfferOutput = v.InferOutput<typeof createOfferOutputSchema>;
+export type Offer = v.InferOutput<typeof offerOutputSchema>;
