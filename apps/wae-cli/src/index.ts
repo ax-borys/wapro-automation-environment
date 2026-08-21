@@ -1,6 +1,5 @@
 import fs from 'fs';
-import { db } from '@wae/db';
-import { recordReceipt } from '@wae/wapro';
+import { recordReceipt, dbWapro as db } from '@wae/wapro';
 import { closeConnection } from '@wae/wapro';
 import { Config, Mapping, Order } from '@wae/types';
 import { generateReceipts } from './commands/generate-receipts';
