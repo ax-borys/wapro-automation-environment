@@ -20,36 +20,63 @@ export const positionsTable = sqliteTable(
       receiptId: int('receipt_id')
          .notNull()
          .references(() => receiptsTable.id),
-      productId: int()
+      offerId: int('offer_id')
          .notNull()
          .references(() => productsTable.id),
-      title: text().notNull(),
       quantity: int().notNull(),
-      tax: int().notNull(),
       price: int().notNull(),
    },
-   (t) => [primaryKey({ columns: [t.receiptId, t.productId] })],
+   (t) => [primaryKey({ columns: [t.receiptId, t.offerId] })],
 );
 
 export const productsTable = sqliteTable('products', {
    id: int().primaryKey({ autoIncrement: true }),
-   externalId: int(),
+   externalId: int().unique(),
    name: text().notNull(),
-   imgSrc: text('image_source').notNull(),
+   imgSrc: text('image_source'),
    tax: int().notNull(),
 });
 
+export const offersTable = sqliteTable('offers', {
+   id: int().primaryKey({ autoIncrement: true }),
+   externalId: int('external_id').unique(),
+   src: text('source').notNull(),
+   title: text().notNull(),
+   imgSrc: text('image_source'),
+});
+
+export const itemsTable = sqliteTable(
+   'items',
+   {
+      offerId: int('offer_id')
+         .notNull()
+         .references(() => offersTable.id),
+      productId: int('product_id')
+         .notNull()
+         .references(() => productsTable.id),
+      quantity: int().notNull(),
+   },
+   (t) => [primaryKey({ columns: [t.offerId, t.productId] })],
+);
+
 export const relations = defineRelations(
-   { receiptsTable, positionsTable, productsTable },
+   { receiptsTable, positionsTable, productsTable, itemsTable, offersTable },
    (r) => ({
       receiptsTable: {
-         positions: r.many.productsTable({
+         positions: r.many.offersTable({
             from: r.receiptsTable.id.through(r.positionsTable.receiptId),
-            to: r.productsTable.id.through(r.positionsTable.productId),
+            to: r.offersTable.id.through(r.positionsTable.offerId),
          }),
       },
-      productsTable: {
+      offersTable: {
+         items: r.many.productsTable({
+            from: r.offersTable.id.through(r.itemsTable.offerId),
+            to: r.productsTable.id.through(r.itemsTable.productId),
+         }),
          receipts: r.many.receiptsTable(),
+      },
+      productsTable: {
+         items: r.many.offersTable(),
       },
    }),
 );
