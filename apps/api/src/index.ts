@@ -21,8 +21,12 @@ import mssql from 'mssql';
 import type { ApiError, ApiResponse } from '@wae/types';
 import { AppError } from '@wae/core';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import { createOfferInputSchema } from '@wae/offer';
-import { createOfferHandler, getOffersHandler } from './offer/controller.js';
+import { addItemsInputSchema, createOfferInputSchema } from '@wae/offer';
+import {
+   addItemsHandler,
+   createOfferHandler,
+   getOffersHandler,
+} from './offer/controller.js';
 const app = new Hono();
 
 app.use(
@@ -67,6 +71,12 @@ app.post(
 );
 
 app.get('/get-offers', getOffersHandler);
+
+app.post(
+   '/add-items',
+   vValidator('json', addItemsInputSchema, valibotHook),
+   addItemsHandler,
+);
 
 app.onError((error, c) => {
    let message = null;
