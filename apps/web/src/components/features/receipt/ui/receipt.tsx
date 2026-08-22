@@ -16,8 +16,6 @@ import {
 } from '@/components/ui/receipt-card';
 import { GenerateReceiptInput } from '@wae/receipt';
 import currency from 'currency.js';
-import { useRecordReceipts } from '../model/record-receipt.hook';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
    FloppyDiskIcon,

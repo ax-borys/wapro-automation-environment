@@ -17,6 +17,7 @@ import { Button } from './button';
 import { Separator } from './separator';
 import { BadgeCheck } from 'lucide-react';
 import {
+   CashRegisterIcon,
    CopyIcon,
    HandCoinsIcon,
    ReceiptIcon,
@@ -36,9 +37,17 @@ import { cn } from '@/lib/utils';
 import currency from 'currency.js';
 import React from 'react';
 
-export function BadgePaid({ ...props }: React.ComponentProps<typeof Badge>) {
+export function BadgePaid({
+   className,
+   ...props
+}: React.ComponentProps<typeof Badge>) {
    return (
-      <Badge className="ml-auto text-sm p-4 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
+      <Badge
+         className={cn(
+            'ml-auto text-sm p-4 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
+            className,
+         )}
+      >
          <SealCheckIcon className="size-4!" />
          Paid
       </Badge>
@@ -47,7 +56,7 @@ export function BadgePaid({ ...props }: React.ComponentProps<typeof Badge>) {
 
 export function BadgePickup({ ...props }: React.ComponentProps<typeof Badge>) {
    return (
-      <Badge className="ml-auto p-4 bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+      <Badge className="ml-auto p-4 text-sm bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
          <HandCoinsIcon className="size-4!" />
          Pickup
       </Badge>
@@ -63,6 +72,20 @@ export function BadgeReceiptNumber({
    return (
       <Badge className="ml-auto p-4 underline font-medium bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
          <CopyIcon className="size-4!" />
+         {value}
+      </Badge>
+   );
+}
+
+export function BadgeFiskalNumber({
+   value,
+   ...props
+}: React.ComponentProps<typeof Badge> & {
+   value: number;
+}) {
+   return (
+      <Badge className="ml-auto p-4 font-medium bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+         <CashRegisterIcon className="size-4!" />
          {value}
       </Badge>
    );
