@@ -1,7 +1,7 @@
 export {
    type CreateReceiptInput as RecordReceiptInput,
    type ReceiptPosition,
-   type CreateReceiptReturn as RecordReceiptReturn,
+   type CreateReceiptOutput as RecordReceiptOutput,
 } from './services/record-receipts';
 
 export { createReceipt as recordReceipt } from './services/record-receipts';

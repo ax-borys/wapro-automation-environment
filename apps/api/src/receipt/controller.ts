@@ -1,15 +1,6 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-import fs from 'fs';
-
 import type { Handler } from 'hono';
-import type { ApiResponse, Config, Mapping } from '@wae/types';
-import { generateReceipts, type GenerateReceiptInput } from '@wae/receipt';
-import { dbWapro as db, recordReceipt } from '@wae/wapro';
+import type { ApiResponse, Config } from '@wae/types';
+import { createReceipts, type CreateReceiptInput } from '@wae/receipt';
 
 const config: Config = {
    companyId: 1,
@@ -19,30 +10,14 @@ const config: Config = {
    stockId: 1,
 };
 
-const map: Mapping = JSON.parse(
-   fs.readFileSync(
-      path.resolve(__dirname, '../../../../example_data/map.json'),
-      'utf-8',
-   ),
-);
-
 export const recordReceiptHandler: Handler = async (c) => {
-   const body = await c.req.json<GenerateReceiptInput[]>();
+   const createReceiptsInput = await c.req.json<CreateReceiptInput[]>();
 
-   const receipts = generateReceipts(body, map, config);
-   let results: { receiptNumber: string }[] = [];
+   const receipts = createReceipts(createReceiptsInput, config);
 
-   await db.transaction(async (tx) => {
-      for (const receipt of receipts) {
-         results.push(await recordReceipt(tx, receipt));
-      }
-   });
-
-   return c.json<ApiResponse<{ receiptNumbers: string[] }>>(
+   return c.json<ApiResponse<typeof receipts>>(
       {
-         data: {
-            receiptNumbers: results.map((i) => i.receiptNumber),
-         },
+         data: receipts,
          error: null,
       },
       200,

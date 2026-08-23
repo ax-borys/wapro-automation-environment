@@ -409,6 +409,9 @@ importers:
 
   packages/integrations/wapro:
     dependencies:
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../../types
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2

@@ -13,6 +13,7 @@
       "drizzle-kit": "1.0.0-rc.4"
    },
    "dependencies": {
+      "@wae/types": "workspace:*",
       "dotenv": "^17.4.2",
       "drizzle-orm": "1.0.0-rc.4",
       "mssql": "^12.7.0",

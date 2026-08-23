@@ -1,6 +1,7 @@
 import { array, InferOutput, number, object, picklist, string } from 'valibot';
 
 export const generateReceiptInputSchema = object({
+   id: number(),
    paymentMethod: picklist(
       ['PREPAID', 'POSTPAID'],
       'Payment method must be either PREPAID or POSTPAID',

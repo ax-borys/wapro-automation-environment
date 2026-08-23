@@ -6,12 +6,13 @@ export const receiptsTable = sqliteTable('receipts', {
    id: int().primaryKey({ autoIncrement: true }),
    orderId: int('order_id').notNull(),
    number: text().notNull().unique(),
-   fiscalNumber: int('fiscal_number').notNull().unique(),
+   fiscalNumber: int('fiscal_number').unique(),
    recipientFirstName: text('recipient_first_name').notNull(),
    recipientLastName: text('recipient_last_name').notNull(),
    paymentMethod: text('payment_method').notNull(),
    totalPaid: int('total_paid').notNull(),
    packagesMade: int('packages_made').notNull(),
+   clientTag: text('client_tag'),
 });
 
 export const positionsTable = sqliteTable(
@@ -23,8 +24,11 @@ export const positionsTable = sqliteTable(
       offerId: int('offer_id')
          .notNull()
          .references(() => productsTable.id),
+
+      title: text().notNull(),
       quantity: int().notNull(),
       price: int().notNull(),
+      clientTag: text('client_tag'),
    },
    (t) => [primaryKey({ columns: [t.receiptId, t.offerId] })],
 );
@@ -34,7 +38,7 @@ export const productsTable = sqliteTable('products', {
    externalId: text('external_id').unique(),
    name: text().notNull(),
    imgSrc: text('image_source'),
-   tax: int().notNull(),
+   tax: int().$type<0 | 8 | 23>().notNull(),
 });
 
 export const offersTable = sqliteTable('offers', {
@@ -77,6 +81,18 @@ export const relations = defineRelations(
       },
       productsTable: {
          items: r.many.offersTable(),
+      },
+      itemsTable: {
+         offer: r.one.offersTable({
+            from: r.itemsTable.offerId,
+            to: r.offersTable.id,
+            optional: false,
+         }),
+         product: r.one.productsTable({
+            from: r.itemsTable.productId,
+            to: r.productsTable.id,
+            optional: false,
+         }),
       },
    }),
 );

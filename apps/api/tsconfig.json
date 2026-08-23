@@ -1,16 +1,13 @@
 {
+   "extends": "../../tsconfig.base.json",
    "compilerOptions": {
-      "target": "ESNext",
-      "module": "NodeNext",
-      "strict": true,
-      "verbatimModuleSyntax": true,
-      "skipLibCheck": true,
-      "types": ["node"],
-      "jsx": "react-jsx",
-      "jsxImportSource": "hono/jsx",
-      "rootDir": "./src",
-      "outDir": "./dist"
+      "outDir": "dist",
+      "rootDir": "src",
+      "tsBuildInfoFile": "dist/.tsbuildinfo",
+      "emitDeclarationOnly": true,
+      "declarationMap": true
    },
+   "include": ["src"],
    "references": [
       {
          "path": "../../packages/integrations/wapro"
@@ -27,7 +24,7 @@
       {
          "path": "../../packages/core/"
       },
-            {
+      {
          "path": "../../packages/offer/"
       }
    ],

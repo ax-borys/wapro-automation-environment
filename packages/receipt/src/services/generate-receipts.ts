@@ -1,9 +1,4 @@
-import {
-   Config,
-   Mapping,
-   Position,
-   RecordReceiptWapro as Receipt,
-} from '@wae/types';
+import { Config, Mapping, Position } from '@wae/types';
 import { type RecordReceiptInput } from '@wae/wapro';
 
 import currency from 'currency.js';
@@ -124,7 +119,8 @@ export function generateReceipts(
          );
       }
 
-      const receipt: Receipt = {
+      const receipt: RecordReceiptInput = {
+         id: receiptInput.id,
          companyId,
          userId,
          cashRegisterId,

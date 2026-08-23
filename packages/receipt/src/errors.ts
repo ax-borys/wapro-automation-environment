@@ -19,3 +19,12 @@ export const wrongCalculation = (total: number, calculatedTotal: number) => {
 export const offerDoesntExist = (id: number) => {
    return businessRuleViolation(`Offer with id #${id} does not exist.`);
 };
+
+export const positionHasNoMatchedOffer = (
+   id: string | number,
+   title: string,
+) => {
+   return businessRuleViolation(
+      `Receipt position with id #${id} and title "${title}" has no recorded matches.`,
+   );
+};
