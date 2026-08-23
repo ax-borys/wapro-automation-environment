@@ -13,6 +13,9 @@ export const receiptsTable = sqliteTable('receipts', {
    totalPaid: int('total_paid').notNull(),
    packagesMade: int('packages_made').notNull(),
    clientTag: text('client_tag'),
+   createdAt: int('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .default(new Date()),
 });
 
 export const positionsTable = sqliteTable(

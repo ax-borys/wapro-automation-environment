@@ -7,29 +7,25 @@ import {
    BadgeReceiptNumber,
 } from '@/components/ui/receipt-card';
 import { createColumnHelper } from '@tanstack/react-table';
+import { GetReceiptOutput } from '@wae/receipt';
 import currency from 'currency.js';
 
-export type ReceiptRecorded = {
-   buyerFirstName: string;
-   buyerLastName: string;
-   packages: number;
-   number: string;
-   fiskalNumber: string;
-   paymentMethod: 'PREPAID' | 'POSTPAID';
-   total: number;
-};
+export type ReceiptRecorded = GetReceiptOutput;
 
 const columnHelper = createColumnHelper<DataTableFeatures, ReceiptRecorded>();
 
 export const columns = columnHelper.columns([
-   columnHelper.accessor((r) => `${r.buyerFirstName} ${r.buyerLastName}`, {
-      id: 'buyerFullName',
-      header: () => <div className="w-30">Buyer name</div>,
-   }),
-   columnHelper.accessor('packages', {
+   columnHelper.accessor(
+      (r) => `${r.recipientFirstName} ${r.recipientLastName}`,
+      {
+         id: 'buyerFullName',
+         header: () => <div className="w-30">Buyer name</div>,
+      },
+   ),
+   columnHelper.accessor('packagesMade', {
       header: () => <div className="text-center">packages</div>,
       cell: ({ row: r }) => {
-         const value = r.getValue('packages') as number;
+         const value = r.getValue('packagesMade') as number;
 
          return <div className="text-center">{value}</div>;
       },
@@ -46,10 +42,10 @@ export const columns = columnHelper.columns([
          );
       },
    }),
-   columnHelper.accessor('fiskalNumber', {
+   columnHelper.accessor('fiscalNumber', {
       header: () => <div className="text-center">Fiskal number</div>,
       cell: ({ row: r }) => {
-         const value = r.getValue('fiskalNumber') as number;
+         const value = r.getValue('fiscalNumber') as number;
 
          return (
             <div className="text-center">
@@ -72,10 +68,10 @@ export const columns = columnHelper.columns([
          );
       },
    }),
-   columnHelper.accessor('total', {
+   columnHelper.accessor('totalPaid', {
       header: () => <div className="text-right">Total</div>,
       cell: ({ row: r }) => {
-         const total = r.getValue('total') as number;
+         const total = r.getValue('totalPaid') as number;
          const formatted = currency(total, {
             decimal: ',',
             symbol: 'zł',

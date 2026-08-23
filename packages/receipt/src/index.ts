@@ -6,3 +6,10 @@ export {
    createReceiptOutputSchema,
    createReceipts,
 } from './services/create-receipts';
+
+export {
+   type GetReceiptsInput,
+   type GetReceiptOutput,
+   getReceiptsInputSchema,
+   getReceipts,
+} from './services/get-receipts';

@@ -1,6 +1,12 @@
 import type { Handler } from 'hono';
 import type { ApiResponse, Config } from '@wae/types';
-import { createReceipts, type CreateReceiptInput } from '@wae/receipt';
+import {
+   createReceipts,
+   GetReceiptOutput,
+   getReceipts,
+   GetReceiptsInput,
+   type CreateReceiptInput,
+} from '@wae/receipt';
 
 const config: Config = {
    companyId: 1,
@@ -10,7 +16,7 @@ const config: Config = {
    stockId: 1,
 };
 
-export const recordReceiptHandler: Handler = async (c) => {
+export const recordReceiptsHandler: Handler = async (c) => {
    const createReceiptsInput = await c.req.json<CreateReceiptInput[]>();
 
    const receipts = await createReceipts(createReceiptsInput, config);
@@ -22,4 +28,15 @@ export const recordReceiptHandler: Handler = async (c) => {
       },
       200,
    );
+};
+
+export const getReceiptsHandler: Handler = async (c) => {
+   const getReceiptsInput = await c.req.json<GetReceiptsInput>();
+
+   const receipts = await getReceipts(getReceiptsInput);
+
+   return c.json<ApiResponse<GetReceiptOutput[]>>({
+      data: receipts,
+      error: null,
+   });
 };

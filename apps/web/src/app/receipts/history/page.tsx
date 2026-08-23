@@ -10,45 +10,14 @@ import {
    TableHeader,
    TableRow,
 } from '@/components/ui/table';
-
-async function getData(): Promise<ReceiptRecorded[]> {
-   return [
-      {
-         buyerFirstName: 'Alex',
-         buyerLastName: 'Borysiuk',
-         packages: 1,
-         number: 'P/0001/08/26',
-         fiskalNumber: 'W038123',
-         paymentMethod: 'PREPAID',
-         total: 1600,
-      },
-      {
-         buyerFirstName: 'Alex',
-         buyerLastName: 'Borysiuk',
-         packages: 1,
-         number: 'P/0001/08/26',
-         fiskalNumber: 'W038123',
-         paymentMethod: 'PREPAID',
-         total: 1600,
-      },
-      {
-         buyerFirstName: 'Alex',
-         buyerLastName: 'Borysiuk',
-         packages: 1,
-         number: 'P/0001/08/26',
-         fiskalNumber: 'W038123',
-         paymentMethod: 'PREPAID',
-         total: 1600,
-      },
-   ];
-}
+import { fetchReceipts } from '@/entities/receipt';
 
 export default async function ReceiptHistoryPage() {
-   const data = await getData();
+   const response = await fetchReceipts();
 
    return (
       <div className="">
-         <ReceiptsDataTable data={data} />
+         <ReceiptsDataTable initialData={response.data || []} />
       </div>
    );
 }

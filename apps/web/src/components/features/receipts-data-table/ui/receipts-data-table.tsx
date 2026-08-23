@@ -9,21 +9,40 @@ import {
    ToolbarSelectMenu,
    ToolbarSelectMenuCheckboxItem,
 } from '@/components/ui/toolbar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
-import { addDays } from 'date-fns';
+import { addDays, endOfDay, formatISO, startOfDay } from 'date-fns';
 import { ColumnVisibilityState, useTable } from '@tanstack/react-table';
+import { GetReceiptOutput } from '@wae/receipt';
+import { fetchReceipts } from '@/entities/receipt';
 
-export function ReceiptsDataTable({ data }: { data: ReceiptRecorded[] }) {
+export function ReceiptsDataTable({
+   initialData,
+}: {
+   initialData: ReceiptRecorded[];
+}) {
    const [date, setDate] = useState<DateRange | undefined>({
-      from: new Date(new Date().getFullYear(), 0, 20),
-      to: addDays(new Date(new Date().getFullYear(), 0, 20), 20),
+      from: new Date(new Date().toISOString().split('T')[0]),
+      to: new Date(new Date().toISOString()),
    });
 
    const [columnVisibility, setColumnVisibility] =
       useState<ColumnVisibilityState>({});
 
    const [globalFilter, setGlobalFilter] = useState('');
+
+   const [data, setData] = useState<ReceiptRecorded[]>(initialData);
+
+   useEffect(() => {
+      const result = fetchReceipts({
+         dateRange: {
+            from: date?.from ? formatISO(startOfDay(date?.from)) : null,
+            to: date?.to ? formatISO(endOfDay(date?.to)) : null,
+         },
+      });
+
+      result.then((r) => (!r.error ? setData(r.data) : null));
+   }, [date]);
 
    const table = useTable({
       columns,

@@ -6,7 +6,10 @@ const __dirname = path.dirname(__filename);
 
 import { serve } from '@hono/node-server';
 import { Hono, type Env } from 'hono';
-import { recordReceiptHandler } from './receipt/controller.js';
+import {
+   recordReceiptsHandler,
+   getReceiptsHandler,
+} from './receipt/controller.js';
 
 import { serveStatic } from '@hono/node-server/serve-static';
 import { cors } from 'hono/cors';
@@ -26,7 +29,10 @@ import {
    createOfferHandler,
    getOffersHandler,
 } from './offer/controller.js';
-import { createReceiptsInputSchema } from '@wae/receipt';
+import {
+   createReceiptsInputSchema,
+   getReceiptsInputSchema,
+} from '@wae/receipt';
 const app = new Hono();
 
 app.use(
@@ -61,7 +67,13 @@ const valibotHook: Hook<
 app.post(
    '/record-receipts',
    vValidator('json', createReceiptsInputSchema, valibotHook),
-   recordReceiptHandler,
+   recordReceiptsHandler,
+);
+
+app.post(
+   '/get-receipts',
+   vValidator('json', getReceiptsInputSchema, valibotHook),
+   getReceiptsHandler,
 );
 
 app.post(
