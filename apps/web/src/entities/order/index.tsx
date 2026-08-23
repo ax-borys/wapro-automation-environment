@@ -4,10 +4,13 @@ import { createContext, ReactNode, useContext } from 'react';
 
 export type Item = CreateReceiptInput['positions'][number] & { imgSrc: string };
 
-export type Order = Omit<CreateReceiptInput, 'positions'> & {
-   positions: Item[];
-   orderProcessedAt: string;
-};
+export type Order = Omit<
+   Omit<CreateReceiptInput, 'positions'> & {
+      positions: Item[];
+      orderProcessedAt: string;
+   },
+   'fiscalNumber'
+>;
 
 const ordersContext = createContext<Order[]>([]);
 

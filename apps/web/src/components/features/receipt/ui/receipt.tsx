@@ -1,6 +1,7 @@
 'use client';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
+   BadgeFiskalNumber,
    BadgePaid,
    BadgePickup,
    BadgeReceiptNumber,
@@ -17,6 +18,7 @@ import {
 import currency from 'currency.js';
 import { Button } from '@/components/ui/button';
 import {
+   CashRegisterIcon,
    FloppyDiskIcon,
    ReceiptIcon,
    SpinnerIcon,
@@ -25,6 +27,22 @@ import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import { useReceipt } from '@/entities/receipt/receipt.context';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
 import { Order } from '@/entities/order';
+import {
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
+   DialogTrigger,
+} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { DialogClose } from 'radix-ui/dialog';
+import { SubmitEventHandler, useCallback } from 'react';
+import { set } from 'date-fns';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -33,9 +51,24 @@ async function wait(delay = 3000) {
 export function Receipt({ order }: { order: Order }) {
    const [receipt, setReceipt] = useReceipt(order.orderId.toString());
    const status = receipt.status;
+
    const setReceiptStatus = (status: typeof receipt.status) => {
       setReceipt((prev) => ({ ...prev, status }));
    };
+
+   const test = () => {
+      console.log(receipt);
+   };
+
+   test();
+
+   const setReceiptFiscalNumber = useCallback(
+      (fiscalNumber: typeof receipt.fiscalNumber) => {
+         console.log({ ...receipt }, { ...order });
+         setReceipt((prev) => ({ ...prev, fiscalNumber }));
+      },
+      [receipt.orderId, order.orderId],
+   );
 
    const selected = receipt.selected as boolean;
    const toggleSelect = () => {
@@ -52,8 +85,13 @@ export function Receipt({ order }: { order: Order }) {
    const recordReceiptsHandler = async () => {
       setReceiptStatus('RECORDING');
 
+      const fiscalNumber = receipt.fiscalNumber;
+      if (!fiscalNumber) {
+         return;
+      }
+
       try {
-         const result = await recordReceipts([order]);
+         const result = await recordReceipts([{ ...order, fiscalNumber }]);
          console.log(order);
 
          if (result.error) {
@@ -69,6 +107,24 @@ export function Receipt({ order }: { order: Order }) {
       } catch (error) {
          console.error(error);
          setReceiptStatus('RECORD');
+      }
+   };
+
+   const receiptNumberSubmitHandler: React.SubmitEventHandler<
+      HTMLFormElement
+   > = (e) => {
+      e.preventDefault();
+      const fiscalNumber = (
+         e.target.elements.namedItem('fiscalNumber') as HTMLInputElement
+      )?.value;
+
+      const parsedFiscalNumber = Number.parseInt(fiscalNumber);
+
+      if (parsedFiscalNumber) {
+         setReceiptFiscalNumber(parsedFiscalNumber);
+      } else if (fiscalNumber === '') {
+         setReceiptFiscalNumber(null);
+      } else if (fiscalNumber === '') {
       }
    };
 
@@ -91,10 +147,15 @@ export function Receipt({ order }: { order: Order }) {
                {status === 'RECORDED' ? (
                   <Button
                      onClick={() => copyToClipboard(number as string)}
-                     className="bg-transparent hover:bg-transparent cursor-pointer"
+                     className="bg-transparent hover:bg-transparent cursor-pointer px-0"
                   >
                      <BadgeReceiptNumber value={number as string} />
                   </Button>
+               ) : null}
+               {receipt.fiscalNumber ? (
+                  <BadgeFiskalNumber
+                     value={`W${String(receipt.fiscalNumber).padStart(6, '0')}`}
+                  />
                ) : null}
                {order.paymentMethod === 'PREPAID' ? (
                   <BadgePaid />
@@ -131,8 +192,54 @@ export function Receipt({ order }: { order: Order }) {
             }
             orderProcessedAt={order.orderProcessedAt}
          >
+            <Dialog>
+               <form
+                  onSubmit={receiptNumberSubmitHandler}
+                  id="set-fiscal-number-form"
+               >
+                  <DialogTrigger asChild>
+                     <Button
+                        variant={'outline'}
+                        disabled={receipt.status !== 'RECORD'}
+                     >
+                        <CashRegisterIcon />
+                     </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                     <DialogHeader>
+                        <DialogTitle>Enter receipt's fiscal number</DialogTitle>
+                     </DialogHeader>
+                     <DialogDescription>
+                        Make sure you are writing correct fiscal number.
+                     </DialogDescription>
+                     <FieldGroup>
+                        <Field>
+                           <Label>Fiscal number</Label>
+                           <Input
+                              autoFocus={true}
+                              name="fiscalNumber"
+                              form="set-fiscal-number-form"
+                           />
+                        </Field>
+                     </FieldGroup>
+                     <DialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
+                        <DialogClose asChild>
+                           <Button variant={'outline'}>Cancel</Button>
+                        </DialogClose>
+                        <DialogClose asChild>
+                           <Button type="submit" form="set-fiscal-number-form">
+                              Save changes
+                           </Button>
+                        </DialogClose>
+                     </DialogFooter>
+                  </DialogContent>
+               </form>
+            </Dialog>
             {status === 'RECORD' ? (
-               <Button onClick={recordReceiptsHandler}>
+               <Button
+                  onClick={recordReceiptsHandler}
+                  disabled={receipt.fiscalNumber ? false : true}
+               >
                   <ReceiptIcon />
                   Record a receipt
                </Button>

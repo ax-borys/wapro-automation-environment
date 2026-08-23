@@ -81,7 +81,7 @@ export function BadgeFiskalNumber({
    value,
    ...props
 }: React.ComponentProps<typeof Badge> & {
-   value: number;
+   value: number | string;
 }) {
    return (
       <Badge className="ml-auto p-4 font-medium bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">

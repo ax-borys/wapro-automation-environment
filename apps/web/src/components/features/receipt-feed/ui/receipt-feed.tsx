@@ -79,12 +79,24 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
 
    const recordSelectedReceipts = async () => {
       const selectedReceipts = receipts.filter(
-         (r) => r.selected && r.status === 'RECORD',
+         (
+            r,
+         ): r is Omit<ReceiptType, 'fiscalNumber'> & { fiscalNumber: number } =>
+            (r.selected && r.status === 'RECORD' && r.fiscalNumber) as boolean,
       );
 
-      const selectedOrders = orders.filter((order) =>
-         selectedReceipts.find((r) => r.orderId === order.orderId.toString()),
-      );
+      const selectedOrders = orders
+         .filter((order) =>
+            selectedReceipts.find(
+               (r) => r.orderId === order.orderId.toString(),
+            ),
+         )
+         .map((i) => ({
+            ...i,
+            fiscalNumber: selectedReceipts.find(
+               (j) => j.orderId === i.orderId.toString(),
+            )!.fiscalNumber,
+         }));
 
       if (!selectedOrders.length) return;
 

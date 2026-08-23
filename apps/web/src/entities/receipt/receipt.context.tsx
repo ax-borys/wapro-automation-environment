@@ -6,6 +6,7 @@ export type Receipt = {
    status: 'RECORD' | 'RECORDING' | 'RECORDED';
    selected?: boolean;
    number?: string | null;
+   fiscalNumber?: number | null;
 };
 
 export type ReceiptsSetter<T> = React.Dispatch<React.SetStateAction<T>>;
