@@ -6,7 +6,7 @@ export const receiptsTable = sqliteTable('receipts', {
    id: int().primaryKey({ autoIncrement: true }),
    orderId: int('order_id').notNull(),
    number: text().notNull().unique(),
-   fiscalNumber: int('fiscal_number').unique(),
+   fiscalNumber: int('fiscal_number'),
    recipientFirstName: text('recipient_first_name').notNull(),
    recipientLastName: text('recipient_last_name').notNull(),
    paymentMethod: text('payment_method').notNull(),

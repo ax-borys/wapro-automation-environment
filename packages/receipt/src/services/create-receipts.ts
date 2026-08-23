@@ -1,19 +1,7 @@
 import { Config, Mapping, Tx } from '@wae/types';
-import {
-   dbWapro,
-   recordReceipt,
-   RecordReceiptInput,
-   RecordReceiptOutput,
-} from '@wae/wapro';
+import { dbWapro, recordReceipt, RecordReceiptOutput } from '@wae/wapro';
 import * as v from 'valibot';
-import {
-   db,
-   itemsTable,
-   offersTable,
-   positionsTable,
-   productsTable,
-   receiptsTable,
-} from '@wae/db';
+import { db, positionsTable, productsTable, receiptsTable } from '@wae/db';
 import { createInsertSchema } from 'drizzle-orm/valibot';
 import { positionHasNoMatchedOffer } from '../errors';
 import { GenerateReceiptInput } from '../schema';
@@ -30,18 +18,21 @@ const positionInputSchema = createInsertSchema(positionsTable);
 const productInputSchema = createInsertSchema(productsTable);
 
 export const createReceiptInputSchema = v.object({
-   ...v.omit(receiptInputSchema, ['id', 'number']).entries,
+   ...v.omit(receiptInputSchema, ['id', 'number', 'clientTag']).entries,
    fiscalNumber: v.nonNullish(receiptInputSchema.entries.fiscalNumber),
    paymentMethod: v.picklist(['PREPAID', 'POSTPAID']),
    positions: v.array(
       v.object({
-         ...v.omit(positionInputSchema, ['receiptId', 'offerId']).entries,
+         ...v.omit(positionInputSchema, ['receiptId', 'offerId', 'clientTag'])
+            .entries,
          externalId: v.nonNullish(
             v.pick(productInputSchema, ['externalId']).entries.externalId,
          ),
       }),
    ),
 });
+
+export const createReceiptsInputSchema = v.array(createReceiptInputSchema);
 
 export const createReceiptOutputSchema = saveReceiptOutputSchema;
 
@@ -139,6 +130,7 @@ export async function createReceipts(
             (receipt) => {
                return {
                   ...receipt,
+                  id: undefined,
                   number: receiptsInfo[receipt.id].receiptNumber,
                   orderId: receipt.orderId,
                   positions: receipt.positions.map((position) => ({

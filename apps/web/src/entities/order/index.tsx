@@ -1,11 +1,11 @@
 'use client';
-import { GenerateReceiptInput } from '@wae/receipt';
+import { CreateReceiptInput } from '@wae/receipt';
 import { createContext, ReactNode, useContext } from 'react';
 
-export type Order = Omit<GenerateReceiptInput, 'items'> & {
-   orderId: string;
-   items: (GenerateReceiptInput['items'][number] & { name: string; imgSrc: string })[];
-   buyerFullname: string;
+export type Item = CreateReceiptInput['positions'][number] & { imgSrc: string };
+
+export type Order = Omit<CreateReceiptInput, 'positions'> & {
+   positions: Item[];
    orderProcessedAt: string;
 };
 

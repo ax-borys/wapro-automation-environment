@@ -14,7 +14,6 @@ import {
    ReceiptCardTableHeader,
    ReceiptCardTablePosition,
 } from '@/components/ui/receipt-card';
-import { GenerateReceiptInput } from '@wae/receipt';
 import currency from 'currency.js';
 import { Button } from '@/components/ui/button';
 import {
@@ -25,25 +24,14 @@ import {
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import { useReceipt } from '@/entities/receipt/receipt.context';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
+import { Order } from '@/entities/order';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
-export function Receipt({
-   order,
-}: {
-   order: Omit<GenerateReceiptInput, 'items'> & {
-      orderId: string;
-      items: (GenerateReceiptInput['items'][number] & {
-         name: string;
-         imgSrc: string;
-      })[];
-      buyerFullname: string;
-      orderProcessedAt: string;
-   };
-}) {
-   const [receipt, setReceipt] = useReceipt(order.orderId);
+export function Receipt({ order }: { order: Order }) {
+   const [receipt, setReceipt] = useReceipt(order.orderId.toString());
    const status = receipt.status;
    const setReceiptStatus = (status: typeof receipt.status) => {
       setReceipt((prev) => ({ ...prev, status }));
@@ -66,6 +54,7 @@ export function Receipt({
 
       try {
          const result = await recordReceipts([order]);
+         console.log(order);
 
          if (result.error) {
             setReceiptStatus('RECORD');
@@ -73,8 +62,10 @@ export function Receipt({
             return;
          }
 
+         const [receipt] = result.data;
+
          setReceiptStatus('RECORDED');
-         setNumber(result.data.receiptNumbers[0]);
+         setNumber(receipt.number);
       } catch (error) {
          console.error(error);
          setReceiptStatus('RECORD');
@@ -116,11 +107,11 @@ export function Receipt({
             <ReceiptCardTable>
                <ReceiptCardTableHeader />
                <ReceiptCardTableBody>
-                  {order.items.map((item, i) => (
+                  {order.positions.map((item, i) => (
                      <ReceiptCardTablePosition
-                        key={order.orderId + item.offerId + i}
+                        key={order.orderId + item.externalId + i}
                         imgSrc={item.imgSrc}
-                        name={item.name}
+                        name={item.title}
                         quantity={item.quantity}
                         tax="23"
                         net={currency(item.price).divide(1.23).value}
@@ -129,13 +120,15 @@ export function Receipt({
                   ))}
                </ReceiptCardTableBody>
                <ReceiptCardTableFooter
-                  totalNet={currency(order.total).divide(1.23).value}
-                  totalGross={currency(order.total).value}
+                  totalNet={currency(order.totalPaid).divide(1.23).value}
+                  totalGross={currency(order.totalPaid).value}
                />
             </ReceiptCardTable>
          </ReceiptCardBody>
          <ReceiptCardFooter
-            buyerFullname={order.buyerFullname}
+            buyerFullname={
+               order.recipientFirstName + ' ' + order.recipientLastName
+            }
             orderProcessedAt={order.orderProcessedAt}
          >
             {status === 'RECORD' ? (

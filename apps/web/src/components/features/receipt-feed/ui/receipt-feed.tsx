@@ -83,7 +83,7 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
       );
 
       const selectedOrders = orders.filter((order) =>
-         selectedReceipts.find((r) => r.orderId === order.orderId),
+         selectedReceipts.find((r) => r.orderId === order.orderId.toString()),
       );
 
       if (!selectedOrders.length) return;
@@ -98,8 +98,13 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
             return;
          }
 
+         const receipts = result.data;
+
          setReceiptsStatus(selectedReceipts, 'RECORDED');
-         setReceiptsNumbers(selectedReceipts, result.data.receiptNumbers);
+         setReceiptsNumbers(
+            selectedReceipts,
+            receipts.map((receipt) => receipt.number),
+         );
       } catch (error) {
          console.error(error);
          setReceiptsStatus(selectedReceipts, 'RECORD');

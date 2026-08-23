@@ -26,7 +26,7 @@ import {
    createOfferHandler,
    getOffersHandler,
 } from './offer/controller.js';
-import { createReceiptInputSchema } from '@wae/receipt';
+import { createReceiptsInputSchema } from '@wae/receipt';
 const app = new Hono();
 
 app.use(
@@ -60,7 +60,7 @@ const valibotHook: Hook<
 
 app.post(
    '/record-receipts',
-   vValidator('json', createReceiptInputSchema, valibotHook),
+   vValidator('json', createReceiptsInputSchema, valibotHook),
    recordReceiptHandler,
 );
 

@@ -13,7 +13,7 @@ const config: Config = {
 export const recordReceiptHandler: Handler = async (c) => {
    const createReceiptsInput = await c.req.json<CreateReceiptInput[]>();
 
-   const receipts = createReceipts(createReceiptsInput, config);
+   const receipts = await createReceipts(createReceiptsInput, config);
 
    return c.json<ApiResponse<typeof receipts>>(
       {
