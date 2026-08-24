@@ -1,8 +1,4 @@
 export { fetchReceipts } from './fetch-receipts';
 export { recordReceipts } from './record-receipts';
-export {
-   useReceiptsStore,
-   useReceipts,
-   useReceipt,
-   type ReceiptModel,
-} from './receipt.store';
+export { useReceiptsStore, type ReceiptModel } from './receipt.store';
+export { useReceipts, useReceipt } from './receipt.hooks';

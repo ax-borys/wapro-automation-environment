@@ -13,7 +13,6 @@ import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { addDays, endOfDay, formatISO, startOfDay } from 'date-fns';
 import { ColumnVisibilityState, useTable } from '@tanstack/react-table';
-import { GetReceiptOutput } from '@wae/receipt';
 import { fetchReceipts } from '@/entities/receipt';
 
 export function ReceiptsDataTable({
