@@ -1,3 +1,4 @@
+import { use, useEffect } from 'react';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
@@ -29,10 +30,12 @@ type ReceiptsStore = {
       id: ReceiptModel['orderId'],
       value: ReceiptModel['fiscalNumber'],
    ) => void;
+   ensureReceipt: (id: ReceiptModel['orderId']) => boolean;
+   ensureReceipts: () => boolean;
 };
 
 export const useReceiptsStore = create<ReceiptsStore>()(
-   immer((set) => ({
+   immer((set, get) => ({
       receipts: {},
       add: (receipt) =>
          set((s) => {
@@ -70,14 +73,37 @@ export const useReceiptsStore = create<ReceiptsStore>()(
          set((s) => {
             s.receipts[id].fiscalNumber = value;
          }),
+      ensureReceipt: (id) => {
+         return get().receipts[id] ? true : false;
+      },
+      ensureReceipts: () => {
+         return Object.values(get().receipts).length ? true : false;
+      },
    })),
 );
 
-export const useReceipts = () => {
+export const useReceipts = (initialReceipts: ReceiptModel[]) => {
+   const receiptsExist = useReceiptsStore((s) => s.ensureReceipts)();
+   const addReceipt = useReceiptsStore((s) => s.add);
+
+   if (!receiptsExist) {
+      initialReceipts.forEach((receipt) => addReceipt(receipt));
+   }
+
    return useReceiptsStore();
 };
 
-export const useReceipt = (id: ReceiptModel['orderId']) => {
+export const useReceipt = (
+   id: ReceiptModel['orderId'],
+   initialReceipt: ReceiptModel,
+) => {
+   const receiptExists = useReceiptsStore((s) => s.ensureReceipt)(id);
+   const addReceipt = useReceiptsStore((s) => s.add);
+
+   if (!receiptExists) {
+      addReceipt(initialReceipt);
+   }
+
    return {
       receipt: useReceiptsStore((s) => s.receipts[id]),
       changeStatus: useReceiptsStore((s) => s.changeStatus).bind(null, id),

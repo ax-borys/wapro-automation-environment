@@ -24,7 +24,6 @@ import {
    SpinnerIcon,
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
-import { useReceipt } from '@/entities/receipt/receipt.context';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
 import { Order } from '@/entities/order';
 import {
@@ -39,51 +38,24 @@ import {
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Separator } from '@/components/ui/separator';
 import { DialogClose } from 'radix-ui/dialog';
-import { SubmitEventHandler, useCallback } from 'react';
-import { set } from 'date-fns';
+import { useReceipt } from '@/entities/receipt';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
 export function Receipt({ order }: { order: Order }) {
-   const [receipt, setReceipt] = useReceipt(order.orderId.toString());
-   const status = receipt.status;
+   const { receipt, changeStatus, setNumber, setFiscalNumber, selectToggle } =
+      useReceipt(order.orderId.toString(), {
+         orderId: order.orderId.toString(),
+         status: 'RECORD',
+      });
 
-   const setReceiptStatus = (status: typeof receipt.status) => {
-      setReceipt((prev) => ({ ...prev, status }));
-   };
-
-   const test = () => {
-      console.log(receipt);
-   };
-
-   test();
-
-   const setReceiptFiscalNumber = useCallback(
-      (fiscalNumber: typeof receipt.fiscalNumber) => {
-         console.log({ ...receipt }, { ...order });
-         setReceipt((prev) => ({ ...prev, fiscalNumber }));
-      },
-      [receipt.orderId, order.orderId],
-   );
-
-   const selected = receipt.selected as boolean;
-   const toggleSelect = () => {
-      setReceipt((prev) => ({
-         ...prev,
-         selected: receipt.selected ? false : true,
-      }));
-   };
-
-   const number = receipt.number;
-   const setNumber = (number: string) =>
-      setReceipt((prev) => ({ ...prev, number }));
+   const { number, status, fiscalNumber, selected } = receipt;
 
    const recordReceiptsHandler = async () => {
-      setReceiptStatus('RECORDING');
+      changeStatus('RECORDING');
 
       const fiscalNumber = receipt.fiscalNumber;
       if (!fiscalNumber) {
@@ -95,18 +67,18 @@ export function Receipt({ order }: { order: Order }) {
          console.log(order);
 
          if (result.error) {
-            setReceiptStatus('RECORD');
+            changeStatus('RECORD');
             console.error(result.error);
             return;
          }
 
          const [receipt] = result.data;
 
-         setReceiptStatus('RECORDED');
+         changeStatus('RECORDED');
          setNumber(receipt.number);
       } catch (error) {
          console.error(error);
-         setReceiptStatus('RECORD');
+         changeStatus('RECORD');
       }
    };
 
@@ -121,9 +93,9 @@ export function Receipt({ order }: { order: Order }) {
       const parsedFiscalNumber = Number.parseInt(fiscalNumber);
 
       if (parsedFiscalNumber) {
-         setReceiptFiscalNumber(parsedFiscalNumber);
+         setFiscalNumber(parsedFiscalNumber);
       } else if (fiscalNumber === '') {
-         setReceiptFiscalNumber(null);
+         setFiscalNumber(null);
       } else if (fiscalNumber === '') {
       }
    };
@@ -133,12 +105,12 @@ export function Receipt({ order }: { order: Order }) {
    };
 
    return (
-      <ReceiptCard className="">
+      <ReceiptCard>
          <ReceiptCardHeader>
             <Checkbox
                className="cursor-pointer"
                checked={selected}
-               onCheckedChange={toggleSelect}
+               onCheckedChange={selectToggle}
             />
             <span className="font-medium underline">
                Order #{order.orderId}
@@ -152,9 +124,9 @@ export function Receipt({ order }: { order: Order }) {
                      <BadgeReceiptNumber value={number as string} />
                   </Button>
                ) : null}
-               {receipt.fiscalNumber ? (
+               {fiscalNumber ? (
                   <BadgeFiskalNumber
-                     value={`W${String(receipt.fiscalNumber).padStart(6, '0')}`}
+                     value={`W${String(fiscalNumber).padStart(6, '0')}`}
                   />
                ) : null}
                {order.paymentMethod === 'PREPAID' ? (
@@ -195,7 +167,7 @@ export function Receipt({ order }: { order: Order }) {
             <Dialog>
                <form
                   onSubmit={receiptNumberSubmitHandler}
-                  id="set-fiscal-number-form"
+                  id={`set-fiscal-number-form-#${receipt.orderId}`}
                >
                   <DialogTrigger asChild>
                      <Button
@@ -218,7 +190,7 @@ export function Receipt({ order }: { order: Order }) {
                            <Input
                               autoFocus={true}
                               name="fiscalNumber"
-                              form="set-fiscal-number-form"
+                              form={`set-fiscal-number-form-#${receipt.orderId}`}
                            />
                         </Field>
                      </FieldGroup>
@@ -227,7 +199,10 @@ export function Receipt({ order }: { order: Order }) {
                            <Button variant={'outline'}>Cancel</Button>
                         </DialogClose>
                         <DialogClose asChild>
-                           <Button type="submit" form="set-fiscal-number-form">
+                           <Button
+                              type="submit"
+                              form={`set-fiscal-number-form-#${receipt.orderId}`}
+                           >
                               Save changes
                            </Button>
                         </DialogClose>
@@ -238,7 +213,7 @@ export function Receipt({ order }: { order: Order }) {
             {status === 'RECORD' ? (
                <Button
                   onClick={recordReceiptsHandler}
-                  disabled={receipt.fiscalNumber ? false : true}
+                  disabled={fiscalNumber ? false : true}
                >
                   <ReceiptIcon />
                   Record a receipt
