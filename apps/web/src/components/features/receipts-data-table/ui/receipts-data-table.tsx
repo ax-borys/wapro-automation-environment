@@ -12,18 +12,21 @@ import {
 import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { addDays, endOfDay, formatISO, startOfDay } from 'date-fns';
-import { ColumnVisibilityState, useTable } from '@tanstack/react-table';
+import {
+   ColumnVisibilityState,
+   PaginationState,
+   useTable,
+} from '@tanstack/react-table';
 import { fetchReceipts } from '@/entities/receipt';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export function ReceiptsDataTable({
    initialData,
 }: {
    initialData: ReceiptRecorded[];
 }) {
-   const [date, setDate] = useState<DateRange | undefined>({
-      from: new Date(new Date().toISOString().split('T')[0]),
-      to: new Date(new Date().toISOString()),
-   });
+   const [date, setDate] = useState<DateRange | undefined>();
 
    const [columnVisibility, setColumnVisibility] =
       useState<ColumnVisibilityState>({});
@@ -43,6 +46,13 @@ export function ReceiptsDataTable({
       result.then((r) => (!r.error ? setData(r.data) : null));
    }, [date]);
 
+   // fix hydrantion error bug with pageIndex=0
+   const [isMounted, setIsMounted] = useState(false);
+
+   useEffect(() => {
+      setIsMounted(true);
+   }, []);
+
    const table = useTable({
       columns,
       data,
@@ -50,6 +60,12 @@ export function ReceiptsDataTable({
       onColumnVisibilityChange: setColumnVisibility,
       onGlobalFilterChange: setGlobalFilter,
       globalFilterFn: 'fuzzy',
+      initialState: {
+         pagination: {
+            pageIndex: 0,
+            pageSize: 10,
+         },
+      },
       state: {
          columnVisibility,
          globalFilter,
@@ -57,7 +73,7 @@ export function ReceiptsDataTable({
    });
 
    return (
-      <>
+      <div className="flex flex-col h-full relative">
          <Toolbar>
             <ToolbarGroup>
                <ToolbarDatePickerWithRange date={date} onDateSelect={setDate} />
@@ -90,7 +106,42 @@ export function ReceiptsDataTable({
                </ToolbarSelectMenu>
             </ToolbarGroup>
          </Toolbar>
-         <DataTable table={table} />
-      </>
+         <div className="overflow-y-auto h-fit max-h-190 pb-28">
+            <DataTable table={table} />
+         </div>
+         <Toolbar className="bottom-0 fixed shrink-0 border-t border-border bg-background w-full">
+            <ToolbarGroup className="mx-auto gap-2">
+               <Button
+                  variant={'ghost'}
+                  disabled={isMounted ? !table.getCanPreviousPage() : undefined}
+                  onClick={table.previousPage}
+               >
+                  <ChevronLeft />
+                  Previous
+               </Button>
+               {[...new Array(table.getPageCount())].map((_, i) => (
+                  <Button
+                     key={i}
+                     variant={
+                        table.state.pagination.pageIndex === i
+                           ? 'outline'
+                           : 'ghost'
+                     }
+                     onClick={() => table.setPageIndex(i)}
+                  >
+                     {i + 1}
+                  </Button>
+               ))}
+               <Button
+                  variant={'ghost'}
+                  disabled={isMounted ? !table.getCanNextPage() : undefined}
+                  onClick={table.nextPage}
+               >
+                  Next
+                  <ChevronRight />
+               </Button>
+            </ToolbarGroup>
+         </Toolbar>
+      </div>
    );
 }

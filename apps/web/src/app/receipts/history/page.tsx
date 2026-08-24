@@ -16,7 +16,7 @@ export default async function ReceiptHistoryPage() {
    const response = await fetchReceipts();
 
    return (
-      <div className="">
+      <div className="flex flex-col h-full">
          <ReceiptsDataTable initialData={response.data || []} />
       </div>
    );
