@@ -19,8 +19,16 @@ type ReceiptsStore = {
       id: ReceiptModel['orderId'],
       status: ReceiptModel['status'],
    ) => void;
+   changeStatusForMany: (
+      ids: ReceiptModel['orderId'][],
+      status: ReceiptModel['status'],
+   ) => void;
    select: (id: ReceiptModel['orderId']) => void;
    unselect: (id: ReceiptModel['orderId']) => void;
+   selectMany: (ids: ReceiptModel['orderId'][]) => void;
+   unselectMany: (ids: ReceiptModel['orderId'][]) => void;
+   selectAll: () => void;
+   unselectAll: () => void;
    selectToggle: (id: ReceiptModel['orderId']) => void;
    setNumber: (
       id: ReceiptModel['orderId'],
@@ -53,6 +61,9 @@ export const useReceiptsStore = create<ReceiptsStore>()(
          set((s) => {
             s.receipts[id].status = status;
          }),
+      changeStatusForMany: (ids, status) => {
+         ids.forEach((id) => get().changeStatus(id, status));
+      },
       select: (id) =>
          set((s) => {
             s.receipts[id].selected = true;
@@ -64,6 +75,26 @@ export const useReceiptsStore = create<ReceiptsStore>()(
       selectToggle: (id) =>
          set((s) => {
             s.receipts[id].selected = !s.receipts[id].selected;
+         }),
+      selectMany: (ids) =>
+         set((s) => {
+            ids.forEach((id) => (s.receipts[id].selected = true));
+         }),
+      unselectMany: (ids) =>
+         set((s) => {
+            ids.forEach((id) => (s.receipts[id].selected = false));
+         }),
+      selectAll: () =>
+         set((s) => {
+            Object.values(s.receipts).forEach((receipt) => {
+               receipt.selected = true;
+            });
+         }),
+      unselectAll: () =>
+         set((s) => {
+            Object.values(s.receipts).forEach((receipt) => {
+               receipt.selected = false;
+            });
          }),
       setNumber: (id, value) =>
          set((s) => {

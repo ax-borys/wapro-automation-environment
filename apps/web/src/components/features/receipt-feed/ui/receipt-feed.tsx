@@ -5,85 +5,57 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
-import {
-   useSetReceipts,
-   useReceipts,
-   type Receipt as ReceiptType,
-} from '@/entities/receipt/receipt.context';
 import { Receipt } from '@/components/features/receipt';
 import { useOrders } from '@/entities/order';
-import { useEffect } from 'react';
-import { recordReceipts } from '@/entities/receipt/record-receipts';
+import { ReceiptModel, useReceipts } from '@/entities/receipt';
+import { recordReceipts } from '@/entities/receipt';
+
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
-export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
+export function ReceiptFeed({
+   initReceipts,
+}: {
+   initReceipts: ReceiptModel[];
+}) {
    const orders = useOrders();
-   const receipts = useReceipts();
-   const setReceipts = useSetReceipts();
-
-   const selected = receipts
-      .filter((receipt) => receipt.selected)
-      .map((receipt) => receipt.orderId);
-
-   useEffect(() => {
-      setReceipts([...initReceipts]);
-   }, []);
-
-   const selectAll = () =>
-      setReceipts((prev) => prev.map((r) => ({ ...r, selected: true })));
-
-   const removeAll = () =>
-      setReceipts((prev) => prev.map((r) => ({ ...r, selected: false })));
+   const { receipts, selectAll, unselectAll, changeStatusForMany, setNumber } =
+      useReceipts(initReceipts);
+   console.log('Receipts: ', receipts);
+   const selected = Object.values(receipts).filter(
+      (receipt) => receipt.selected,
+   );
 
    const selectAllHandler = () => {
       const isSelectedAll = selected.length === orders.length;
 
       if (isSelectedAll) {
-         removeAll();
+         unselectAll();
       } else {
          selectAll();
       }
    };
-   const setReceiptsStatus = (
-      receipts: ReceiptType[],
-      status: ReceiptType['status'],
-   ) =>
-      setReceipts((prev) =>
-         prev.map((r) =>
-            receipts.find((r2) => r2.orderId === r.orderId)
-               ? { ...r, status }
-               : r,
-         ),
-      );
 
-   const setReceiptsNumbers = (
-      receipts: ReceiptType[],
-      numbers: ReceiptType['number'][],
+   const distributeNumbers = (
+      receiptsInfo: Pick<ReceiptModel, 'orderId' | 'number'>[],
    ) => {
-      setReceipts((prev) =>
-         prev.map((r) =>
-            receipts.find((r2) => r2.orderId === r.orderId)
-               ? {
-                    ...r,
-                    number:
-                       numbers[
-                          receipts.map((r3) => r3.orderId).indexOf(r.orderId)
-                       ],
-                 }
-               : r,
-         ),
-      );
+      for (const receiptInfo of receiptsInfo) {
+         setNumber(receiptInfo.orderId, receiptInfo.number);
+      }
    };
 
    const recordSelectedReceipts = async () => {
-      const selectedReceipts = receipts.filter(
+      const selectedReceipts = Object.values(receipts).filter(
          (
             r,
-         ): r is Omit<ReceiptType, 'fiscalNumber'> & { fiscalNumber: number } =>
+         ): r is Omit<ReceiptModel, 'fiscalNumber'> & {
+            fiscalNumber: number;
+         } =>
             (r.selected && r.status === 'RECORD' && r.fiscalNumber) as boolean,
       );
+
+      const selectedIds = selectedReceipts.map((i) => i.orderId);
 
       const selectedOrders = orders
          .filter((order) =>
@@ -101,25 +73,27 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
       if (!selectedOrders.length) return;
 
       try {
-         setReceiptsStatus(selectedReceipts, 'RECORDING');
+         changeStatusForMany(selectedIds, 'RECORDING');
          const result = await recordReceipts(selectedOrders);
 
          if (result.error) {
-            setReceiptsStatus(selectedReceipts, 'RECORD');
+            changeStatusForMany(selectedIds, 'RECORD');
             console.error(result.error);
             return;
          }
 
          const receipts = result.data;
 
-         setReceiptsStatus(selectedReceipts, 'RECORDED');
-         setReceiptsNumbers(
-            selectedReceipts,
-            receipts.map((receipt) => receipt.number),
+         changeStatusForMany(selectedIds, 'RECORDED');
+         distributeNumbers(
+            receipts.map((i) => ({
+               orderId: i.orderId.toString(),
+               number: i.number,
+            })),
          );
       } catch (error) {
          console.error(error);
-         setReceiptsStatus(selectedReceipts, 'RECORD');
+         changeStatusForMany(selectedIds, 'RECORD');
       }
    };
 
@@ -153,7 +127,9 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
                      className="cursor-pointer"
                      onClick={recordSelectedReceipts}
                      disabled={
-                        receipts.find((r) => r.status === 'RECORDING') && true
+                        Object.values(receipts).find(
+                           (r) => r.status === 'RECORDING',
+                        ) && true
                      }
                   >
                      <ReceiptIcon /> Record selected
@@ -163,7 +139,7 @@ export function ReceiptFeed({ initReceipts }: { initReceipts: ReceiptType[] }) {
          </div>
          <Separator />
          <div className="overflow-scroll max-h-full pb-28">
-            {receipts.length
+            {Object.values(receipts).length
                ? orders.map((order, i) => (
                     <Fragment key={order.orderId}>
                        <Receipt order={order} />

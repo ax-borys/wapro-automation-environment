@@ -1,6 +1,7 @@
 import { ReceiptFeed } from '@/components/features/receipt-feed';
 import { type Receipt } from '@/entities/receipt/receipt.context';
 import { Order, OrdersProvider } from '@/entities/order';
+import { ReceiptModel } from '@/entities/receipt';
 
 const data: Order[] = [
    {
@@ -79,7 +80,7 @@ const data: Order[] = [
 
 export default function AllegroOrdersPage() {
    const initReceipts = data.map((d) => {
-      const receipt: Receipt = {
+      const receipt: ReceiptModel = {
          orderId: d.orderId.toString(),
          status: 'RECORD',
          selected: false,

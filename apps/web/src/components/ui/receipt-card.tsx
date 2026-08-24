@@ -168,6 +168,7 @@ export function ReceiptCardTableFooter({
             <TableCell className="text-right">
                {currency(totalNet, {
                   decimal: ',',
+                  separator: ' ',
                   pattern: '# !',
                   symbol: 'zł',
                }).format()}
@@ -175,6 +176,7 @@ export function ReceiptCardTableFooter({
             <TableCell className="text-right">
                {currency(totalGross, {
                   decimal: ',',
+                  separator: ' ',
                   pattern: '# !',
                   symbol: 'zł',
                }).format()}
@@ -219,6 +221,7 @@ export function ReceiptCardTablePosition({
          <TableCell className="text-right">
             {currency(net, {
                decimal: ',',
+               separator: ' ',
                pattern: '# !',
                symbol: 'zł',
             }).format()}
@@ -226,6 +229,7 @@ export function ReceiptCardTablePosition({
          <TableCell className="text-right">
             {currency(gross, {
                decimal: ',',
+               separator: ' ',
                pattern: '# !',
                symbol: 'zł',
             }).format()}
