@@ -33,6 +33,10 @@ export function DataTable<TData extends RowData>({
                            return (
                               <TableHead
                                  key={header.id}
+                                 style={{
+                                    width: header.getSize(),
+                                    minWidth: 0,
+                                 }}
                                  className="first:pl-6 last:pr-6"
                               >
                                  {header.isPlaceholder

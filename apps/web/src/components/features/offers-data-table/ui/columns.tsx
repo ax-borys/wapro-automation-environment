@@ -1,0 +1,116 @@
+import { Button } from '@/components/ui/button';
+import { DataTableFeatures } from '@/components/ui/data-table/data-table-features';
+import { OfferModel, ProductModel } from '@/entities/offer';
+import {
+   PauseCircleIcon,
+   PlayCircleIcon,
+   PlayIcon,
+   SealCheckIcon,
+   SealIcon,
+   WarningIcon,
+} from '@phosphor-icons/react';
+import { createColumnHelper } from '@tanstack/react-table';
+import { EditIcon } from 'lucide-react';
+import Image from 'next/image';
+
+export type OfferData = Pick<
+   OfferModel,
+   'title' | 'imgSrc' | 'active' | 'approved' | 'items'
+>;
+
+const columnHelper = createColumnHelper<DataTableFeatures, OfferData>();
+
+export const columns = columnHelper.columns([
+   columnHelper.accessor('imgSrc', {
+      header: () => <div>Preview</div>,
+      cell: ({ row: r }) => {
+         const imgUrl = r.getValue('imgSrc') as string;
+
+         return (
+            <div className="flex items-center">
+               <Image
+                  src={imgUrl}
+                  alt="preview"
+                  width={65}
+                  height={65}
+                  className="w-[65px]"
+               />
+            </div>
+         );
+      },
+      size: 70,
+   }),
+   columnHelper.accessor('title', {
+      header: () => <div>Title</div>,
+      cell: ({ row: r }) => {
+         const title = r.getValue('title') as string;
+
+         return <div>{title}</div>;
+      },
+      minSize: 300,
+      size: 900,
+      maxSize: 1500,
+   }),
+   columnHelper.accessor('approved', {
+      header: () => <div className="text-center">Approved</div>,
+      cell: ({ row: r }) => {
+         const approved = r.getValue('approved') as boolean;
+
+         return (
+            <div className="flex justify-center">
+               {approved ? (
+                  <SealCheckIcon className="size-6!" />
+               ) : (
+                  <WarningIcon className="size-6!" />
+               )}
+            </div>
+         );
+      },
+      size: 50,
+   }),
+   columnHelper.accessor('active', {
+      header: () => <div className="text-center">Active</div>,
+      cell: ({ row: r }) => {
+         const active = r.getValue('active') as boolean;
+
+         return (
+            <div className="flex justify-center">
+               <Button
+                  variant={'outline'}
+                  className="text-primary/70 rounded-full"
+               >
+                  {active ? (
+                     <PauseCircleIcon className="size-6!" />
+                  ) : (
+                     <PlayCircleIcon className="size-6!" />
+                  )}
+               </Button>
+            </div>
+         );
+      },
+      size: 50,
+   }),
+   columnHelper.accessor('items', {
+      header: () => <div className="text-center">Products</div>,
+      cell: ({ row: r }) => {
+         const items = r.getValue('items') as ProductModel[];
+
+         return <div className="text-center">{items.length}</div>;
+      },
+      size: 70,
+   }),
+   columnHelper.display({
+      id: 'edit',
+      cell: ({ row: r }) => {
+         return (
+            <div className="flex flex-col w-full">
+               <Button variant={'outline'} className="self-end">
+                  <EditIcon />
+               </Button>
+            </div>
+         );
+      },
+      size: 40,
+      minSize: 40,
+   }),
+]);

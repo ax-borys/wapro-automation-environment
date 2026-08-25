@@ -23,7 +23,7 @@ export const columns = columnHelper.columns([
       },
    ),
    columnHelper.accessor('packagesMade', {
-      header: () => <div className="text-center">packages</div>,
+      header: () => <div className="text-center">Packages</div>,
       cell: ({ row: r }) => {
          const value = r.getValue('packagesMade') as number;
 
@@ -49,7 +49,9 @@ export const columns = columnHelper.columns([
 
          return (
             <div className="text-center">
-               <BadgeFiskalNumber value={value} />
+               <BadgeFiskalNumber
+                  value={'W' + String(value).padStart(6, '0')}
+               />
             </div>
          );
       },

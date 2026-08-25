@@ -16,6 +16,7 @@ import {
    FilterFn,
    metaHelper,
    globalFilteringFeature,
+   columnSizingFeature,
 } from '@tanstack/react-table';
 
 export interface FuzzyFilterMeta {
@@ -33,6 +34,7 @@ export const fuzzyFilter: FilterFn<any, any> = (
 };
 
 export const features = tableFeatures({
+   columnSizingFeature,
    columnFilteringFeature,
    columnVisibilityFeature,
    rowPaginationFeature,

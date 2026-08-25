@@ -30,7 +30,7 @@ export function AppSidebar() {
          <SidebarHeader className="">
             <div className="flex items-center h-8 w-full overflow-x-hidden">
                <Button className="size-8 grow-0" asChild>
-                  <Link href='/'>
+                  <Link href="/">
                      <Logo className="size-5" />
                   </Link>
                </Button>
@@ -67,10 +67,17 @@ export function AppSidebar() {
                                        </Link>
                                     </SidebarMenuSubButton>
                                  </SidebarMenuSubItem>
-                                                                  <SidebarMenuSubItem>
+                                 <SidebarMenuSubItem>
                                     <SidebarMenuSubButton asChild>
                                        <Link href="/receipts/history">
                                           History
+                                       </Link>
+                                    </SidebarMenuSubButton>
+                                 </SidebarMenuSubItem>
+                                 <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild>
+                                       <Link href="/receipts/offers">
+                                          Offers
                                        </Link>
                                     </SidebarMenuSubButton>
                                  </SidebarMenuSubItem>
