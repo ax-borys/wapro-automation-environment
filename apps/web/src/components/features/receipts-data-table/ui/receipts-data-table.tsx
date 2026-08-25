@@ -73,8 +73,8 @@ export function ReceiptsDataTable({
    });
 
    return (
-      <div className="flex flex-col h-full relative">
-         <Toolbar>
+      <div className="flex flex-col h-full max-h-full shrink min-h-0">
+         <Toolbar className="flex shrink-0 min-h-0">
             <ToolbarGroup>
                <ToolbarDatePickerWithRange date={date} onDateSelect={setDate} />
             </ToolbarGroup>
@@ -106,42 +106,47 @@ export function ReceiptsDataTable({
                </ToolbarSelectMenu>
             </ToolbarGroup>
          </Toolbar>
-         <div className="overflow-y-auto h-fit max-h-190 pb-28">
-            <DataTable table={table} />
-         </div>
-         <Toolbar className="bottom-0 fixed shrink-0 border-t border-border bg-background w-full">
-            <ToolbarGroup className="mx-auto gap-2">
-               <Button
-                  variant={'ghost'}
-                  disabled={isMounted ? !table.getCanPreviousPage() : undefined}
-                  onClick={table.previousPage}
-               >
-                  <ChevronLeft />
-                  Previous
-               </Button>
-               {[...new Array(table.getPageCount())].map((_, i) => (
+         <div className="flex flex-col h-full max-h-full shrink min-h-0">
+            <div className="max-h-full min-h-0  overflow-auto shrink">
+               <DataTable table={table} />
+            </div>
+            <div className="flex-1 shrink"></div>
+            <Toolbar className="shrink-0 border-t border-border bg-background w-full">
+               <ToolbarGroup className="mx-auto gap-2">
                   <Button
-                     key={i}
-                     variant={
-                        table.state.pagination.pageIndex === i
-                           ? 'outline'
-                           : 'ghost'
+                     variant={'ghost'}
+                     disabled={
+                        isMounted ? !table.getCanPreviousPage() : undefined
                      }
-                     onClick={() => table.setPageIndex(i)}
+                     onClick={table.previousPage}
                   >
-                     {i + 1}
+                     <ChevronLeft />
+                     Previous
                   </Button>
-               ))}
-               <Button
-                  variant={'ghost'}
-                  disabled={isMounted ? !table.getCanNextPage() : undefined}
-                  onClick={table.nextPage}
-               >
-                  Next
-                  <ChevronRight />
-               </Button>
-            </ToolbarGroup>
-         </Toolbar>
+                  {[...new Array(table.getPageCount())].map((_, i) => (
+                     <Button
+                        key={i}
+                        variant={
+                           table.state.pagination.pageIndex === i
+                              ? 'outline'
+                              : 'ghost'
+                        }
+                        onClick={() => table.setPageIndex(i)}
+                     >
+                        {i + 1}
+                     </Button>
+                  ))}
+                  <Button
+                     variant={'ghost'}
+                     disabled={isMounted ? !table.getCanNextPage() : undefined}
+                     onClick={table.nextPage}
+                  >
+                     Next
+                     <ChevronRight />
+                  </Button>
+               </ToolbarGroup>
+            </Toolbar>
+         </div>
       </div>
    );
 }
