@@ -19,7 +19,7 @@ import {
    BreadcrumbPage,
    BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { Header } from '@/components/features/header';
+import { Header } from '@/components/widgets/header';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 

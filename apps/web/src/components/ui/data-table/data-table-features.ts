@@ -1,4 +1,4 @@
-import { ReceiptRecorded } from '@/components/features/receipts-data-table';
+import { ReceiptRecorded } from '@/components/widgets/receipts-data-table';
 import { RankingInfo, rankItem } from '@tanstack/match-sorter-utils';
 import {
    tableFeatures,

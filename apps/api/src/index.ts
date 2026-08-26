@@ -38,6 +38,7 @@ import {
    createReceiptsInputSchema,
    getReceiptsInputSchema,
 } from '@wae/receipt';
+import { getProducts } from '@wae/wapro';
 const app = new Hono();
 
 app.use(
@@ -100,6 +101,11 @@ app.post(
    vValidator('json', addProductInputSchema, valibotHook),
    addProductsHandler,
 );
+
+app.get('/get-products', async (c) => {
+   const result = await getProducts();
+   return c.json<ApiResponse<typeof result>>({ data: result, error: null });
+});
 
 app.onError((error, c) => {
    let message = null;

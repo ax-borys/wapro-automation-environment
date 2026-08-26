@@ -1,5 +1,7 @@
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTableFeatures } from '@/components/ui/data-table/data-table-features';
+import { EditProductDialog } from '@/components/ui/edit-dialog';
 import { OfferModel, ProductModel } from '@/entities/offer';
 import {
    PauseCircleIcon,
@@ -33,7 +35,7 @@ export const columns = columnHelper.columns([
                   alt="preview"
                   width={65}
                   height={65}
-                  className="w-[65px]"
+                  className="size-[65px] object-cover"
                />
             </div>
          );
@@ -59,9 +61,13 @@ export const columns = columnHelper.columns([
          return (
             <div className="flex justify-center">
                {approved ? (
-                  <SealCheckIcon className="size-6!" />
+                  <div className="bg-green-100 rounded-full p-1  text-green-600">
+                     <SealCheckIcon className="size-5!" />
+                  </div>
                ) : (
-                  <WarningIcon className="size-6!" />
+                  <div className="bg-orange-100 rounded-md p-1 text-orange-600">
+                     <WarningIcon className="size-5!" />
+                  </div>
                )}
             </div>
          );
@@ -75,16 +81,11 @@ export const columns = columnHelper.columns([
 
          return (
             <div className="flex justify-center">
-               <Button
-                  variant={'outline'}
-                  className="text-primary/70 rounded-full"
-               >
-                  {active ? (
-                     <PauseCircleIcon className="size-6!" />
-                  ) : (
-                     <PlayCircleIcon className="size-6!" />
-                  )}
-               </Button>
+               {active ? (
+                  <span className="text-green-600">Yes</span>
+               ) : (
+                  <span className="text-red-600">No</span>
+               )}
             </div>
          );
       },
@@ -95,7 +96,15 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          const items = r.getValue('items') as ProductModel[];
 
-         return <div className="text-center">{items.length}</div>;
+         return (
+            <div className="text-center">
+               {items.length ? (
+                  items.length
+               ) : (
+                  <span className="text-destructive">0</span>
+               )}
+            </div>
+         );
       },
       size: 70,
    }),
@@ -104,9 +113,7 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          return (
             <div className="flex flex-col w-full">
-               <Button variant={'outline'} className="self-end">
-                  <EditIcon />
-               </Button>
+               <EditProductDialog />
             </div>
          );
       },

@@ -1,7 +1,7 @@
 import {
    ReceiptRecorded,
    ReceiptsDataTable,
-} from '@/components/features/receipts-data-table';
+} from '@/components/widgets/receipts-data-table';
 import {
    Table,
    TableBody,
