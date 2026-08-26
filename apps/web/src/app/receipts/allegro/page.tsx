@@ -91,9 +91,7 @@ export default function AllegroOrdersPage() {
 
    return (
       <OrdersProvider value={data}>
-         <main className="mx-auto min-w-full bg-background">
-            <ReceiptFeed initReceipts={initReceipts} />
-         </main>
+         <ReceiptFeed initReceipts={initReceipts} />
       </OrdersProvider>
    );
 }

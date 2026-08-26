@@ -33,9 +33,9 @@ export const columns = columnHelper.columns([
                <Image
                   src={imgUrl}
                   alt="preview"
-                  width={65}
-                  height={65}
-                  className="size-[65px] object-cover"
+                  width={50}
+                  height={50}
+                  className="size-[50px] object-cover"
                />
             </div>
          );
@@ -113,7 +113,7 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          return (
             <div className="flex flex-col w-full">
-               <EditProductDialog />
+               <EditProductDialog offer={r.original} />
             </div>
          );
       },

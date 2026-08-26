@@ -105,7 +105,7 @@ export function Receipt({ order }: { order: Order }) {
    };
 
    return (
-      <ReceiptCard>
+      <ReceiptCard className="flex h-fit">
          <ReceiptCardHeader>
             <Checkbox
                className="cursor-pointer"

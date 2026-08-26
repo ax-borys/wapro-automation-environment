@@ -98,8 +98,8 @@ export function ReceiptFeed({
    };
 
    return (
-      <div className="h-screen">
-         <div className="w-full h-12 px-6 flex items-center gap-3 text-muted-foreground text-sm">
+      <div className="flex-1 min-h-0 flex flex-col">
+         <div className="w-full h-12 px-6 flex items-center gap-3 text-muted-foreground text-sm shrink-0">
             <div
                className="flex items-center gap-3 cursor-pointer"
                onClick={selectAllHandler}
@@ -138,7 +138,7 @@ export function ReceiptFeed({
             ) : null}
          </div>
          <Separator />
-         <div className="overflow-scroll max-h-full pb-28">
+         <div className="overflow-y-scroll min-h-0 flex-1">
             {Object.values(receipts).length
                ? orders.map((order, i) => (
                     <Fragment key={order.orderId}>
