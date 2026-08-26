@@ -1,6 +1,11 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { addItems, createOffer, type CreateOfferInput } from '@wae/offer';
+import {
+   addItems,
+   addProducts,
+   createOffer,
+   type CreateOfferInput,
+} from '@wae/offer';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,7 +16,9 @@ import type { Handler } from 'hono';
 import type { ApiResponse } from '@wae/types';
 import type {
    AddItemInput,
-   AddItemsReturn,
+   AddItemOutput,
+   AddProductInput,
+   AddProductOutput,
    CreateOfferOutput,
    Offer,
 } from '@wae/offer';
@@ -42,7 +49,18 @@ export const addItemsHandler: Handler = async (c) => {
 
    const result = await addItems(items);
 
-   return c.json<ApiResponse<AddItemsReturn>>({
+   return c.json<ApiResponse<AddItemOutput[]>>({
+      data: result,
+      error: null,
+   });
+};
+
+export const addProductsHandler: Handler = async (c) => {
+   const products = await c.req.json<AddProductInput[]>();
+
+   const result = await addProducts(products);
+
+   return c.json<ApiResponse<AddProductOutput[]>>({
       data: result,
       error: null,
    });

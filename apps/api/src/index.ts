@@ -23,9 +23,14 @@ import mssql from 'mssql';
 import type { ApiError, ApiResponse } from '@wae/types';
 import { AppError } from '@wae/core';
 import type { ContentfulStatusCode } from 'hono/utils/http-status';
-import { addItemsInputSchema, createOfferInputSchema } from '@wae/offer';
+import {
+   addItemInputSchema,
+   addProductInputSchema,
+   createOfferInputSchema,
+} from '@wae/offer';
 import {
    addItemsHandler,
+   addProductsHandler,
    createOfferHandler,
    getOffersHandler,
 } from './offer/controller.js';
@@ -86,8 +91,14 @@ app.get('/get-offers', getOffersHandler);
 
 app.post(
    '/add-items',
-   vValidator('json', addItemsInputSchema, valibotHook),
+   vValidator('json', addItemInputSchema, valibotHook),
    addItemsHandler,
+);
+
+app.post(
+   '/add-products',
+   vValidator('json', addProductInputSchema, valibotHook),
+   addProductsHandler,
 );
 
 app.onError((error, c) => {
