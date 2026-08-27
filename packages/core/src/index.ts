@@ -21,5 +21,6 @@ export {
    validationError,
    conflict,
    businessRuleViolation,
+   externalApiError,
    AppError,
 } from './app-error';

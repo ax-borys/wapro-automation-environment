@@ -8,6 +8,7 @@ export type Config = {
    counterPartyId: number;
    userId: number;
    stockId: number;
+   refreshToken: string | null | undefined;
 };
 
 export type Order = {

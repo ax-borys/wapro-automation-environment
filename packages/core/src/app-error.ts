@@ -4,7 +4,8 @@ type ErrorCode =
    | 'UNPROCESSABLE'
    | 'CONFLICT'
    | 'FORBIDDEN'
-   | 'UNAUTHORIZED';
+   | 'UNAUTHORIZED'
+   | 'EXTERNAL_API_ERROR';
 
 const STATUS_MAP: Record<ErrorCode, number> = {
    NOT_FOUND: 404,
@@ -13,6 +14,7 @@ const STATUS_MAP: Record<ErrorCode, number> = {
    CONFLICT: 409,
    FORBIDDEN: 403,
    UNAUTHORIZED: 401,
+   EXTERNAL_API_ERROR: 502,
 };
 
 export class AppError extends Error {
@@ -32,3 +34,5 @@ export const forbidden = (msg = 'Forbidden') => new AppError('FORBIDDEN', msg);
 export const validationError = (msg: string) => new AppError('VALIDATION', msg);
 export const businessRuleViolation = (msg: string) =>
    new AppError('UNPROCESSABLE', msg);
+export const externalApiError = (msg: string) =>
+   new AppError('EXTERNAL_API_ERROR', msg);

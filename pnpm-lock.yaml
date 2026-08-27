@@ -281,6 +281,9 @@ importers:
 
   apps/wae-cli:
     dependencies:
+      '@wae/allegro':
+        specifier: workspace:*
+        version: link:../../packages/integrations/allegro
       '@wae/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -412,6 +415,15 @@ importers:
       drizzle-kit:
         specifier: rc
         version: 1.0.0-rc.4
+
+  packages/integrations/allegro:
+    dependencies:
+      '@wae/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../../types
 
   packages/integrations/wapro:
     dependencies:

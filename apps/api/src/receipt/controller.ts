@@ -8,7 +8,7 @@ import {
    type CreateReceiptInput,
 } from '@wae/receipt';
 
-const config: Config = {
+const config: Omit<Config, 'refreshToken'> = {
    companyId: 1,
    cashRegisterId: 1,
    userId: 3000001,
