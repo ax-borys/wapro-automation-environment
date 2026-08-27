@@ -1,20 +1,6 @@
-import dotenv from 'dotenv';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { invalidDeviceCode } from '../errors/api-errors';
 import { externalApiError } from '@wae/core';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const envPath = path.resolve(__dirname, '../../../../.env');
-
-const envConfig = dotenv.config({
-   path: envPath,
-   quiet: true,
-});
-
-console.log('Allegro env: ', envConfig);
+import { store } from '../store/store';
 
 type AllegroApiErrorResponse = {
    error: string;
@@ -29,13 +15,13 @@ export type AllegroApiRefreshTokenResponse = {
    jti: string;
 };
 
-export async function fetchRefreshToken(
-   refreshToken: string | null,
-): Promise<AllegroApiRefreshTokenResponse> {
+export async function fetchAuthTokens(): Promise<AllegroApiRefreshTokenResponse> {
+   const { refreshToken, clientId, clientSecret, deviceId } = store.getState();
+
    const response = await fetch(`http://allegro.pl/auth/oauth/token`, {
       method: 'POST',
       headers: {
-         Authorization: `Basic ${btoa(`${process.env.ALLEGRO_CLIENT_ID!}:${process.env.ALLEGRO_CLIENT_SECRET}`)}`,
+         Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
          'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams(
@@ -46,14 +32,14 @@ export async function fetchRefreshToken(
               }
             : {
                  grant_type: 'urn:ietf:params:oauth:grant-type:device_code',
-                 device_code: process.env.ALLEGRO_DEVICE_CODE!,
+                 device_code: deviceId,
               },
       ),
    });
 
    if (!response.ok) {
       if (response.status !== 400) {
-         throw new Error(`Failed to refresh tokens. `);
+         throw new Error(`Failed to refresh tokens.`);
       }
 
       const { error } = (await response.json()) as AllegroApiErrorResponse;

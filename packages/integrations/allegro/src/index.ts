@@ -1,17 +1,7 @@
-export default function helloWorld() {
-   console.log('hello world');
-}
-
 export {
-   fetchRefreshToken,
+   fetchAuthTokens,
    type AllegroApiRefreshTokenResponse,
-} from './api/fetch-refresh-token';
+} from './api/fetch-auth-tokens';
 
 export { fetchOffers } from './api/fetch-offers';
-
-export {
-   getAccessToken,
-   getRefreshToken,
-   saveRefreshToken,
-   saveAccessToken,
-} from './services/token-service';
+export { obtainAuthTokens } from './services/obtain-auth-tokens';

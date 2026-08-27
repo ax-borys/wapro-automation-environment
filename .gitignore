@@ -38,3 +38,5 @@ tmp/
 
 config.json
 local.db
+
+**/storage.json
