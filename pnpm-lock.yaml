@@ -421,6 +421,9 @@ importers:
       '@wae/core':
         specifier: workspace:*
         version: link:../../core
+      '@wae/offer':
+        specifier: workspace:*
+        version: link:../../offer
       '@wae/types':
         specifier: workspace:*
         version: link:../../types

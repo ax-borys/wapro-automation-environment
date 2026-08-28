@@ -1,4 +1,4 @@
-import { fetchAuthTokens } from '../api/fetch-auth-tokens';
+import { fetchAuthTokens } from './fetch-auth-tokens';
 import { store } from '../store/store';
 
 export async function obtainAuthTokens(): Promise<{
