@@ -16,10 +16,15 @@ import { Separator } from './separator';
 import { LinkIcon, PlusIcon, TrashIcon, XIcon } from '@phosphor-icons/react';
 import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from './item';
 
+type OfferData = {
+   imgSrc: OfferModel['imgSrc'];
+   title: OfferModel['title'];
+};
+
 export function EditProductDialog({
    offer,
    ...props
-}: React.ComponentProps<typeof Dialog> & { offer: OfferModel }) {
+}: React.ComponentProps<typeof Dialog> & { offer: OfferData }) {
    return (
       <Dialog {...props}>
          <DialogTrigger asChild>

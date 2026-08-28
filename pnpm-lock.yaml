@@ -290,6 +290,9 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@wae/offer':
+        specifier: workspace:*
+        version: link:../../packages/offer
       '@wae/wapro':
         specifier: workspace:*
         version: link:../../packages/integrations/wapro

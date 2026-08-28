@@ -113,7 +113,7 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          return (
             <div className="flex flex-col w-full">
-               <EditProductDialog />
+               <EditProductDialog offer={r.original} />
             </div>
          );
       },

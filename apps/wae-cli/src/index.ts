@@ -4,11 +4,13 @@ import { closeConnection } from '@wae/wapro';
 import { Config, Mapping, Order } from '@wae/types';
 import { generateReceipts } from './commands/generate-receipts';
 import { getAllOffers } from './commands/get-all-offers';
+import { syncOffers } from './commands/sync-offers';
 
 const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'create-receipts': createReceiptsCommand,
    'generate-receipts': generateReceiptsCommand,
    'get-all-offers': getAllOffersCommand,
+   'sync-offers': syncOffersCommand,
 };
 
 const config: Config = {
@@ -70,6 +72,11 @@ async function createReceiptsCommand(arg: string) {
 
 async function getAllOffersCommand() {
    const offers = await getAllOffers();
+   process.stdout.write(JSON.stringify(offers, null, 3));
+}
+
+async function syncOffersCommand() {
+   const offers = await syncOffers();
    process.stdout.write(JSON.stringify(offers, null, 3));
 }
 

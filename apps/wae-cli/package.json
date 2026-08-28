@@ -14,6 +14,7 @@
       "@wae/allegro": "workspace:*",
       "@wae/core": "workspace:*",
       "@wae/db": "workspace:*",
+      "@wae/offer": "workspace:*",
       "@wae/wapro": "workspace:*",
       "currency.js": "^2.0.4"
    },

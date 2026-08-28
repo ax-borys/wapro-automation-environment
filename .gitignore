@@ -38,5 +38,6 @@ tmp/
 
 config.json
 local.db
+local.spzoo.db
 
 **/storage.json
