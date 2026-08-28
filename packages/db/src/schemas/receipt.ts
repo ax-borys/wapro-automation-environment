@@ -40,8 +40,8 @@ export const productsTable = sqliteTable('products', {
    id: int().primaryKey({ autoIncrement: true }),
    externalId: text('external_id').unique(),
    name: text().notNull(),
-   imgSrc: text('image_source'),
-   tax: int().$type<0 | 8 | 23>().notNull(),
+   imgSrc: text('image_source').notNull(),
+   tax: int().$type<0 | 8 | 23>(),
 });
 
 export const offersTable = sqliteTable('offers', {
@@ -49,7 +49,7 @@ export const offersTable = sqliteTable('offers', {
    externalId: text('external_id').unique(),
    src: text('source').notNull(),
    title: text().notNull(),
-   imgSrc: text('image_source'),
+   imgSrc: text('image_source').notNull(),
 });
 
 export const itemsTable = sqliteTable(

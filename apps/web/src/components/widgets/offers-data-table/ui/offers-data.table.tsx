@@ -1,24 +1,31 @@
 'use client';
 import { DataTable, features } from '@/components/ui/data-table';
 import { OfferModel } from '@/entities/offer';
-import { TableState, useTable } from '@tanstack/react-table';
-import { columns } from './columns';
+import { useTable } from '@tanstack/react-table';
+import { columns, OfferData } from './columns';
+import { useEffect, useState } from 'react';
+import { fetchOffers } from '@/entities/offer/fetch-offers';
+import { setDate } from 'date-fns';
+import { Offer } from '@wae/offer';
 
-const data: Pick<OfferModel, 'imgSrc' | 'title' | 'approved' | 'items'>[] = [
-   {
-      imgSrc: 'http://localhost:8082/public/rtx5090.jpg',
-      title: 'Geforce RTX 5090',
-      items: [],
-      approved: true,
-   },
-   {
-      imgSrc: 'http://localhost:8082/public/rtx5080.png',
-      title: 'Geforce RTX 5080',
-      items: [],
-      approved: false,
-   },
-];
 export function OffersDataTable() {
+   const [data, setData] = useState<OfferData[]>([]);
+
+   useEffect(() => {
+      const promise = fetchOffers();
+      promise.then((offers) =>
+         setData(
+            offers.map((offer) => ({
+               imgSrc: offer.imgSrc,
+               title: offer.title,
+               active: false,
+               approved: false,
+               items: [],
+            })),
+         ),
+      );
+   }, []);
+
    const table = useTable({
       features,
       data,

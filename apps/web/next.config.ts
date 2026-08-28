@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
       remotePatterns: [
          {
             protocol: 'https',
-            hostname: 'a.allegroimg.com',
+            hostname: '*.allegroimg.com',
          },
          {
             protocol: 'http',

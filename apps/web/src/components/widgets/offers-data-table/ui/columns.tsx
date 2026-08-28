@@ -29,13 +29,13 @@ export const columns = columnHelper.columns([
          const imgUrl = r.getValue('imgSrc') as string;
 
          return (
-            <div className="flex items-center">
+            <div className="flex items-center rounded-xl overfllow-clip h-25">
                <Image
                   src={imgUrl}
                   alt="preview"
-                  width={50}
-                  height={50}
-                  className="size-[50px] object-cover"
+                  width={96}
+                  height={96}
+                  className="w-[50px] h-auto object-cover rounded-xl"
                />
             </div>
          );

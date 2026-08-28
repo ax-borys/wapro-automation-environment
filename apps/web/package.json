@@ -12,6 +12,7 @@
       "@phosphor-icons/react": "^2.1.10",
       "@tanstack/match-sorter-utils": "^9.1.2",
       "@tanstack/react-table": "^9.1.2",
+      "@wae/offer": "workspace:*",
       "@wae/receipt": "workspace:*",
       "class-variance-authority": "^0.7.1",
       "clsx": "^2.1.1",
