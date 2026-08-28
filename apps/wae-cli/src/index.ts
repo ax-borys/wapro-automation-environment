@@ -5,12 +5,14 @@ import { Config, Mapping, Order } from '@wae/types';
 import { generateReceipts } from './commands/generate-receipts';
 import { getAllOffers } from './commands/get-all-offers';
 import { syncOffers } from './commands/sync-offers';
+import { getPendingOrders } from '@wae/allegro';
 
 const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'create-receipts': createReceiptsCommand,
    'generate-receipts': generateReceiptsCommand,
    'get-all-offers': getAllOffersCommand,
    'sync-offers': syncOffersCommand,
+   'get-pending-orders': getPendingOrdersCommand,
 };
 
 const config: Config = {
@@ -78,6 +80,11 @@ async function getAllOffersCommand() {
 async function syncOffersCommand() {
    const offers = await syncOffers();
    process.stdout.write(JSON.stringify(offers, null, 3));
+}
+
+async function getPendingOrdersCommand() {
+   const orders = await getPendingOrders();
+   process.stdout.write(JSON.stringify(orders, null, 3));
 }
 
 for (let i = 0; i < process.argv.length; i++) {

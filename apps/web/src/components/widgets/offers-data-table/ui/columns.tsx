@@ -12,7 +12,6 @@ import {
    WarningIcon,
 } from '@phosphor-icons/react';
 import { createColumnHelper } from '@tanstack/react-table';
-import { EditIcon } from 'lucide-react';
 import Image from 'next/image';
 
 export type OfferData = Pick<

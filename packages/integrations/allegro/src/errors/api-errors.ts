@@ -12,3 +12,5 @@ export const clientSecretIsNotSet = () =>
 export const deviceIdIsNotSet = () => runtimeError('Device ID is not set.');
 export const userAgentIsNotSet = () =>
    runtimeError('User-Agent is not provided.');
+export const sellerIdIsNotSet = () =>
+   runtimeError('Seller ID has not been provided.');

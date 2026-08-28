@@ -9,6 +9,7 @@ import {
    clientIdIsNotSet,
    clientSecretIsNotSet,
    deviceIdIsNotSet,
+   sellerIdIsNotSet,
    userAgentIsNotSet,
 } from '../errors/api-errors';
 
@@ -23,6 +24,7 @@ type Config = {
    ALLEGRO_DEVICE_ID: string;
    ALLEGRO_CLIENT_SECRET: string;
    ALLEGRO_USER_AGENT: string;
+   ALLEGRO_SELLER_ID: string;
 };
 
 const output = dotenv.config({
@@ -47,6 +49,10 @@ if (!config.ALLEGRO_USER_AGENT) {
    throw userAgentIsNotSet();
 }
 
+if (!config.ALLEGRO_SELLER_ID) {
+   throw sellerIdIsNotSet();
+}
+
 const fileStorage: StateStorage = {
    getItem: (name: string): string | null => {
       if (!existsSync(name)) return null;
@@ -68,6 +74,8 @@ type AppState = {
    deviceId: Config['ALLEGRO_DEVICE_ID'];
    clientId: Config['ALLEGRO_CLIENT_ID'];
    clientSecret: Config['ALLEGRO_CLIENT_SECRET'];
+   allegroSellerId: Config['ALLEGRO_SELLER_ID'];
+   userAgent: Config['ALLEGRO_USER_AGENT'];
    setAccessToken: (token: Token) => void;
    setRefreshToken: (token: Token) => void;
    setDeviceId: (id: string) => void;
@@ -81,6 +89,8 @@ export const store = createStore<AppState>()(
          clientId: config.ALLEGRO_CLIENT_ID,
          clientSecret: config.ALLEGRO_CLIENT_SECRET,
          deviceId: config.ALLEGRO_DEVICE_ID,
+         userAgent: config.ALLEGRO_USER_AGENT,
+         allegroSellerId: config.ALLEGRO_SELLER_ID,
          setAccessToken: (token) =>
             set((draft) => {
                draft.accessToken = token;
