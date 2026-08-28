@@ -24,3 +24,5 @@ export {
    externalApiError,
    AppError,
 } from './app-error';
+
+export { runtimeError } from './runtime-errors';

@@ -1,5 +1,5 @@
 import { externalApiError } from '@wae/core';
-import { runtimeError } from '@wae/core/src/runtime-errors';
+import { runtimeError } from '@wae/core';
 
 export const invalidDeviceCode = () =>
    externalApiError(

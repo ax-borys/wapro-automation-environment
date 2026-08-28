@@ -4,6 +4,7 @@ import { store } from '../store/store';
 
 type AllegroApiErrorResponse = {
    error: string;
+   error_description?: string;
 };
 
 export type AllegroApiRefreshTokenResponse = {
@@ -17,8 +18,7 @@ export type AllegroApiRefreshTokenResponse = {
 
 export async function fetchAuthTokens(): Promise<AllegroApiRefreshTokenResponse> {
    const { refreshToken, clientId, clientSecret, deviceId } = store.getState();
-
-   const response = await fetch(`http://allegro.pl/auth/oauth/token`, {
+   const request = new Request(`https://allegro.pl/auth/oauth/token`, {
       method: 'POST',
       headers: {
          Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
@@ -27,7 +27,7 @@ export async function fetchAuthTokens(): Promise<AllegroApiRefreshTokenResponse>
       body: new URLSearchParams(
          refreshToken
             ? {
-                 grant_type: 'grant_type=refresh_token',
+                 grant_type: 'refresh_token',
                  refresh_token: refreshToken,
               }
             : {
@@ -37,19 +37,20 @@ export async function fetchAuthTokens(): Promise<AllegroApiRefreshTokenResponse>
       ),
    });
 
+   const response = await fetch(request);
+
    if (!response.ok) {
       if (response.status !== 400) {
+         console.error(response);
          throw new Error(`Failed to refresh tokens.`);
       }
 
-      const { error } = (await response.json()) as AllegroApiErrorResponse;
+      const { error, error_description } =
+         (await response.json()) as AllegroApiErrorResponse;
 
-      switch (error) {
-         case 'Invalid device code':
-            throw invalidDeviceCode();
-         default:
-            throw externalApiError('ALLEGRO_CODE: ' + error);
-      }
+      throw externalApiError(
+         'ALLEGRO_ERROR: ' + error + ':' + error_description,
+      );
    }
 
    const result = (await response.json()) as AllegroApiRefreshTokenResponse;
