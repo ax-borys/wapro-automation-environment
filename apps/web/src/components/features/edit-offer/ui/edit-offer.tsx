@@ -9,6 +9,7 @@ import {
    EditOfferDialogObject,
    EditOfferDialogProduct,
    EditOfferDialogProducts,
+   EditOfferDialogSelect,
    EditOfferDialogTitle,
    EditOfferDialogTrigger,
 } from '@/components/ui/edit-offer-dialog';
@@ -48,6 +49,7 @@ export function EditOffer({
                ) : (
                   <EditOfferDialogEmptyProducts />
                )}
+               <EditOfferDialogSelect />
             </EditOfferDialogProducts>
             <Separator />
             <Button variant={'outline'} className="w-fit">

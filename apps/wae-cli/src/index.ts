@@ -6,6 +6,7 @@ import { generateReceipts } from './commands/generate-receipts';
 import { getAllOffers } from './commands/get-all-offers';
 import { syncOffers } from './commands/sync-offers';
 import { getPendingOrders } from '@wae/allegro';
+import { syncProducts } from './commands/sync-products';
 
 const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'create-receipts': createReceiptsCommand,
@@ -13,6 +14,7 @@ const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'get-all-offers': getAllOffersCommand,
    'sync-offers': syncOffersCommand,
    'get-pending-orders': getPendingOrdersCommand,
+   'sync-products': syncProductsCommand,
 };
 
 const config: WaproConfig = {
@@ -86,6 +88,10 @@ async function getPendingOrdersCommand() {
    process.stdout.write(JSON.stringify(orders, null, 3));
 }
 
+async function syncProductsCommand() {
+   const products = await syncProducts();
+   process.stdout.write(JSON.stringify(products, null, 3));
+}
 for (let i = 0; i < process.argv.length; i++) {
    const arg = process.argv[i];
 

@@ -13,6 +13,14 @@ import Image from 'next/image';
 import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from '../item';
 import { LinkIcon, TrashIcon, XIcon } from '@phosphor-icons/react';
 import { Button } from '../button';
+import {
+   Combobox,
+   ComboboxContent,
+   ComboboxEmpty,
+   ComboboxInput,
+   ComboboxItem,
+   ComboboxList,
+} from '../combobox';
 
 type OfferData = Pick<OfferModel, 'title' | 'imgSrc'>;
 
@@ -155,3 +163,27 @@ export function EditOfferDialogEmptyProducts() {
 }
 
 export const EditOfferDialogClose = DialogClose;
+
+export function EditOfferDialogSelect({
+   ...props
+}: React.ComponentProps<typeof Combobox>) {
+   return (
+      <Combobox {...props}>
+         <ComboboxInput
+            placeholder="Select product"
+            className="h-9 py-6.5"
+            triggerClassName={'-translate-x-3.5'}
+         />
+         <ComboboxContent className="translate-y-3">
+            <ComboboxEmpty>No products found.</ComboboxEmpty>
+            <ComboboxList>
+               {(i) => (
+                  <ComboboxItem key={i} value={i}>
+                     {i}
+                  </ComboboxItem>
+               )}
+            </ComboboxList>
+         </ComboboxContent>
+      </Combobox>
+   );
+}

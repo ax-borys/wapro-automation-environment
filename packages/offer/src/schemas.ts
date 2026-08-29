@@ -15,7 +15,7 @@ export type Offer = v.InferOutput<typeof offerOutputSchema>;
 
 // Item
 const itemInputSchema = createInsertSchema(itemsTable);
-const productInputSchema = createInsertSchema(productsTable, {
+export const productInputSchema = createInsertSchema(productsTable, {
    tax: v.picklist([0, 8, 23]),
 });
 const itemOutputSchema = createSelectSchema(itemsTable);

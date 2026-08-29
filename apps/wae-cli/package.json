@@ -16,7 +16,9 @@
       "@wae/db": "workspace:*",
       "@wae/offer": "workspace:*",
       "@wae/wapro": "workspace:*",
-      "currency.js": "^2.0.4"
+      "currency.js": "^2.0.4",
+      "drizzle-orm": "1.0.0-rc.4",
+      "valibot": "^1.4.2"
    },
    "devDependencies": {
       "@wae/types": "workspace: *"
