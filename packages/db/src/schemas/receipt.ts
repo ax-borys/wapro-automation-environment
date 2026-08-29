@@ -46,7 +46,7 @@ export const productsTable = sqliteTable('products', {
 
 export const offersTable = sqliteTable('offers', {
    id: int().primaryKey({ autoIncrement: true }),
-   externalId: text('external_id').unique(),
+   externalId: text('external_id').notNull().unique(),
    src: text('source').notNull(),
    title: text().notNull(),
    imgSrc: text('image_source').notNull(),

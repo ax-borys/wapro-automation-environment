@@ -22,7 +22,10 @@ import {
 import mssql from 'mssql';
 import type { ApiError, ApiResponse } from '@wae/types';
 import { AppError } from '@wae/core';
-import type { ContentfulStatusCode } from 'hono/utils/http-status';
+import type {
+   ContentfulStatusCode,
+   ServerErrorStatusCode,
+} from 'hono/utils/http-status';
 import {
    addItemInputSchema,
    addProductInputSchema,
@@ -34,6 +37,7 @@ import {
    createOfferHandler,
    getAllOffersWithItemsHandler,
    getOffersHandler,
+   getAllProductsHandler,
 } from './offer/controller.js';
 import {
    createReceiptsInputSchema,
@@ -97,10 +101,7 @@ const app = new Hono()
       vValidator('json', addProductInputSchema, valibotHook),
       ...addProductsHandler,
    )
-   .get('/get-products', async (c) => {
-      const result = await getProducts();
-      return c.json<ApiResponse<typeof result>>({ data: result, error: null });
-   })
+   .get('/get-all-products', ...getAllProductsHandler)
    .onError((error, c) => {
       let message = null;
       let code = null;
@@ -138,12 +139,11 @@ const app = new Hono()
 
 export type AppType = ApplyGlobalResponse<
    typeof app,
-   Omit<
-      {
-         [key: number]: ApiResponse<ApiError>;
-      },
-      200
-   >
+   {
+      [K in ServerErrorStatusCode]: {
+         json: ApiResponse<ApiError>;
+      };
+   }
 >;
 
 serve(

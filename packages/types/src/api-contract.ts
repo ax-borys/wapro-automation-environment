@@ -3,9 +3,9 @@ export type ApiError = {
    message: string;
 };
 
-export type ApiResponse<T> =
-   | {
+export type ApiResponse<T> = T extends ApiError
+   ? { data: null; error: ApiError }
+   : {
         data: T;
         error: null;
-     }
-   | { data: null; error: ApiError };
+     };

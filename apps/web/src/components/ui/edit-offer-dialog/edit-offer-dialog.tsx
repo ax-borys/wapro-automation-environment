@@ -11,7 +11,12 @@ import {
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from '../item';
-import { LinkIcon, TrashIcon, XIcon } from '@phosphor-icons/react';
+import {
+   ArrowsVerticalIcon,
+   LinkIcon,
+   TrashIcon,
+   XIcon,
+} from '@phosphor-icons/react';
 import { Button } from '../button';
 import {
    Combobox,
@@ -21,6 +26,7 @@ import {
    ComboboxItem,
    ComboboxList,
 } from '../combobox';
+import { Input } from '../input';
 
 type OfferData = Pick<OfferModel, 'title' | 'imgSrc'>;
 
@@ -101,15 +107,21 @@ export function EditOfferDialogProducts({
 export function EditOfferDialogProduct({
    name,
    quantity,
-}: {
+   onRemove,
+   onQuantityChange,
+   ...props
+}: React.ComponentProps<typeof Item> & {
    name: OfferModel['items'][number]['name'];
    quantity: OfferModel['items'][number]['quantity'];
+   onRemove?: () => void;
+   onQuantityChange?: (delta: number) => void;
 }) {
    return (
       <Item
          size={'xs'}
          variant={'outline'}
          className="bg-secondary/50 text-primary/80 min-w-0 w-full"
+         {...props}
       >
          <ItemMedia variant={'icon'}>
             <LinkIcon />
@@ -119,8 +131,17 @@ export function EditOfferDialogProduct({
                <span className="border-b border-primary/80 border-dashed truncate min-w-0 cursor-pointer">
                   {name}
                </span>
-               <span className="flex items-center mx-4 gap-1">
-                  <XIcon className="size-3!" /> {quantity}
+               <span
+                  className="flex items-center ml-3 cursor-ns-resize px-3 gap-1"
+                  onWheel={(e) => {
+                     if (!onQuantityChange) return;
+                     e.preventDefault();
+                     onQuantityChange(e.deltaY > 0 ? 1 : -1);
+                  }}
+               >
+                  <XIcon className="size-3! mx-1" />
+                  {quantity}
+                  <ArrowsVerticalIcon className="text-primary/30" />
                </span>
             </ItemTitle>
          </ItemContent>
@@ -128,6 +149,7 @@ export function EditOfferDialogProduct({
             <Button
                variant={'ghost'}
                className="hover:text-destructive hover:bg-destructive/5"
+               onClick={onRemove}
             >
                <TrashIcon />
             </Button>
@@ -164,22 +186,30 @@ export function EditOfferDialogEmptyProducts() {
 
 export const EditOfferDialogClose = DialogClose;
 
-export function EditOfferDialogSelect({
+export function EditOfferDialogSelect<TData>({
+   itemToKeyValue,
+   itemToStringValue,
+   onClose,
    ...props
-}: React.ComponentProps<typeof Combobox>) {
+}: React.ComponentProps<typeof Combobox<TData>> & {
+   itemToKeyValue: (i: TData) => string | number;
+   onClose?: () => void;
+}) {
    return (
-      <Combobox {...props}>
+      <Combobox<TData> itemToStringValue={itemToStringValue} {...props}>
          <ComboboxInput
             placeholder="Select product"
             className="h-9 py-6.5"
             triggerClassName={'-translate-x-3.5'}
+            autoFocus
+            onBlur={() => setTimeout(() => onClose?.(), 50)}
          />
          <ComboboxContent className="translate-y-3">
             <ComboboxEmpty>No products found.</ComboboxEmpty>
             <ComboboxList>
                {(i) => (
-                  <ComboboxItem key={i} value={i}>
-                     {i}
+                  <ComboboxItem key={itemToKeyValue(i)} value={i}>
+                     {itemToStringValue ? itemToStringValue(i) : i}
                   </ComboboxItem>
                )}
             </ComboboxList>

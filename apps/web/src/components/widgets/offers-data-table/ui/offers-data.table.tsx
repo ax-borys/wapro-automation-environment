@@ -4,28 +4,35 @@ import { useTable } from '@tanstack/react-table';
 import { columns, OfferData } from './columns';
 import { useEffect, useState } from 'react';
 import { fetchAllOffersWithItems } from '@/entities/offer/fetch-offers-with-items';
+import { useOffersStore } from '@/entities/offer';
 
 export function OffersDataTable() {
-   const [data, setData] = useState<OfferData[]>([]);
+   const { offers, add } = useOffersStore();
 
    useEffect(() => {
       const promise = fetchAllOffersWithItems();
-      promise.then((offers) =>
-         setData(
-            offers.map((offer) => ({
+      promise.then((offers) => {
+         offers.forEach((offer) => {
+            const items: OfferData['items'] = {};
+            offer.items.forEach((i) => (items[i.id] = i));
+
+            add({
                imgSrc: offer.imgSrc,
                title: offer.title,
                active: false,
                approved: false,
-               items: offer.items,
-            })),
-         ),
-      );
+               items,
+               id: offer.id,
+               externalId: offer.externalId,
+               src: offer.src,
+            });
+         });
+      });
    }, []);
 
    const table = useTable({
       features,
-      data,
+      data: Object.values(offers),
       columns: columns,
    });
 

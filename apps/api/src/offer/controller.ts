@@ -8,17 +8,19 @@ import {
 
 import type { Handler } from 'hono';
 import type { ApiResponse } from '@wae/types';
-import type {
+import {
    AddItemInput,
    AddItemOutput,
    AddProductInput,
    AddProductOutput,
    CreateOfferOutput,
    GetAllOffersWithItemsOutput,
+   getAllProducts,
    Offer,
 } from '@wae/offer';
 import { getAllOffers } from '@wae/offer';
 import { createFactory } from 'hono/factory';
+import { Product } from '@wae/offer/src/schemas';
 
 const factory = createFactory();
 const createHandler = factory.createHandlers.bind(factory);
@@ -70,6 +72,15 @@ export const addProductsHandler = createHandler(async (c) => {
 
    return c.json<ApiResponse<AddProductOutput[]>>({
       data: result,
+      error: null,
+   });
+});
+
+export const getAllProductsHandler = createHandler(async (c) => {
+   const products = await getAllProducts();
+
+   return c.json<ApiResponse<Product[]>>({
+      data: products,
       error: null,
    });
 });

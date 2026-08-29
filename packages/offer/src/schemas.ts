@@ -19,7 +19,9 @@ export const productInputSchema = createInsertSchema(productsTable, {
    tax: v.picklist([0, 8, 23]),
 });
 const itemOutputSchema = createSelectSchema(itemsTable);
-const productOutputSchema = createSelectSchema(productsTable);
+const productOutputSchema = createSelectSchema(productsTable, {
+   tax: v.picklist([0, 8, 23]),
+});
 const itemsOutputSchema = v.array(itemOutputSchema);
 const productsOutputSchema = v.array(productOutputSchema);
 
@@ -35,3 +37,4 @@ export type AddItemsReturn = {
    items: v.InferOutput<typeof itemsOutputSchema>;
    products: v.InferOutput<typeof productsOutputSchema>;
 };
+export type Product = v.InferOutput<typeof productOutputSchema>;

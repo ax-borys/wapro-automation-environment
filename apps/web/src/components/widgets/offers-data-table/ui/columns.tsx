@@ -18,7 +18,7 @@ import Image from 'next/image';
 
 export type OfferData = Pick<
    OfferModel,
-   'title' | 'imgSrc' | 'active' | 'approved' | 'items'
+   'title' | 'imgSrc' | 'active' | 'approved' | 'items' | 'id'
 >;
 
 const columnHelper = createColumnHelper<DataTableFeatures, OfferData>();
@@ -99,8 +99,8 @@ export const columns = columnHelper.columns([
 
          return (
             <div className="text-center">
-               {items.length ? (
-                  items.length
+               {Object.values(items).length ? (
+                  Object.values(items).length
                ) : (
                   <span className="text-destructive">0</span>
                )}

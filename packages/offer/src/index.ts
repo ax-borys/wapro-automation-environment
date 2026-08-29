@@ -21,3 +21,5 @@ export {
    getAllOffersWithItems,
    type GetAllOffersWithItemsOutput,
 } from './services/get-all-offers-with-items';
+
+export { getAllProducts } from './services/get-all-products';
