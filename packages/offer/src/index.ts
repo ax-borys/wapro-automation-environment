@@ -16,3 +16,8 @@ export {
    type AddProductOutput,
    addProductInputSchema,
 } from './services/add-products';
+
+export {
+   getAllOffersWithItems,
+   type GetAllOffersWithItemsOutput,
+} from './services/get-all-offers-with-items';

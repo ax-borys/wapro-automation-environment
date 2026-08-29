@@ -32,6 +32,7 @@ import {
    addItemsHandler,
    addProductsHandler,
    createOfferHandler,
+   getAllOffersWithItemsHandler,
    getOffersHandler,
 } from './offer/controller.js';
 import {
@@ -39,25 +40,8 @@ import {
    getReceiptsInputSchema,
 } from '@wae/receipt';
 import { getProducts } from '@wae/wapro';
-const app = new Hono();
-
-app.use(
-   '*',
-   cors({
-      origin: 'http://localhost:8081',
-   }),
-);
-
-app.use(
-   '/public/*',
-   serveStatic({
-      root: path.resolve(__dirname, '../'),
-   }),
-);
-
-app.get('/', (c) => {
-   return c.text('Hello Hono!');
-});
+import { ApplyGlobalResponse } from 'hono/client';
+import { createFactory } from 'hono/factory';
 
 const valibotHook: Hook<
    GenericSchema | GenericSchemaAsync,
@@ -70,77 +54,97 @@ const valibotHook: Hook<
    }
 };
 
-app.post(
-   '/record-receipts',
-   vValidator('json', createReceiptsInputSchema, valibotHook),
-   recordReceiptsHandler,
-);
+const app = new Hono()
+   .use(
+      '*',
+      cors({
+         origin: 'http://localhost:8081',
+      }),
+   )
+   .use(
+      '/public/*',
+      serveStatic({
+         root: path.resolve(__dirname, '../'),
+      }),
+   )
+   .get('/', (c) => {
+      return c.text('Hello Hono!');
+   })
+   .post(
+      '/record-receipts',
+      vValidator('json', createReceiptsInputSchema, valibotHook),
+      ...recordReceiptsHandler,
+   )
+   .post(
+      '/get-receipts',
+      vValidator('json', getReceiptsInputSchema, valibotHook),
+      ...getReceiptsHandler,
+   )
+   .post(
+      '/create-offer',
+      vValidator('json', createOfferInputSchema, valibotHook),
+      ...createOfferHandler,
+   )
+   .get('/get-offers', ...getOffersHandler)
+   .get('/get-all-offers-with-items', ...getAllOffersWithItemsHandler)
+   .post(
+      '/add-items',
+      vValidator('json', addItemInputSchema, valibotHook),
+      ...addItemsHandler,
+   )
+   .post(
+      '/add-products',
+      vValidator('json', addProductInputSchema, valibotHook),
+      ...addProductsHandler,
+   )
+   .get('/get-products', async (c) => {
+      const result = await getProducts();
+      return c.json<ApiResponse<typeof result>>({ data: result, error: null });
+   })
+   .onError((error, c) => {
+      let message = null;
+      let code = null;
+      let status: ContentfulStatusCode = 500;
 
-app.post(
-   '/get-receipts',
-   vValidator('json', getReceiptsInputSchema, valibotHook),
-   getReceiptsHandler,
-);
+      if (error instanceof ValiError) {
+         status = 400;
+         code = 'VALIDATION';
+         message = error.message;
+      } else if (error instanceof mssql.RequestError) {
+         message = error.message;
+         code = error.name;
+      } else if (error instanceof mssql.TransactionError) {
+         message = error.message;
+         code = error.name;
+      } else if (error instanceof AppError) {
+         message = error.message;
+         code = error.code;
+         status = error.status as ContentfulStatusCode;
+      } else {
+         console.error(error);
+      }
 
-app.post(
-   '/create-offer',
-   vValidator('json', createOfferInputSchema, valibotHook),
-   createOfferHandler,
-);
-
-app.get('/get-offers', getOffersHandler);
-
-app.post(
-   '/add-items',
-   vValidator('json', addItemInputSchema, valibotHook),
-   addItemsHandler,
-);
-
-app.post(
-   '/add-products',
-   vValidator('json', addProductInputSchema, valibotHook),
-   addProductsHandler,
-);
-
-app.get('/get-products', async (c) => {
-   const result = await getProducts();
-   return c.json<ApiResponse<typeof result>>({ data: result, error: null });
-});
-
-app.onError((error, c) => {
-   let message = null;
-   let code = null;
-   let status: ContentfulStatusCode = 500;
-
-   if (error instanceof ValiError) {
-      status = 400;
-      code = 'VALIDATION';
-      message = error.message;
-   } else if (error instanceof mssql.RequestError) {
-      message = error.message;
-      code = error.name;
-   } else if (error instanceof mssql.TransactionError) {
-      message = error.message;
-      code = error.name;
-   } else if (error instanceof AppError) {
-      message = error.message;
-      code = error.code;
-      status = error.status as ContentfulStatusCode;
-   } else {
-      console.error(error);
-   }
-
-   return c.json<ApiResponse<ApiError>>(
-      {
-         error: {
-            code: code || 'INTERNAL_ERROR',
-            message: message || 'Something went wrong',
+      return c.json<ApiResponse<ApiError>>(
+         {
+            error: {
+               code: code || 'INTERNAL_ERROR',
+               message: message || 'Something went wrong',
+            },
+            data: null,
          },
-         data: null,
+         status,
+      );
+   });
+
+export type AppType = ApplyGlobalResponse<
+   typeof app,
+   Omit<
+      {
+         [key: number]: ApiResponse<ApiError>;
       },
-      status,
-   );
-});
+      200
+   >
+>;
 
 serve(
    {

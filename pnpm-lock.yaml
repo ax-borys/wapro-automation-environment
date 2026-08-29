@@ -250,9 +250,6 @@ importers:
       '@wae/receipt':
         specifier: workspace:*
         version: link:../../packages/receipt
-      '@wae/types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@wae/wapro':
         specifier: workspace:*
         version: link:../../packages/integrations/wapro
@@ -272,6 +269,9 @@ importers:
       '@types/node':
         specifier: ^26.1.1
         version: 26.2.0
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       tsx:
         specifier: ^4.23.0
         version: 4.23.11
@@ -315,6 +315,9 @@ importers:
       '@tanstack/react-table':
         specifier: ^9.1.2
         version: 9.1.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@wae/api-types':
+        specifier: workspace:*
+        version: link:../../packages/api-types
       '@wae/offer':
         specifier: workspace:*
         version: link:../../packages/offer
@@ -333,6 +336,9 @@ importers:
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
+      hono:
+        specifier: ^4.13.2
+        version: 4.13.2
       immer:
         specifier: ^11.1.18
         version: 11.1.18
@@ -400,6 +406,12 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+
+  packages/api-types:
+    dependencies:
+      '@wae/api':
+        specifier: workspace:*
+        version: link:../../apps/api
 
   packages/core: {}
 

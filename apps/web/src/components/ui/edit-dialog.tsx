@@ -77,11 +77,11 @@ export function EditProductDialog({
                      </Button>
                   </ItemActions>
                </Item>
-               <Separator />
-               <Button variant={'outline'} className="w-fit">
-                  <PlusIcon /> Add product
-               </Button>
             </div>
+            <Separator />
+            <Button variant={'outline'} className="w-fit">
+               <PlusIcon /> Add product
+            </Button>
             <DialogFooter className="-mx-6 px-6 -mb-6 py-6 rounded-b-xl border-t border-border bg-muted/50">
                <DialogClose asChild>
                   <Button variant={'outline'}>Cancel</Button>

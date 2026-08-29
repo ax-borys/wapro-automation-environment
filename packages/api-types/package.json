@@ -1,0 +1,14 @@
+{
+   "name": "@wae/api-types",
+   "private": true,
+   "main": "./dist/index.mjs",
+   "types": "./dist/index.d.ts",
+   "type": "module",
+   "scripts": {
+      "build": "tsc -b && tsdown"
+   },
+   "dependencies": {
+      "@wae/api": "workspace:*"
+   },
+   "packageManager": "pnpm@10.33.0"
+}

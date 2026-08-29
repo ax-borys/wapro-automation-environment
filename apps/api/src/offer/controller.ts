@@ -1,16 +1,10 @@
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import {
    addItems,
    addProducts,
    createOffer,
+   getAllOffersWithItems,
    type CreateOfferInput,
 } from '@wae/offer';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-import fs from 'fs';
 
 import type { Handler } from 'hono';
 import type { ApiResponse } from '@wae/types';
@@ -20,11 +14,16 @@ import type {
    AddProductInput,
    AddProductOutput,
    CreateOfferOutput,
+   GetAllOffersWithItemsOutput,
    Offer,
 } from '@wae/offer';
 import { getAllOffers } from '@wae/offer';
+import { createFactory } from 'hono/factory';
 
-export const createOfferHandler: Handler = async (c) => {
+const factory = createFactory();
+const createHandler = factory.createHandlers.bind(factory);
+
+export const createOfferHandler = createHandler(async (c) => {
    const offer = await c.req.json<CreateOfferInput>();
 
    const result = await createOffer(offer);
@@ -33,18 +32,27 @@ export const createOfferHandler: Handler = async (c) => {
       data: result,
       error: null,
    });
-};
+});
 
-export const getOffersHandler: Handler = async (c) => {
+export const getOffersHandler = createHandler(async (c) => {
    const offers = await getAllOffers();
 
    return c.json<ApiResponse<Offer[]>>({
       data: offers,
       error: null,
    });
-};
+});
 
-export const addItemsHandler: Handler = async (c) => {
+export const getAllOffersWithItemsHandler = createHandler(async (c) => {
+   const offers = await getAllOffersWithItems();
+
+   return c.json<ApiResponse<GetAllOffersWithItemsOutput>>({
+      data: offers,
+      error: null,
+   });
+});
+
+export const addItemsHandler = createHandler(async (c) => {
    const items = await c.req.json<AddItemInput[]>();
 
    const result = await addItems(items);
@@ -53,9 +61,9 @@ export const addItemsHandler: Handler = async (c) => {
       data: result,
       error: null,
    });
-};
+});
 
-export const addProductsHandler: Handler = async (c) => {
+export const addProductsHandler = createHandler(async (c) => {
    const products = await c.req.json<AddProductInput[]>();
 
    const result = await addProducts(products);
@@ -64,4 +72,4 @@ export const addProductsHandler: Handler = async (c) => {
       data: result,
       error: null,
    });
-};
+});

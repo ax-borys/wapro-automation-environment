@@ -1,6 +1,8 @@
 {
    "name": "@wae/api",
    "type": "module",
+   "main": "./dist/index.mjs",
+   "types": "./dist/index.d.ts",
    "scripts": {
       "dev": "tsx watch src/index.ts",
       "build": "tsc -b && tsdown",
@@ -14,7 +16,6 @@
       "@wae/db": "workspace:*",
       "@wae/offer": "workspace:*",
       "@wae/receipt": "workspace:*",
-      "@wae/types": "workspace:*",
       "@wae/wapro": "workspace:*",
       "drizzle-orm": "1.0.0-rc.4",
       "hono": "^4.13.2",
@@ -23,6 +24,7 @@
    },
    "devDependencies": {
       "@types/node": "^26.1.1",
+      "@wae/types": "workspace:*",
       "tsx": "^4.23.0",
       "typescript": "^7.0.2"
    }

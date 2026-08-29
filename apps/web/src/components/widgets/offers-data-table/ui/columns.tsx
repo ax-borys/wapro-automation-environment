@@ -1,3 +1,4 @@
+import { EditOffer } from '@/components/features/edit-offer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DataTableFeatures } from '@/components/ui/data-table/data-table-features';
@@ -12,6 +13,7 @@ import {
    WarningIcon,
 } from '@phosphor-icons/react';
 import { createColumnHelper } from '@tanstack/react-table';
+import { EditIcon } from 'lucide-react';
 import Image from 'next/image';
 
 export type OfferData = Pick<
@@ -112,7 +114,14 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          return (
             <div className="flex flex-col w-full">
-               <EditProductDialog offer={r.original} />
+               <EditOffer
+                  offer={r.original}
+                  trigger={
+                     <Button variant={'ghost'}>
+                        <EditIcon />
+                     </Button>
+                  }
+               />
             </div>
          );
       },

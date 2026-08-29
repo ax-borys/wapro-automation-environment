@@ -7,6 +7,7 @@ import {
    GetReceiptsInput,
    type CreateReceiptInput,
 } from '@wae/receipt';
+import { createFactory } from 'hono/factory';
 
 const config: WaproConfig = {
    companyId: 1,
@@ -16,7 +17,10 @@ const config: WaproConfig = {
    stockId: 1,
 };
 
-export const recordReceiptsHandler: Handler = async (c) => {
+const factory = createFactory();
+const createHandlers = factory.createHandlers.bind(factory);
+
+export const recordReceiptsHandler = factory.createHandlers(async (c) => {
    const createReceiptsInput = await c.req.json<CreateReceiptInput[]>();
 
    const receipts = await createReceipts(createReceiptsInput, config);
@@ -28,9 +32,9 @@ export const recordReceiptsHandler: Handler = async (c) => {
       },
       200,
    );
-};
+});
 
-export const getReceiptsHandler: Handler = async (c) => {
+export const getReceiptsHandler = factory.createHandlers(async (c) => {
    const getReceiptsInput = await c.req.json<GetReceiptsInput>();
 
    const receipts = await getReceipts(getReceiptsInput);
@@ -39,4 +43,4 @@ export const getReceiptsHandler: Handler = async (c) => {
       data: receipts,
       error: null,
    });
-};
+});

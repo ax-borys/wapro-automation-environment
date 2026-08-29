@@ -1,0 +1,12 @@
+{
+   "extends": "../../tsconfig.base.json",
+   "compilerOptions": {
+      "outDir": "dist",
+      "rootDir": "src",
+      "tsBuildInfoFile": "dist/.tsbuildinfo",
+      "emitDeclarationOnly": true,
+      "declarationMap": true
+   },
+   "references": [{ "path": "../../apps/api" }],
+   "include": ["src"]
+}
