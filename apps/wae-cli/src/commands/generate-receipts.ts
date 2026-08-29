@@ -1,5 +1,11 @@
 import distributeNumber from '@wae/core';
-import { Config, Mapping, Order, Position, RecordReceiptWapro as Receipt } from '@wae/types';
+import {
+   WaproConfig,
+   Mapping,
+   Order,
+   Position,
+   RecordReceiptWapro as Receipt,
+} from '@wae/types';
 import currency from 'currency.js';
 
 function calculatePaymentDeadline(
@@ -48,7 +54,7 @@ function shrinkNumbersList(numbers: number[]) {
 export function generateReceipts(
    orders: Order[],
    map: Mapping,
-   { companyId, userId, cashRegisterId, counterPartyId, stockId }: Config,
+   { companyId, userId, cashRegisterId, counterPartyId, stockId }: WaproConfig,
 ): Receipt[] {
    const receipts: Receipt[] = [];
 

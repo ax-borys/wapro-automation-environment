@@ -1,4 +1,4 @@
-import { Config, Mapping, Tx } from '@wae/types';
+import { WaproConfig, Mapping, Tx } from '@wae/types';
 import { dbWapro, recordReceipt, RecordReceiptOutput } from '@wae/wapro';
 import * as v from 'valibot';
 import { db, positionsTable, productsTable, receiptsTable } from '@wae/db';
@@ -41,7 +41,7 @@ export type CreateReceiptOutput = SaveReceiptOutput;
 
 export async function createReceipts(
    receipts: CreateReceiptInput[],
-   config: Config,
+   config: WaproConfig,
 ): Promise<CreateReceiptOutput[]> {
    return await db.transaction(async (tx) => {
       const items = await tx.query.itemsTable.findMany({

@@ -1,4 +1,4 @@
-import { Config, Mapping, Position } from '@wae/types';
+import { WaproConfig, Mapping, Position } from '@wae/types';
 import { type RecordReceiptInput } from '@wae/wapro';
 
 import currency from 'currency.js';
@@ -54,7 +54,7 @@ function shrinkNumbersList(numbers: number[]) {
 export function generateReceipts(
    receiptInputs: GenerateReceiptInput[],
    map: Mapping,
-   { companyId, userId, cashRegisterId, counterPartyId, stockId }: Config,
+   { companyId, userId, cashRegisterId, counterPartyId, stockId }: WaproConfig,
 ): RecordReceiptInput[] {
    const receipts: RecordReceiptInput[] = [];
 

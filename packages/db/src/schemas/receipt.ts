@@ -41,7 +41,7 @@ export const productsTable = sqliteTable('products', {
    externalId: text('external_id').unique(),
    name: text().notNull(),
    imgSrc: text('image_source').notNull(),
-   tax: int().$type<0 | 8 | 23>(),
+   tax: int().$type<0 | 8 | 23>().notNull(),
 });
 
 export const offersTable = sqliteTable('offers', {

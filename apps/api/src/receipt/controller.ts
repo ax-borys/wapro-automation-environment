@@ -1,5 +1,5 @@
 import type { Handler } from 'hono';
-import type { ApiResponse, Config } from '@wae/types';
+import type { ApiResponse, WaproConfig } from '@wae/types';
 import {
    createReceipts,
    GetReceiptOutput,
@@ -8,7 +8,7 @@ import {
    type CreateReceiptInput,
 } from '@wae/receipt';
 
-const config: Omit<Config, 'refreshToken'> = {
+const config: WaproConfig = {
    companyId: 1,
    cashRegisterId: 1,
    userId: 3000001,

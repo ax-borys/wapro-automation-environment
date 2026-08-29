@@ -1,7 +1,7 @@
 import fs from 'fs';
 import { recordReceipt, dbWapro as db } from '@wae/wapro';
 import { closeConnection } from '@wae/wapro';
-import { Config, Mapping, Order } from '@wae/types';
+import { WaproConfig, Mapping, Order } from '@wae/types';
 import { generateReceipts } from './commands/generate-receipts';
 import { getAllOffers } from './commands/get-all-offers';
 import { syncOffers } from './commands/sync-offers';
@@ -15,13 +15,12 @@ const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'get-pending-orders': getPendingOrdersCommand,
 };
 
-const config: Config = {
+const config: WaproConfig = {
    companyId: 1,
    cashRegisterId: 1,
    userId: 3000001,
    counterPartyId: 1,
    stockId: 1,
-   refreshToken: null,
 };
 
 function generateReceiptsCommand(

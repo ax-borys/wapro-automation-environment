@@ -1,16 +1,7 @@
 import { db } from '@wae/db';
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
-
-export type Config = {
-   companyId: number;
-   cashRegisterId: number;
-   counterPartyId: number;
-   userId: number;
-   stockId: number;
-   refreshToken: string | null | undefined;
-};
-
+export type { WaproConfig } from './wapro-types.ts';
 export type Order = {
    buyer: {
       id: string;
