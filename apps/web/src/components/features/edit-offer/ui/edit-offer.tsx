@@ -14,6 +14,7 @@ import {
    EditOfferDialogTitle,
    EditOfferDialogTrigger,
 } from '@/components/ui/edit-offer-dialog';
+import { Kbd, KbdGroup } from '@/components/ui/kbd';
 import { Separator } from '@/components/ui/separator';
 import { OfferModel, ProductModel, useOffersStore } from '@/entities/offer';
 import { causeUpdateAndUlinkItems } from '@/entities/offer/cause-update-and-unlink-items';
@@ -85,8 +86,11 @@ export function EditOffer({
    const cancel = () => {
       restore();
       setIsOpen(false);
+      setAddingItem(false);
    };
+
    const save = async () => {
+      if (addingItem) return;
       try {
          setIsSaving(true);
          await causeUpdateAndUlinkItems({
@@ -117,7 +121,20 @@ export function EditOffer({
          <EditOfferDialogTrigger asChild onClick={() => setIsOpen(true)}>
             {trigger}
          </EditOfferDialogTrigger>
-         <EditOfferDialogContent onClose={cancel}>
+         <EditOfferDialogContent
+            onClose={cancel}
+            onOpenAutoFocus={(e) => {
+               e.preventDefault();
+               (e.currentTarget as HTMLElement).focus();
+            }}
+            onKeyDown={(e) =>
+               e.key === 'Insert'
+                  ? setAddingItem(true)
+                  : e.key === 'F10' && !addingItem
+                    ? save()
+                    : e.key === 'Escape' && cancel()
+            }
+         >
             <EditOfferDialogHeader>
                <EditOfferDialogTitle>
                   <EditIcon /> Edit offer
@@ -174,17 +191,23 @@ export function EditOffer({
                variant={'outline'}
                className="w-fit"
                onClick={() => setAddingItem(true)}
+               tabIndex={-1}
             >
                <PlusIcon /> Add product
+               <Kbd>Ins</Kbd>
             </Button>
             <EditOfferDialogFooter>
                <EditOfferDialogClose asChild>
-                  <Button variant={'outline'} onClick={cancel}>
+                  <Button variant={'outline'} onClick={cancel} tabIndex={-1}>
                      Cancel
+                     <Kbd>Esc</Kbd>
                   </Button>
                </EditOfferDialogClose>
                <EditOfferDialogClose asChild onClick={save}>
-                  <Button>Save</Button>
+                  <Button tabIndex={-1}>
+                     Save
+                     <Kbd>F10</Kbd>
+                  </Button>
                </EditOfferDialogClose>
             </EditOfferDialogFooter>
          </EditOfferDialogContent>

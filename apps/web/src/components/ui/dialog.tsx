@@ -76,6 +76,7 @@ function DialogContent({
                      className="absolute top-4 right-4"
                      size="icon-sm"
                      onClick={onClose}
+                     tabIndex={-1}
                   >
                      <XIcon />
                      <span className="sr-only">Close</span>

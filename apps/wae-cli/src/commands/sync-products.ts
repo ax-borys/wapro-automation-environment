@@ -1,13 +1,15 @@
-import { addProductInputSchema, addProducts } from '@wae/offer';
-import { dbWapro, getProducts } from '@wae/wapro';
+import { addProductInputSchema, addProducts, getAllProducts } from '@wae/offer';
+import * as wapro from '@wae/wapro';
 import * as v from 'valibot';
 
 export async function syncProducts() {
-   const waproProducts = await getProducts();
+   const waproProducts = await wapro.getProducts();
 
-   console.log(waproProducts);
+   const filteredWaproProducts = waproProducts.filter(
+      (p) => !Number.isNaN(Number.parseInt(p.tax || '')),
+   );
 
-   const productsInput = waproProducts.map((wp) => ({
+   const productsInput = filteredWaproProducts.map((wp) => ({
       externalId: wp.id.toString(),
       name: wp.name,
       tax: Number.parseInt(wp.tax || ''),
@@ -18,7 +20,13 @@ export async function syncProducts() {
       productsInput,
    );
 
-   const products = await addProducts(validatedProductsInput);
+   const existingProducts = await getAllProducts();
+
+   const notExistingProductsInput = validatedProductsInput.filter(
+      (i) => !existingProducts.map((j) => j.externalId).includes(i.externalId),
+   );
+
+   const products = await addProducts(notExistingProductsInput);
 
    return products;
 }
