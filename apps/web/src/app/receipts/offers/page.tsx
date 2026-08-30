@@ -8,7 +8,7 @@ export default async function OffersPage() {
    const offersInput = offers.map((offer) => {
       const items: Record<ProductModel['id'], ProductModel> = {};
       offer.items.forEach((i) => (items[i.id] = i));
-      return { ...offer, items };
+      return { ...offer, active: true, items };
    });
 
    return (
