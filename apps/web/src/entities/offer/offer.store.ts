@@ -16,7 +16,7 @@ export type OfferModel = {
    title: string;
    src: string;
    active?: boolean;
-   approved?: boolean;
+   approved: boolean;
    items: Record<ProductModel['id'], ProductModel>;
 };
 

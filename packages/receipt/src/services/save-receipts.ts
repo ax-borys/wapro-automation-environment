@@ -1,16 +1,9 @@
-import {
-   db,
-   itemsTable,
-   offersTable,
-   positionsTable,
-   productsTable,
-   receiptsTable,
-} from '@wae/db';
-import { eq } from 'drizzle-orm';
+import { positionsTable, receiptsTable } from '@wae/db';
 import { createInsertSchema, createSelectSchema } from 'drizzle-orm/valibot';
 import * as v from 'valibot';
-import { offerDoesntExist, positionHasNoMatchedOffer } from '../errors';
+import { offerDoesntExist } from '../errors';
 import { Tx } from '@wae/types';
+import currency from 'currency.js';
 
 const receiptInputSchema = createInsertSchema(receiptsTable);
 const positionInputSchema = createInsertSchema(positionsTable);
@@ -19,12 +12,39 @@ const positionOutputSchema = createSelectSchema(positionsTable);
 
 export const saveReceiptInputSchema = v.object({
    ...receiptInputSchema.entries,
-   positions: v.array(v.omit(positionInputSchema, ['receiptId'])),
+   totalPaid: v.pipe(
+      v.number(),
+      v.minValue(0),
+      v.check(
+         (value) =>
+            currency(value).intValue === currency(value).multiply(100).value,
+         'Must be decimal with maximum 2 numbers after floating point',
+      ),
+   ),
+   positions: v.array(
+      v.object({
+         ...v.omit(positionInputSchema, ['receiptId']).entries,
+         price: v.pipe(
+            v.number(),
+            v.minValue(0),
+            v.check(
+               (value) =>
+                  currency(value).intValue ===
+                  currency(value).multiply(100).value,
+               'Price must be a decimal with maximum 2 numbers after floating point.',
+            ),
+         ),
+      }),
+   ),
 });
 
 export const saveReceiptOutputSchema = v.object({
    ...receiptInputSchema.entries,
-   positions: v.array(positionInputSchema),
+   positions: v.array(
+      v.object({
+         ...positionInputSchema.entries,
+      }),
+   ),
 });
 
 export type SaveReceiptInput = v.InferInput<typeof saveReceiptInputSchema>;
@@ -63,7 +83,12 @@ export async function saveReceipts(
 
       const receipts = await tx
          .insert(receiptsTable)
-         .values(taggedReceiptsInput)
+         .values(
+            taggedReceiptsInput.map((i) => ({
+               ...i,
+               totalPaid: currency(i.totalPaid).intValue,
+            })),
+         )
          .returning();
 
       const mappedReceiptsIds: Record<
@@ -77,6 +102,7 @@ export async function saveReceipts(
 
       const completePositionsInput = taggedPositionsInput.map((i) => ({
          ...i,
+         price: currency(i.price).intValue,
          receiptId: mappedReceiptsIds[i.clientTag as string],
       }));
 

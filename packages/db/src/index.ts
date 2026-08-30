@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/libsql';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { relations } from './schemas/receipt';
+import { relations } from './schemas';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -26,4 +26,4 @@ export {
    itemsTable,
    productsTable,
    positionsTable,
-} from './schemas/receipt';
+} from './schemas';

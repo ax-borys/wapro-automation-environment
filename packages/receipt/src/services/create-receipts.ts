@@ -8,6 +8,7 @@ import { GenerateReceiptInput } from '../schema';
 import { generateReceipts } from './generate-receipts';
 import {
    SaveReceiptInput,
+   saveReceiptInputSchema,
    SaveReceiptOutput,
    saveReceiptOutputSchema,
    saveReceipts,
@@ -18,13 +19,22 @@ const positionInputSchema = createInsertSchema(positionsTable);
 const productInputSchema = createInsertSchema(productsTable);
 
 export const createReceiptInputSchema = v.object({
-   ...v.omit(receiptInputSchema, ['id', 'number', 'clientTag']).entries,
+   ...v.omit(saveReceiptInputSchema, [
+      'id',
+      'number',
+      'clientTag',
+      'fiscalNumber',
+      'paymentMethod',
+   ]).entries,
    fiscalNumber: v.nonNullish(receiptInputSchema.entries.fiscalNumber),
    paymentMethod: v.picklist(['PREPAID', 'POSTPAID']),
    positions: v.array(
       v.object({
-         ...v.omit(positionInputSchema, ['receiptId', 'offerId', 'clientTag'])
-            .entries,
+         ...v.omit(saveReceiptInputSchema.entries.positions.item, [
+            'offerId',
+            'clientTag',
+            'id',
+         ]).entries,
          externalId: v.nonNullish(
             v.pick(productInputSchema, ['externalId']).entries.externalId,
          ),
@@ -89,11 +99,13 @@ export async function createReceipts(
          (offer) =>
             (map[offer.externalId as NonNullable<typeof offer.externalId>] = {
                offerName: offer.title,
-               products: items.map((item) => ({
-                  sid: item.productId,
-                  quantity: item.quantity,
-                  vat: item.product.tax.toString() as '0' | '8' | '23',
-               })),
+               products: items
+                  .filter((item) => item.offerId === offer.id)
+                  .map((item) => ({
+                     sid: item.productId,
+                     quantity: item.quantity,
+                     vat: item.product.tax.toString() as '0' | '8' | '23',
+                  })),
             }),
       );
 

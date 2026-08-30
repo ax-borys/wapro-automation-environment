@@ -18,23 +18,20 @@ export const receiptsTable = sqliteTable('receipts', {
       .default(new Date()),
 });
 
-export const positionsTable = sqliteTable(
-   'positions',
-   {
-      receiptId: int('receipt_id')
-         .notNull()
-         .references(() => receiptsTable.id),
-      offerId: int('offer_id')
-         .notNull()
-         .references(() => productsTable.id),
+export const positionsTable = sqliteTable('positions', {
+   id: int().primaryKey({ autoIncrement: true }),
+   receiptId: int('receipt_id')
+      .notNull()
+      .references(() => receiptsTable.id),
+   offerId: int('offer_id')
+      .notNull()
+      .references(() => offersTable.id),
 
-      title: text().notNull(),
-      quantity: int().notNull(),
-      price: int().notNull(),
-      clientTag: text('client_tag'),
-   },
-   (t) => [primaryKey({ columns: [t.receiptId, t.offerId] })],
-);
+   title: text().notNull(),
+   quantity: int().notNull(),
+   price: int().notNull(),
+   clientTag: text('client_tag'),
+});
 
 export const productsTable = sqliteTable('products', {
    id: int().primaryKey({ autoIncrement: true }),
@@ -50,6 +47,7 @@ export const offersTable = sqliteTable('offers', {
    src: text('source').notNull(),
    title: text().notNull(),
    imgSrc: text('image_source').notNull(),
+   approved: int('approved', { mode: 'boolean' }).default(false).notNull(),
 });
 
 export const itemsTable = sqliteTable(

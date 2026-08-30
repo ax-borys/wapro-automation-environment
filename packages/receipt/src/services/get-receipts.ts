@@ -1,4 +1,5 @@
 import { db, receiptsTable } from '@wae/db';
+import currency from 'currency.js';
 import { and, gte, lt, lte } from 'drizzle-orm';
 import { createSelectSchema } from 'drizzle-orm/valibot';
 import * as v from 'valibot';
@@ -33,5 +34,10 @@ export async function getReceipts({
       .from(receiptsTable)
       .where(and(...conditions));
 
-   return receipts;
+   const normilized = receipts.map((i) => ({
+      ...i,
+      totalPaid: currency(i.totalPaid, { fromCents: true }).value,
+   }));
+
+   return normilized;
 }

@@ -31,8 +31,8 @@ export function OffersDataTable({ initialData }: { initialData: OfferData[] }) {
             add({
                imgSrc: offer.imgSrc,
                title: offer.title,
-               active: false,
-               approved: false,
+               active: true,
+               approved: offer.approved,
                items,
                id: offer.id,
                externalId: offer.externalId,
