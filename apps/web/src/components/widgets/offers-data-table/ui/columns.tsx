@@ -5,15 +5,28 @@ import { DataTableFeatures } from '@/components/ui/data-table/data-table-feature
 import { EditProductDialog } from '@/components/ui/edit-dialog';
 import { OfferModel, ProductModel } from '@/entities/offer';
 import {
+   CheckFatIcon,
+   CheckIcon,
+   CircleIcon,
    PauseCircleIcon,
+   PauseIcon,
    PlayCircleIcon,
    PlayIcon,
+   PulseIcon,
    SealCheckIcon,
    SealIcon,
    WarningIcon,
 } from '@phosphor-icons/react';
+import { XIcon } from '@phosphor-icons/react/dist/ssr';
 import { createColumnHelper } from '@tanstack/react-table';
-import { EditIcon } from 'lucide-react';
+import {
+   CircleDashedIcon,
+   CircleDot,
+   CircleDotIcon,
+   CircleOff,
+   EditIcon,
+   HeartPulseIcon,
+} from 'lucide-react';
 import Image from 'next/image';
 
 export type OfferData = Pick<
@@ -62,13 +75,13 @@ export const columns = columnHelper.columns([
          return (
             <div className="flex justify-center">
                {approved ? (
-                  <div className="bg-green-100 rounded-full p-1  text-green-600">
-                     <SealCheckIcon className="size-5!" />
-                  </div>
+                  <Badge className="bg-green-50  text-green-700 dark:bg-green-950 dark:text-green-300 p-4">
+                     <SealCheckIcon className="size-4!" /> Approved
+                  </Badge>
                ) : (
-                  <div className="bg-orange-100 rounded-md p-1 text-orange-600">
-                     <WarningIcon className="size-5!" />
-                  </div>
+                  <Badge className="bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300 p-4">
+                     <WarningIcon className="size-4!" /> Unapproved
+                  </Badge>
                )}
             </div>
          );
@@ -80,14 +93,14 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          const active = r.getValue('active') as boolean;
 
-         return (
-            <div className="flex justify-center">
-               {active ? (
-                  <span className="text-green-600">Yes</span>
-               ) : (
-                  <span className="text-red-600">No</span>
-               )}
-            </div>
+         return active ? (
+            <Badge className="bg-green-50  text-green-700 dark:bg-green-950 dark:text-green-300 p-4">
+               <PulseIcon className="size-4!" /> Active
+            </Badge>
+         ) : (
+            <Badge className="bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300 p-4">
+               <PauseIcon className="size-4!" /> Paused
+            </Badge>
          );
       },
       size: 50,
@@ -96,13 +109,16 @@ export const columns = columnHelper.columns([
       header: () => <div className="text-center">Products</div>,
       cell: ({ row: r }) => {
          const items = r.getValue('items') as ProductModel[];
+         const quantity = Object.values(items)
+            .map((i) => i.quantity)
+            .reduce((a, b) => a + b, 0);
 
          return (
             <div className="text-center">
-               {Object.values(items).length ? (
-                  Object.values(items).length
+               {quantity ? (
+                  <Badge variant={'ghost'}>{quantity}</Badge>
                ) : (
-                  <span className="text-destructive">0</span>
+                  <Badge variant={'destructive'}>{quantity}</Badge>
                )}
             </div>
          );

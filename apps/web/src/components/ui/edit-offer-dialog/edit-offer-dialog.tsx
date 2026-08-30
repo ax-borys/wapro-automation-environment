@@ -26,9 +26,6 @@ import {
    ComboboxItem,
    ComboboxList,
 } from '../combobox';
-import { Input } from '../input';
-
-type OfferData = Pick<OfferModel, 'title' | 'imgSrc'>;
 
 export function EditOfferDialog({
    children,

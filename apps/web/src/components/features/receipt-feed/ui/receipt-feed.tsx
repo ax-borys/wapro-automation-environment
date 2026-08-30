@@ -74,15 +74,7 @@ export function ReceiptFeed({
 
       try {
          changeStatusForMany(selectedIds, 'RECORDING');
-         const result = await recordReceipts(selectedOrders);
-
-         if (result.error) {
-            changeStatusForMany(selectedIds, 'RECORD');
-            console.error(result.error);
-            return;
-         }
-
-         const receipts = result.data;
+         const receipts = await recordReceipts(selectedOrders);
 
          changeStatusForMany(selectedIds, 'RECORDED');
          distributeNumbers(
