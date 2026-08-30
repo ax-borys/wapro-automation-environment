@@ -1,0 +1,29 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      '@wae/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@wae/offer':
+        specifier: workspace:*
+        version: link:../../packages/offer
+      '@wae/receipt':
+        specifier: workspace:*
+        version: link:../../packages/receipt
+      '@wae/wapro':
+        specifier: workspace:*
+        version: link:../../packages/integrations/wapro
+    devDependencies:
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../../packages/types

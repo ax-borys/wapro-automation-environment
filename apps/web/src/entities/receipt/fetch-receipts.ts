@@ -1,12 +1,16 @@
+import { client } from '@/lib/client';
 import { GetReceiptOutput, GetReceiptsInput } from '@wae/receipt';
 import { ApiResponse } from '@wae/types';
 
 export async function fetchReceipts(input?: GetReceiptsInput) {
-   const result = await fetch('http://localhost:8082/get-receipts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'applications/json' },
-      body: JSON.stringify(input ? input : {}),
-   });
+   const response = await client.receipt.$post({ json: { ...input } });
 
-   return (await result.json()) as ApiResponse<GetReceiptOutput[]>;
+   if (!response.ok) {
+      const result = await response.json();
+      throw result.error;
+   }
+
+   const result = await response.json();
+
+   return result.data;
 }

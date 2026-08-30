@@ -26,3 +26,4 @@ export {
 } from './app-error';
 
 export { runtimeError } from './runtime-errors';
+export { type HandledStatusCodes } from './app-error';

@@ -6,19 +6,10 @@ const __dirname = path.dirname(__filename);
 
 import { serve } from '@hono/node-server';
 import { Hono, type Env } from 'hono';
-import {
-   recordReceiptsHandler,
-   getReceiptsHandler,
-} from './receipt/controller.js';
 
 import { serveStatic } from '@hono/node-server/serve-static';
 import { cors } from 'hono/cors';
-import { vValidator, type Hook } from '@hono/valibot-validator';
-import {
-   ValiError,
-   type GenericSchema,
-   type GenericSchemaAsync,
-} from 'valibot';
+import { ValiError } from 'valibot';
 import mssql from 'mssql';
 import type { ApiError, ApiResponse } from '@wae/types';
 import { AppError } from '@wae/core';
@@ -26,37 +17,11 @@ import type {
    ContentfulStatusCode,
    ServerErrorStatusCode,
 } from 'hono/utils/http-status';
-import {
-   addItemInputSchema,
-   addProductInputSchema,
-   createOfferInputSchema,
-} from '@wae/offer';
-import {
-   addItemsHandler,
-   addProductsHandler,
-   createOfferHandler,
-   getAllOffersWithItemsHandler,
-   getOffersHandler,
-   getAllProductsHandler,
-} from './offer/controller.js';
-import {
-   createReceiptsInputSchema,
-   getReceiptsInputSchema,
-} from '@wae/receipt';
-import { getProducts } from '@wae/wapro';
 import { ApplyGlobalResponse } from 'hono/client';
-import { createFactory } from 'hono/factory';
-
-const valibotHook: Hook<
-   GenericSchema | GenericSchemaAsync,
-   Env,
-   string,
-   'json'
-> = async (result) => {
-   if (!result.success) {
-      throw new ValiError(result.issues);
-   }
-};
+import { offer } from './offer';
+import { receipt } from './receipt';
+import { product } from './product';
+import { type HandledStatusCodes } from '@wae/core';
 
 const app = new Hono()
    .use(
@@ -71,37 +36,9 @@ const app = new Hono()
          root: path.resolve(__dirname, '../'),
       }),
    )
-   .get('/', (c) => {
-      return c.text('Hello Hono!');
-   })
-   .post(
-      '/record-receipts',
-      vValidator('json', createReceiptsInputSchema, valibotHook),
-      ...recordReceiptsHandler,
-   )
-   .post(
-      '/get-receipts',
-      vValidator('json', getReceiptsInputSchema, valibotHook),
-      ...getReceiptsHandler,
-   )
-   .post(
-      '/create-offer',
-      vValidator('json', createOfferInputSchema, valibotHook),
-      ...createOfferHandler,
-   )
-   .get('/get-offers', ...getOffersHandler)
-   .get('/get-all-offers-with-items', ...getAllOffersWithItemsHandler)
-   .post(
-      '/add-items',
-      vValidator('json', addItemInputSchema, valibotHook),
-      ...addItemsHandler,
-   )
-   .post(
-      '/add-products',
-      vValidator('json', addProductInputSchema, valibotHook),
-      ...addProductsHandler,
-   )
-   .get('/get-all-products', ...getAllProductsHandler)
+   .route('/offer', offer)
+   .route('/receipt', receipt)
+   .route('/product', product)
    .onError((error, c) => {
       let message = null;
       let code = null;
@@ -140,7 +77,7 @@ const app = new Hono()
 export type AppType = ApplyGlobalResponse<
    typeof app,
    {
-      [K in ServerErrorStatusCode]: {
+      [K in HandledStatusCodes | 500]: {
          json: ApiResponse<ApiError>;
       };
    }

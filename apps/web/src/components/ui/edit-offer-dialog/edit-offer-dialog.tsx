@@ -176,11 +176,25 @@ export function EditOfferDialogFooter({
    );
 }
 
-export function EditOfferDialogEmptyProducts() {
+export function EditOfferDialogEmptyProducts({
+   className,
+   ...props
+}: React.ComponentProps<typeof Item>) {
    return (
-      <span className="ml-4 text-muted-foreground font-medium">
-         No linked products.
-      </span>
+      <Item
+         size={'xs'}
+         variant={'outline'}
+         className="bg-secondary/50 text-primary/80 min-w-0 w-full"
+         {...props}
+      >
+         <ItemContent className="min-w-0 py-[8.5px]">
+            <ItemTitle className="flex min-w-0 justify-between w-full">
+               <span className="min-w-0 text-primary/50 ">
+                  No linked products.
+               </span>
+            </ItemTitle>
+         </ItemContent>
+      </Item>
    );
 }
 

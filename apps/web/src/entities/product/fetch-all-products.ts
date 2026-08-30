@@ -1,7 +1,7 @@
 import { client } from '@/lib/client';
 
 export async function fetchAllProducts() {
-   const response = await client['get-all-products'].$get();
+   const response = await client.product.$get();
 
    if (!response.ok) {
       const result = await response.json();

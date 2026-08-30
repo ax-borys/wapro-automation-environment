@@ -63,16 +63,8 @@ export function Receipt({ order }: { order: Order }) {
       }
 
       try {
-         const result = await recordReceipts([{ ...order, fiscalNumber }]);
+         const [receipt] = await recordReceipts([{ ...order, fiscalNumber }]);
          console.log(order);
-
-         if (result.error) {
-            changeStatus('RECORD');
-            console.error(result.error);
-            return;
-         }
-
-         const [receipt] = result.data;
 
          changeStatus('RECORDED');
          setNumber(receipt.number);

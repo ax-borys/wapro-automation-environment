@@ -7,7 +7,7 @@ type ErrorCode =
    | 'UNAUTHORIZED'
    | 'EXTERNAL_API_ERROR';
 
-const STATUS_MAP: Record<ErrorCode, number> = {
+const STATUS_MAP = {
    NOT_FOUND: 404,
    VALIDATION: 400,
    UNPROCESSABLE: 422,
@@ -15,7 +15,9 @@ const STATUS_MAP: Record<ErrorCode, number> = {
    FORBIDDEN: 403,
    UNAUTHORIZED: 401,
    EXTERNAL_API_ERROR: 502,
-};
+} as const satisfies Record<ErrorCode, number>;
+
+export type HandledStatusCodes = (typeof STATUS_MAP)[keyof typeof STATUS_MAP];
 
 export class AppError extends Error {
    readonly code: ErrorCode;

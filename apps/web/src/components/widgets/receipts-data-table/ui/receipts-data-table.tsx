@@ -43,7 +43,9 @@ export function ReceiptsDataTable({
          },
       });
 
-      result.then((r) => (!r.error ? setData(r.data) : null));
+      result.then((r) =>
+         setData(r.map((i) => ({ ...i, createdAt: new Date(i.createdAt) }))),
+      );
    }, [date]);
 
    // fix hydrantion error bug with pageIndex=0

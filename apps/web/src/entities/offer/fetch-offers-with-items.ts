@@ -2,7 +2,7 @@ import { type GetAllOffersWithItemsOutput } from '@wae/offer';
 import { client } from '@/lib/client';
 
 export async function fetchAllOffersWithItems() {
-   const response = await client['get-all-offers-with-items'].$get();
+   const response = await client.offer.include.items.$get();
 
    if (!response.ok) {
       throw (await response.json()).error;
@@ -10,5 +10,5 @@ export async function fetchAllOffersWithItems() {
 
    const result = await response.json();
 
-   return result.data ? result.data : [];
+   return result.data;
 }

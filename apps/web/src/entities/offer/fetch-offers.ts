@@ -1,10 +1,16 @@
 import { ApiResponse } from '@wae/types';
 import { Offer } from '@wae/offer';
+import { client } from '@/lib/client';
 
 export async function fetchOffers() {
-   const response = await fetch('http://localhost:8082/get-offers');
+   const response = await client.offer.$get();
 
-   const result = (await response.json()) as ApiResponse<Offer[]>;
+   if (!response.ok) {
+      const result = await response.json();
+      throw result.error;
+   }
 
-   return result.data ? result.data : [];
+   const result = await response.json();
+
+   return result.data;
 }

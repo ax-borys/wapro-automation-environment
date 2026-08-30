@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/edit-offer-dialog';
 import { Separator } from '@/components/ui/separator';
 import { OfferModel, ProductModel, useOffersStore } from '@/entities/offer';
+import { causeUpdateAndUlinkItems } from '@/entities/offer/cause-update-and-unlink-items';
 import { fetchAllProducts } from '@/entities/product/fetch-all-products';
 import { PlusIcon } from '@phosphor-icons/react';
 import { produce } from 'immer';
@@ -40,6 +41,7 @@ export function EditOffer({
    const [draft, setDraft] = useState<OfferData>({ ...offer });
 
    const [isOpen, setIsOpen] = useState<boolean>(false);
+   const [isSaving, setIsSaving] = useState<boolean>(false);
 
    const addDraftItem = (item: ProductData) => {
       setDraft(
@@ -84,9 +86,23 @@ export function EditOffer({
       restore();
       setIsOpen(false);
    };
-   const save = () => {
-      setIsOpen(false);
-      replace(draft);
+   const save = async () => {
+      try {
+         setIsSaving(true);
+         await causeUpdateAndUlinkItems({
+            offerId: offer.id,
+            items: Object.values(draft.items).map((i) => ({
+               productId: i.id,
+               quantity: i.quantity,
+            })),
+         });
+         replace(draft);
+         setIsOpen(false);
+      } catch (error) {
+         throw error;
+      } finally {
+         setIsSaving(false);
+      }
    };
    useEffect(() => {
       const getProducts = async () => {
@@ -124,9 +140,9 @@ export function EditOffer({
                         }
                      />
                   ))
-               ) : (
+               ) : !addingItem ? (
                   <EditOfferDialogEmptyProducts />
-               )}
+               ) : null}
                {addingItem ? (
                   <EditOfferDialogSelect<ProductData>
                      onClose={() => setAddingItem(false)}

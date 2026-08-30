@@ -1,3 +1,10 @@
+export {
+   updateAndUnlinkItems,
+   type UpdateAndUnlinkItemsInput,
+   type UpdateAndUnlinkItemsOutput,
+   updateAndUnlinkItemsSchema,
+} from './services/update-and-unlink-items';
+
 export { createOffer, type CreateOfferReturn } from './services/create-offer';
 export { createOfferInputSchema } from './schemas';
 export type { CreateOfferInput, CreateOfferOutput, Offer } from './schemas';
