@@ -93,14 +93,18 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          const active = r.getValue('active') as boolean;
 
-         return active ? (
-            <Badge className="bg-green-50  text-green-700 dark:bg-green-950 dark:text-green-300 p-4">
-               <PulseIcon className="size-4!" /> Active
-            </Badge>
-         ) : (
-            <Badge className="bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300 p-4">
-               <PauseIcon className="size-4!" /> Paused
-            </Badge>
+         return (
+            <div className="flex justify-center">
+               {active ? (
+                  <Badge className="bg-green-50  text-green-700 dark:bg-green-950 dark:text-green-300 p-4">
+                     <PulseIcon className="size-4!" /> Active
+                  </Badge>
+               ) : (
+                  <Badge className="bg-orange-50 text-orange-700 dark:bg-orange-950 dark:text-orange-300 p-4">
+                     <PauseIcon className="size-4!" /> Paused
+                  </Badge>
+               )}
+            </div>
          );
       },
       size: 50,

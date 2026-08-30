@@ -1,5 +1,4 @@
 import { ReceiptFeed } from '@/components/features/receipt-feed';
-import { type Receipt } from '@/entities/receipt/receipt.context';
 import { Order, OrdersProvider } from '@/entities/order';
 import { ReceiptModel } from '@/entities/receipt';
 import currency from 'currency.js';

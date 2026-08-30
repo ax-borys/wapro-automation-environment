@@ -1,3 +1,4 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import {
    Collapsible,
@@ -21,6 +22,7 @@ import {
    SidebarMenuSubButton,
    SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
+import { PlugsIcon } from '@phosphor-icons/react';
 import { AtomIcon, ChevronLeft, ChevronRight, Notebook } from 'lucide-react';
 import Link from 'next/link';
 
@@ -62,22 +64,15 @@ export function AppSidebar() {
                               <SidebarMenuSub>
                                  <SidebarMenuSubItem>
                                     <SidebarMenuSubButton asChild>
-                                       <Link href="/receipts/allegro">
-                                          Allegro
+                                       <Link href="/receipts/pending">
+                                          Pending
                                        </Link>
                                     </SidebarMenuSubButton>
                                  </SidebarMenuSubItem>
                                  <SidebarMenuSubItem>
                                     <SidebarMenuSubButton asChild>
-                                       <Link href="/receipts/history">
-                                          History
-                                       </Link>
-                                    </SidebarMenuSubButton>
-                                 </SidebarMenuSubItem>
-                                 <SidebarMenuSubItem>
-                                    <SidebarMenuSubButton asChild>
-                                       <Link href="/receipts/offers">
-                                          Offers
+                                       <Link href="/receipts/repository">
+                                          Repository
                                        </Link>
                                     </SidebarMenuSubButton>
                                  </SidebarMenuSubItem>
@@ -88,7 +83,35 @@ export function AppSidebar() {
                   </SidebarMenu>
                </SidebarGroupContent>
             </SidebarGroup>
-            <SidebarGroup />
+            <SidebarGroup>
+               <SidebarGroupLabel>Configuration</SidebarGroupLabel>
+               <SidebarGroupContent>
+                  <SidebarMenu>
+                     <Collapsible defaultOpen>
+                        <SidebarMenuItem>
+                           <CollapsibleTrigger asChild>
+                              <SidebarMenuButton className="flex">
+                                 <PlugsIcon />
+                                 <span>Integrations</span>
+                                 <ChevronRight className="ml-auto" />
+                              </SidebarMenuButton>
+                           </CollapsibleTrigger>
+                           <CollapsibleContent>
+                              <SidebarMenuSub>
+                                 <SidebarMenuSubItem>
+                                    <SidebarMenuSubButton asChild>
+                                       <Link href="/integrations/allegro">
+                                          Allegro
+                                       </Link>
+                                    </SidebarMenuSubButton>
+                                 </SidebarMenuSubItem>
+                              </SidebarMenuSub>
+                           </CollapsibleContent>
+                        </SidebarMenuItem>
+                     </Collapsible>
+                  </SidebarMenu>
+               </SidebarGroupContent>
+            </SidebarGroup>
          </SidebarContent>
          <SidebarFooter />
       </Sidebar>

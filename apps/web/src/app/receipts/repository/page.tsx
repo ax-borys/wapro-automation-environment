@@ -1,15 +1,4 @@
-import {
-   ReceiptRecorded,
-   ReceiptsDataTable,
-} from '@/components/widgets/receipts-data-table';
-import {
-   Table,
-   TableBody,
-   TableCell,
-   TableHead,
-   TableHeader,
-   TableRow,
-} from '@/components/ui/table';
+import { ReceiptsDataTable } from '@/components/widgets/receipts-data-table';
 import { fetchReceipts } from '@/entities/receipt';
 
 export default async function ReceiptHistoryPage() {
