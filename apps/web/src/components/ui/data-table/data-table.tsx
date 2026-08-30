@@ -14,6 +14,14 @@ import {
    TableHeader,
    TableRow,
 } from '../table';
+import {
+   Empty,
+   EmptyDescription,
+   EmptyHeader,
+   EmptyMedia,
+   EmptyTitle,
+} from '../empty';
+import { FileTextIcon, RecordIcon } from '@phosphor-icons/react';
 
 interface DataTableProps<TData extends RowData> {
    table: TableType<typeof features, TData>;
@@ -84,7 +92,17 @@ export function DataTable<TData extends RowData>({
                </TableBody>
             </Table>
          ) : (
-            'No results.'
+            <Empty>
+               <EmptyHeader>
+                  <EmptyMedia variant={'icon'}>
+                     <FileTextIcon />
+                  </EmptyMedia>
+                  <EmptyTitle>No records found</EmptyTitle>
+                  <EmptyDescription>
+                     Unfortunatly, no records matched filters.
+                  </EmptyDescription>
+               </EmptyHeader>
+            </Empty>
          )}
       </div>
    );
