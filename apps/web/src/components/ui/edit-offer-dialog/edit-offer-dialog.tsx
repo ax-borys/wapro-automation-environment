@@ -10,7 +10,14 @@ import {
 } from '../dialog';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from '../item';
+import {
+   Item,
+   ItemActions,
+   ItemContent,
+   ItemHeader,
+   ItemMedia,
+   ItemTitle,
+} from '../item';
 import {
    ArrowsVerticalIcon,
    LinkIcon,
@@ -26,6 +33,8 @@ import {
    ComboboxItem,
    ComboboxList,
 } from '../combobox';
+import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip';
+import { Kbd } from '../kbd';
 
 export function EditOfferDialog({
    children,
@@ -125,9 +134,14 @@ export function EditOfferDialogProduct({
          </ItemMedia>
          <ItemContent className="min-w-0">
             <ItemTitle className="flex min-w-0 justify-between w-full">
-               <span className="border-b border-primary/80 border-dashed truncate min-w-0 cursor-pointer">
-                  {name}
-               </span>
+               <Tooltip>
+                  <TooltipTrigger asChild>
+                     <span className="border-b border-primary/80 border-dashed truncate min-w-0 cursor-pointer">
+                        {name}
+                     </span>
+                  </TooltipTrigger>
+                  <TooltipContent>{name}</TooltipContent>
+               </Tooltip>
                <span
                   className="flex items-center ml-3 cursor-ns-resize px-3 gap-1"
                   onWheel={(e) => {
@@ -138,7 +152,18 @@ export function EditOfferDialogProduct({
                >
                   <XIcon className="size-3! mx-1" />
                   {quantity}
-                  <ArrowsVerticalIcon className="text-primary/30" />
+                  <Tooltip>
+                     <TooltipTrigger asChild>
+                        <div>
+                           <Kbd>
+                              <ArrowsVerticalIcon className="" />
+                           </Kbd>
+                        </div>
+                     </TooltipTrigger>
+                     <TooltipContent>
+                        Use mouse wheel to change quantity.
+                     </TooltipContent>
+                  </Tooltip>
                </span>
             </ItemTitle>
          </ItemContent>
@@ -200,11 +225,13 @@ export const EditOfferDialogClose = DialogClose;
 export function EditOfferDialogSelect<TData>({
    itemToKeyValue,
    itemToStringValue,
+   itemToStockValue,
    onClose,
    ...props
 }: React.ComponentProps<typeof Combobox<TData>> & {
    itemToKeyValue: (i: TData) => string | number;
    onClose?: () => void;
+   itemToStockValue?: (i: TData) => string | number;
 }) {
    return (
       <Combobox<TData> itemToStringValue={itemToStringValue} {...props}>
@@ -220,7 +247,19 @@ export function EditOfferDialogSelect<TData>({
             <ComboboxList>
                {(i) => (
                   <ComboboxItem key={itemToKeyValue(i)} value={i}>
-                     {itemToStringValue ? itemToStringValue(i) : i}
+                     <Item size={'sm'}>
+                        <ItemContent>
+                           <ItemTitle>
+                              {itemToStringValue ? itemToStringValue(i) : i}
+                           </ItemTitle>
+                        </ItemContent>
+                        {itemToStockValue ? (
+                           <ItemActions className="w-5 gap-2">
+                              <XIcon className="size-3" />
+                              {itemToStockValue(i)}
+                           </ItemActions>
+                        ) : null}
+                     </Item>
                   </ComboboxItem>
                )}
             </ComboboxList>

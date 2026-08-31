@@ -19,7 +19,7 @@ import {
 } from '@tanstack/react-table';
 import { fetchReceipts } from '@/entities/receipt';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react';
 
 export function ReceiptsDataTable({
    initialData,
@@ -125,19 +125,43 @@ export function ReceiptsDataTable({
                      <ChevronLeft />
                      Previous
                   </Button>
-                  {[...new Array(table.getPageCount())].map((_, i) => (
-                     <Button
-                        key={i}
-                        variant={
-                           table.state.pagination.pageIndex === i
-                              ? 'outline'
-                              : 'ghost'
-                        }
-                        onClick={() => table.setPageIndex(i)}
-                     >
-                        {i + 1}
-                     </Button>
-                  ))}
+                  {table.state.pagination.pageIndex + 1 > 1 ? (
+                     <>
+                        <Button
+                           variant={'ghost'}
+                           className="w-9"
+                           onClick={() => table.setPageIndex(0)}
+                        >
+                           1
+                        </Button>
+                     </>
+                  ) : (
+                     <div className="flex justify-center items-center w-9">
+                        <Ellipsis className="text-muted-foreground size-4" />
+                     </div>
+                  )}
+
+                  <Button variant={'outline'} className="w-9">
+                     {table.state.pagination.pageIndex + 1}
+                  </Button>
+                  {table.state.pagination.pageIndex + 1 <
+                  table.getPageCount() ? (
+                     <>
+                        <Button
+                           variant={'ghost'}
+                           className="w-9"
+                           onClick={() =>
+                              table.setPageIndex(table.getPageCount() - 1)
+                           }
+                        >
+                           {table.getPageCount()}
+                        </Button>
+                     </>
+                  ) : (
+                     <div className="flex justify-center items-center w-9">
+                        <Ellipsis className="text-muted-foreground size-4" />
+                     </div>
+                  )}
                   <Button
                      variant={'ghost'}
                      disabled={isMounted ? !table.getCanNextPage() : undefined}

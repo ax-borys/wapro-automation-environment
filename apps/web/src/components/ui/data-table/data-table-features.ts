@@ -1,5 +1,9 @@
 import { ReceiptRecorded } from '@/components/widgets/receipts-data-table';
-import { RankingInfo, rankItem } from '@tanstack/match-sorter-utils';
+import {
+   compareItems,
+   RankingInfo,
+   rankItem,
+} from '@tanstack/match-sorter-utils';
 import {
    tableFeatures,
    columnFilteringFeature,
@@ -17,12 +21,18 @@ import {
    metaHelper,
    globalFilteringFeature,
    columnSizingFeature,
+   TableFeatures,
+   RowData,
+   SortFn,
 } from '@tanstack/react-table';
 
 export interface FuzzyFilterMeta {
    itemRank?: RankingInfo;
 }
-export const fuzzyFilter: FilterFn<any, any> = (
+
+type FuzzyFeatures = TableFeatures & { filterMeta: FuzzyFilterMeta };
+
+export const fuzzyFilter: FilterFn<FuzzyFeatures, RowData> = (
    row,
    columnId,
    value,
@@ -31,6 +41,19 @@ export const fuzzyFilter: FilterFn<any, any> = (
    const itemRank = rankItem(row.getValue(columnId), value);
    addMeta?.({ itemRank });
    return itemRank.passed;
+};
+
+export const fuzzySort: SortFn<FuzzyFeatures, any> = (rowA, rowB, columnId) => {
+   let dir = 0;
+
+   if (rowA.columnFiltersMeta[columnId] && rowB.columnFiltersMeta[columnId]) {
+      dir = compareItems(
+         rowA.columnFiltersMeta[columnId].itemRank!,
+         rowB.columnFiltersMeta[columnId].itemRank!,
+      );
+   }
+
+   return dir === 0 ? sortFn_alphanumeric(rowA, rowB, columnId) : dir;
 };
 
 export const features = tableFeatures({
@@ -45,7 +68,11 @@ export const features = tableFeatures({
    paginatedRowModel: createPaginatedRowModel(),
    sortedRowModel: createSortedRowModel(),
    filterFns: { includesString: filterFn_includesString, fuzzy: fuzzyFilter },
-   sortFns: { alphanumeric: sortFn_alphanumeric, text: sortFn_text },
+   sortFns: {
+      alphanumeric: sortFn_alphanumeric,
+      text: sortFn_text,
+      fuzzy: fuzzySort,
+   },
    filterMeta: metaHelper<FuzzyFilterMeta>(),
 });
 

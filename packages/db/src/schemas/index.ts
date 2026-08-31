@@ -15,7 +15,7 @@ export const receiptsTable = sqliteTable('receipts', {
    clientTag: text('client_tag'),
    createdAt: int('created_at', { mode: 'timestamp_ms' })
       .notNull()
-      .default(new Date()),
+      .$defaultFn(() => new Date()),
 });
 
 export const positionsTable = sqliteTable('positions', {
@@ -39,6 +39,7 @@ export const productsTable = sqliteTable('products', {
    name: text().notNull(),
    imgSrc: text('image_source'),
    tax: int().$type<0 | 8 | 23>().notNull(),
+   stock: int().notNull().default(0),
 });
 
 export const offersTable = sqliteTable('offers', {

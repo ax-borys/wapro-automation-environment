@@ -43,13 +43,13 @@ export const columns = columnHelper.columns([
          const imgUrl = r.getValue('imgSrc') as string;
 
          return (
-            <div className="flex items-center rounded-xl overfllow-clip h-25">
+            <div className="flex items-center rounded-xl overfllow-clip h-20">
                <Image
                   src={imgUrl}
                   alt="preview"
                   width={96}
                   height={96}
-                  className="w-[50px] h-auto object-cover rounded-xl"
+                  className="w-[40px] h-auto object-cover rounded-xl"
                />
             </div>
          );
@@ -66,6 +66,7 @@ export const columns = columnHelper.columns([
       minSize: 300,
       size: 900,
       maxSize: 1500,
+      sortFn: 'fuzzy',
    }),
    columnHelper.accessor('approved', {
       header: () => <div className="text-center">Approved</div>,

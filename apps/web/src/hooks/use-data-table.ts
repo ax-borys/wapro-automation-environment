@@ -4,6 +4,7 @@ import {
    ColumnDef,
    ColumnVisibilityState,
    RowData,
+   SortingState,
    useTable,
 } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
@@ -12,6 +13,9 @@ import { DateRange } from 'react-day-picker';
 export function useDataTable<TData extends RowData>(
    data: TData[],
    columns: ColumnDef<DataTableFeatures, TData>[],
+   options?: {
+      initialSortingState: SortingState;
+   },
 ) {
    const [date, setDate] = useState<DateRange | undefined>();
 
@@ -27,6 +31,12 @@ export function useDataTable<TData extends RowData>(
       setIsMounted(true);
    }, []);
 
+   const [sorting, setSorting] = useState<SortingState>(
+      options?.initialSortingState
+         ? options.initialSortingState
+         : [{ id: 'title', desc: false }],
+   );
+
    const table = useTable<DataTableFeatures, TData>({
       columns,
       data,
@@ -34,6 +44,7 @@ export function useDataTable<TData extends RowData>(
       onColumnVisibilityChange: setColumnVisibility,
       onGlobalFilterChange: setGlobalFilter,
       globalFilterFn: 'fuzzy',
+      onSortingChange: setSorting,
       initialState: {
          pagination: {
             pageIndex: 0,
@@ -43,6 +54,7 @@ export function useDataTable<TData extends RowData>(
       state: {
          columnVisibility,
          globalFilter,
+         sorting,
       },
    });
 
@@ -54,5 +66,6 @@ export function useDataTable<TData extends RowData>(
       globalFilter,
       isMounted,
       setGlobalFilter,
+      setSorting,
    };
 }

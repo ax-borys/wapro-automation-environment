@@ -24,7 +24,7 @@ import { produce } from 'immer';
 import { EditIcon, XIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-type ProductData = Pick<ProductModel, 'name' | 'id' | 'externalId'>;
+type ProductData = Pick<ProductModel, 'name' | 'id' | 'externalId' | 'stock'>;
 
 type OfferData = Pick<OfferModel, 'title' | 'imgSrc' | 'items' | 'id'>;
 export function EditOffer({
@@ -131,7 +131,7 @@ export function EditOffer({
                e.key === 'Insert'
                   ? setAddingItem(true)
                   : e.key === 'F10' && !addingItem
-                    ? save()
+                    ? (e.preventDefault() ?? save())
                     : e.key === 'Escape' && cancel()
             }
          >
@@ -181,7 +181,8 @@ export function EditOffer({
                      autoHighlight
                      items={productsList}
                      itemToStringValue={(i) => i.name}
-                     itemToKeyValue={(i) => i.name}
+                     itemToKeyValue={(i) => i.id}
+                     itemToStockValue={(i) => i.stock}
                      defaultOpen
                   />
                ) : null}

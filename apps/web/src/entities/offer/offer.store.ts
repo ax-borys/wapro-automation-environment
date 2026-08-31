@@ -7,6 +7,7 @@ export type ProductModel = {
    externalId: string;
    // Implement it here `cuz i don't want to create Item type for that
    quantity: number;
+   stock: number;
 };
 
 export type OfferModel = {
@@ -23,6 +24,7 @@ export type OfferModel = {
 type OffersStore = {
    offers: Record<OfferModel['id'], OfferModel>;
    add: (offer: OfferModel) => void;
+   addMany: (offers: OfferModel[]) => void;
    remove: (id: OfferModel['id']) => void;
    replace: (offer: Partial<OfferModel>) => void;
    addItem: (id: OfferModel['id'], item: ProductModel) => void;
@@ -39,6 +41,12 @@ export const useOffersStore = create<OffersStore>()(
       add: (offer) =>
          set((s) => {
             if (!s.offers[offer.id]) s.offers[offer.id] = offer;
+         }),
+      addMany: (offers) =>
+         set((s) => {
+            if (!offers.length) return;
+
+            offers.forEach((offer) => (s.offers[offer.id] = offer));
          }),
       remove: (id) =>
          set((s) => {

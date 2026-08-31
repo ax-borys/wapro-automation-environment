@@ -2,51 +2,47 @@
 import { DataTable, features } from '@/components/ui/data-table';
 import { RowData, useTable } from '@tanstack/react-table';
 import { columns, OfferData } from './columns';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchAllOffersWithItems } from '@/entities/offer/fetch-offers-with-items';
-import { OfferModel, ProductModel, useOffersStore } from '@/entities/offer';
+import {
+   normilizeItems,
+   OfferModel,
+   ProductModel,
+   useOffersStore,
+} from '@/entities/offer';
 import {
    Toolbar,
-   ToolbarDatePickerWithRange,
    ToolbarGroup,
    ToolbarSearchbar,
    ToolbarSelectMenu,
    ToolbarSelectMenuCheckboxItem,
 } from '@/components/ui/toolbar';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react';
 import { useDataTable } from '@/hooks/use-data-table';
 
 export function OffersDataTable({ initialData }: { initialData: OfferData[] }) {
-   const { offers, add } = useOffersStore();
+   const { offers, addMany } = useOffersStore();
 
-   const initialized = useRef<boolean>(false);
+   const [initialized, setInitialized] = useState<boolean>(false);
 
    useEffect(() => {
       const promise = fetchAllOffersWithItems();
       promise.then((offers) => {
-         offers.forEach((offer, i) => {
-            const items: OfferData['items'] = {};
-            offer.items.forEach((i) => (items[i.id] = i));
-            add({
-               imgSrc: offer.imgSrc,
-               title: offer.title,
-               active: true,
-               approved: offer.approved,
-               items,
-               id: offer.id,
-               externalId: offer.externalId,
-               src: offer.src,
-            });
-         });
-         initialized.current = true;
+         addMany(
+            offers.map((offer) => ({
+               ...offer,
+               items: normilizeItems(offer.items),
+            })),
+         );
+         setInitialized(true);
       });
    }, []);
 
-   const dataInput = Object.values(offers);
+   const dataInput = useMemo(() => Object.values(offers), [offers]);
 
    const { globalFilter, table, isMounted, setGlobalFilter } = useDataTable(
-      initialized.current ? dataInput : initialData,
+      initialized ? dataInput : initialData,
       columns,
    );
 
@@ -99,19 +95,43 @@ export function OffersDataTable({ initialData }: { initialData: OfferData[] }) {
                      <ChevronLeft />
                      Previous
                   </Button>
-                  {[...new Array(table.getPageCount())].map((_, i) => (
-                     <Button
-                        key={i}
-                        variant={
-                           table.state.pagination.pageIndex === i
-                              ? 'outline'
-                              : 'ghost'
-                        }
-                        onClick={() => table.setPageIndex(i)}
-                     >
-                        {i + 1}
-                     </Button>
-                  ))}
+                  {table.state.pagination.pageIndex + 1 > 1 ? (
+                     <>
+                        <Button
+                           variant={'ghost'}
+                           className="w-9"
+                           onClick={() => table.setPageIndex(0)}
+                        >
+                           1
+                        </Button>
+                     </>
+                  ) : (
+                     <div className="flex justify-center items-center w-9">
+                        <Ellipsis className="text-muted-foreground size-4" />
+                     </div>
+                  )}
+
+                  <Button variant={'outline'} className="w-9">
+                     {table.state.pagination.pageIndex + 1}
+                  </Button>
+                  {table.state.pagination.pageIndex + 1 <
+                  table.getPageCount() ? (
+                     <>
+                        <Button
+                           variant={'ghost'}
+                           className="w-9"
+                           onClick={() =>
+                              table.setPageIndex(table.getPageCount() - 1)
+                           }
+                        >
+                           {table.getPageCount()}
+                        </Button>
+                     </>
+                  ) : (
+                     <div className="flex justify-center items-center w-9">
+                        <Ellipsis className="text-muted-foreground size-4" />
+                     </div>
+                  )}
                   <Button
                      variant={'ghost'}
                      disabled={isMounted ? !table.getCanNextPage() : undefined}

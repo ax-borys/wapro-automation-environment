@@ -13,6 +13,7 @@ export async function syncProducts() {
       externalId: wp.id.toString(),
       name: wp.name,
       tax: Number.parseInt(wp.tax || ''),
+      stock: wp.stock,
    }));
 
    const validatedProductsInput = v.parse(
