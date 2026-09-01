@@ -23,6 +23,8 @@ export async function fetchOrders(
       },
    );
 
+   console.log(response);
+
    if (!response.ok) {
       throw response;
    }

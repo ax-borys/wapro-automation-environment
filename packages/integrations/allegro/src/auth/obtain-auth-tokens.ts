@@ -1,5 +1,22 @@
 import { fetchAuthTokens } from './fetch-auth-tokens';
 import { store } from '../store/store';
+import jwt, { JwtPayload } from 'jsonwebtoken';
+
+interface AllegroJWTPayload extends JwtPayload {
+   iss: string;
+   user_name: string;
+   scope: string;
+   allegro_api: boolean;
+   exp: number;
+   client_id: string;
+   jti: string;
+}
+
+const validToken = (token: string) => {
+   const payload: JwtPayload | null = jwt.decode(token, { json: true });
+
+   if (!payloadString) return false;
+};
 
 export async function obtainAuthTokens(): Promise<{
    refreshToken: string;

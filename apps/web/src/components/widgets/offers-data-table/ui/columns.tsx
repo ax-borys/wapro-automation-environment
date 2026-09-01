@@ -43,13 +43,13 @@ export const columns = columnHelper.columns([
          const imgUrl = r.getValue('imgSrc') as string;
 
          return (
-            <div className="flex items-center rounded-xl overfllow-clip h-20">
+            <div className="flex items-center rounded-xl overfllow-clip s-20 justrify-center p-2 bg-white">
                <Image
                   src={imgUrl}
                   alt="preview"
                   width={96}
                   height={96}
-                  className="w-[40px] h-auto object-cover rounded-xl"
+                  className="w-[68px] h-auto object-cover rounded-md"
                />
             </div>
          );

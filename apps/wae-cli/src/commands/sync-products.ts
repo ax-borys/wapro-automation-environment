@@ -1,3 +1,4 @@
+import { db, itemsTable, productsTable } from '@wae/db';
 import { addProductInputSchema, addProducts, getAllProducts } from '@wae/offer';
 import * as wapro from '@wae/wapro';
 import * as v from 'valibot';
@@ -13,7 +14,7 @@ export async function syncProducts() {
       externalId: wp.id.toString(),
       name: wp.name,
       tax: Number.parseInt(wp.tax || ''),
-      stock: wp.stock,
+      stock: Number.parseInt(String(wp.stock)),
    }));
 
    const validatedProductsInput = v.parse(

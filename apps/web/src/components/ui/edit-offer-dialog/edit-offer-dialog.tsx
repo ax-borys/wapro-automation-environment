@@ -85,14 +85,16 @@ export function EditOfferDialogObject({
    imgSrc: string;
 }) {
    return (
-      <div className="flex object-cover w-full h-auto items-center gap-6">
-         <Image
-            src={imgSrc}
-            width={50}
-            height={50}
-            className="size-12.5"
-            alt="Product preview"
-         />
+      <div className="flex w-full h-auto items-center gap-6">
+         <div className="flex items-center justrify-center size-auto shrink-0 bg-white p-2 rounded-md">
+            <Image
+               src={imgSrc}
+               width={96}
+               height={96}
+               className="size-12.5"
+               alt="Product preview"
+            />
+         </div>
          <span className="text-lg font-medium">{title}</span>
       </div>
    );

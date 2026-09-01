@@ -7,6 +7,7 @@ import { getAllOffers } from './commands/get-all-offers';
 import { syncOffers } from './commands/sync-offers';
 import { getPendingOrders } from '@wae/allegro';
 import { syncProducts } from './commands/sync-products';
+import { convertImgSrcToS128b } from './commands/convertImgSrcToS128b';
 
 const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'create-receipts': createReceiptsCommand,
@@ -15,7 +16,13 @@ const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'sync-offers': syncOffersCommand,
    'get-pending-orders': getPendingOrdersCommand,
    'sync-products': syncProductsCommand,
+   'convert-imgs': convertImgSrcCommnd,
 };
+
+async function convertImgSrcCommnd() {
+   const result = await convertImgSrcToS128b();
+   process.stdout.write(JSON.stringify(result, null, 3));
+}
 
 const config: WaproConfig = {
    companyId: 1,
