@@ -26,4 +26,7 @@ export {
    itemsTable,
    productsTable,
    positionsTable,
+   customersTable,
+   addressesTable,
+   ordersTable,
 } from './schemas';

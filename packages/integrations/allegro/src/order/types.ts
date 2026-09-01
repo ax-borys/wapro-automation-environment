@@ -1,7 +1,26 @@
+type Address = {
+   street: string | null;
+   city: string | null;
+   postCode: string | null;
+   countryCode: string | null;
+};
+
 export type RawOrder = {
    id: string;
+   buyer: {
+      id: string;
+      email: string;
+      login: string;
+      firstName: string | null;
+      lastName: string | null;
+      companyName: string | null;
+      guest: boolean;
+      personalIdentity: string;
+      phoneNumber: string;
+      address: Address;
+   };
    payment: {
-      type: 'ONLINE' | 'CASH_ON_DeLIVERY';
+      type: 'ONLINE' | 'CASH_ON_DELIVERY';
       paidAmount: {
          amount: string;
          currency: 'PLN';
@@ -12,6 +31,16 @@ export type RawOrder = {
       status: 'NEW' | 'PROCESSING' | 'SENT' | 'READY_FOR_SHIPMENT';
    };
    delivery: {
+      address: {
+         firstName: string;
+         lastName: string;
+         street: string;
+         city: string;
+         zipCode: string;
+         countryCode: string;
+         companyName: string | null;
+         phoneNumber: string | null;
+      };
       cost: {
          amount: string;
          currency: 'PLN';

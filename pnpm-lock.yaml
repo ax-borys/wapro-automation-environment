@@ -455,12 +455,21 @@ importers:
       '@wae/core':
         specifier: workspace:*
         version: link:../../core
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../../db
       '@wae/offer':
         specifier: workspace:*
         version: link:../../offer
       '@wae/types':
         specifier: workspace:*
         version: link:../../types
+      currency.js:
+        specifier: ^2.0.4
+        version: 2.0.4
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       immer:
         specifier: ^11.1.18
         version: 11.1.18
@@ -517,6 +526,18 @@ importers:
         specifier: ^1.4.2
         version: 1.4.2(typescript@7.0.2)
 
+  packages/order:
+    dependencies:
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../db
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
+
   packages/receipt:
     dependencies:
       '@hono/valibot-validator':
@@ -561,6 +582,12 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../db
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
 
 packages:
 

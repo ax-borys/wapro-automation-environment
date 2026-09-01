@@ -1,41 +1,11 @@
 import { db } from '@wae/db';
 
+export * from './domain/offer';
+export * from './domain/order';
+export * from './domain/receipt';
+
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type { WaproConfig } from './wapro-types.ts';
-export type Order = {
-   buyer: {
-      id: string;
-      firstName: string;
-      lastName: string;
-      email: string;
-      login: string;
-      phoneNumber: string;
-   };
-   buyerNote: string | null;
-   lineItems: {
-      offer: {
-         id: string;
-         name: string;
-      };
-      quantity: number;
-      price: {
-         amount: string;
-         currency: 'PLN' | string;
-      };
-      boughtAt: string;
-   }[];
-   summary: {
-      paymentStatus: 'PAID' | 'EXTERNAL_PAYMENT';
-      totalToPay: {
-         amount: string;
-         currency: string;
-      };
-      totalPaid: {
-         amount: string;
-         currency: string;
-      };
-   };
-};
 
 export type Position = {
    productId: number;

@@ -11,8 +11,11 @@
    "dependencies": {
       "@types/jsonwebtoken": "^9.0.10",
       "@wae/core": "workspace:*",
+      "@wae/db": "workspace:*",
       "@wae/offer": "workspace:*",
       "@wae/types": "workspace:*",
+      "currency.js": "^2.0.4",
+      "drizzle-orm": "1.0.0-rc.4",
       "immer": "^11.1.18",
       "jsonwebtoken": "^9.0.3",
       "jwt": "^0.2.0",
