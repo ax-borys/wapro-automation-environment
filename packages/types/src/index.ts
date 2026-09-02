@@ -3,11 +3,13 @@ import { db } from '@wae/db';
 export * from './domain/offer';
 export * from './domain/order';
 export * from './domain/receipt';
+export * from './domain/customer';
+export * from './domain/product';
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type { WaproConfig } from './wapro-types.ts';
 
-export type Position = {
+export type RecordReceiptWaproPosition = {
    productId: number;
    quantity: number;
    priceNetto: number;
@@ -26,7 +28,7 @@ export type RecordReceiptWapro = {
    paymentFormat: 'przelew' | 'gotówka' | 'pobranie' | 'przedpłata';
    pricingType: 'Brutto' | 'Netto';
    stockId: number;
-   positions: Position[];
+   positions: RecordReceiptWaproPosition[];
 };
 
 export type Mapping = {

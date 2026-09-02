@@ -22,10 +22,22 @@ export type RawOrder = {
    payment: {
       type: 'ONLINE' | 'CASH_ON_DELIVERY';
       paidAmount: {
-         amount: string;
+         amount: string | null;
          currency: 'PLN';
-      };
+      } | null;
    };
+   lineItems: {
+      id: string;
+      offer: {
+         id: string;
+         name: string;
+      };
+      quantity: number;
+      price: {
+         amount: string;
+         currency: string;
+      };
+   }[];
    status: 'READY_FOR_PROCESSING' | 'BOUGHT' | 'FILLED_IN' | 'CANCELLED';
    fulfillment: {
       status: 'NEW' | 'PROCESSING' | 'SENT' | 'READY_FOR_SHIPMENT';
@@ -56,6 +68,7 @@ export type RawOrder = {
          currency: 'PLN';
       };
    };
+   updatedAt: string;
 };
 
 export type ApiResponseRawOrder = {

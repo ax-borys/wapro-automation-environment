@@ -25,7 +25,7 @@ import {
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
-import { Order } from '@/entities/order';
+import { type OrderModel } from '@/entities/order';
 import {
    Dialog,
    DialogContent,
@@ -45,10 +45,10 @@ async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
-export function Receipt({ order }: { order: Order }) {
+export function Receipt({ order }: { order: OrderModel }) {
    const { receipt, changeStatus, setNumber, setFiscalNumber, selectToggle } =
-      useReceipt(order.orderId.toString(), {
-         orderId: order.orderId.toString(),
+      useReceipt(order.externalId, {
+         orderId: order.externalId,
          status: 'RECORD',
       });
 
@@ -63,7 +63,21 @@ export function Receipt({ order }: { order: Order }) {
       }
 
       try {
-         const [receipt] = await recordReceipts([{ ...order, fiscalNumber }]);
+         const [receipt] = await recordReceipts([
+            {
+               ...order,
+               orderId: 1,
+               fiscalNumber,
+               recipientFirstName: order.customer.firstName!,
+               recipientLastName: order.customer.lastName!,
+               positions: Object.values(order.positions).map((p) => ({
+                  ...p,
+                  title: p.offer.title,
+                  externalId: p.offer.externalId,
+               })),
+               packagesMade: order.packages,
+            },
+         ]);
          console.log(order);
 
          changeStatus('RECORDED');
@@ -105,7 +119,7 @@ export function Receipt({ order }: { order: Order }) {
                onCheckedChange={selectToggle}
             />
             <span className="font-medium underline">
-               Order #{order.orderId}
+               Order #{order.externalId}
             </span>
             <div className="ml-auto flex gap-2 h-9">
                {status === 'RECORDED' ? (
@@ -132,11 +146,11 @@ export function Receipt({ order }: { order: Order }) {
             <ReceiptCardTable>
                <ReceiptCardTableHeader />
                <ReceiptCardTableBody>
-                  {order.positions.map((item, i) => (
+                  {Object.values(order.positions).map((item, i) => (
                      <ReceiptCardTablePosition
-                        key={order.orderId + item.externalId + i}
-                        imgSrc={item.imgSrc}
-                        name={item.title}
+                        key={item.offer.externalId + i}
+                        imgSrc={item.offer.imgSrc}
+                        name={item.offer.title}
                         quantity={item.quantity}
                         tax="23"
                         net={currency(item.price).divide(1.23).value}
@@ -152,9 +166,11 @@ export function Receipt({ order }: { order: Order }) {
          </ReceiptCardBody>
          <ReceiptCardFooter
             buyerFullname={
-               order.recipientFirstName + ' ' + order.recipientLastName
+               order.customer.firstName! + ' ' + order.customer.lastName!
             }
-            orderProcessedAt={order.orderProcessedAt}
+            orderProcessedAt={new Date(
+               order.preparedAt ?? Date.now(),
+            ).toLocaleString()}
          >
             <Dialog>
                <form

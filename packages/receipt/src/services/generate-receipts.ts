@@ -1,4 +1,4 @@
-import { WaproConfig, Mapping, Position } from '@wae/types';
+import { WaproConfig, Mapping, RecordReceiptWaproPosition } from '@wae/types';
 import { type RecordReceiptInput } from '@wae/wapro';
 
 import currency from 'currency.js';
@@ -66,7 +66,7 @@ export function generateReceipts(
          throw unsupportedPaymentMethod(paymentMethod);
       }
 
-      const positions: Position[] = [];
+      const positions: RecordReceiptWaproPosition[] = [];
 
       receiptInput.items.forEach((item) => {
          const mappedOffer = map[item.offerId];
@@ -87,7 +87,7 @@ export function generateReceipts(
             const shrankProductPrices = shrinkNumbersList(productPrices);
 
             shrankProductPrices.forEach((price) => {
-               const position: Position = {
+               const position: RecordReceiptWaproPosition = {
                   productId: product.sid,
                   priceBrutto: currency(price.value, { fromCents: true }).value,
                   priceNetto: currency(price.value, { fromCents: true }).divide(

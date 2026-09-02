@@ -1,5 +1,5 @@
 import { defineRelations } from 'drizzle-orm';
-import { primaryKey } from 'drizzle-orm/sqlite-core';
+import { AnySQLiteColumn, primaryKey, unique } from 'drizzle-orm/sqlite-core';
 import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const customersTable = sqliteTable('customers', {
@@ -22,30 +22,38 @@ export const addressesTable = sqliteTable('addresses', {
    city: text().notNull(),
 });
 
-export const ordersTable = sqliteTable('orders', {
-   id: int().primaryKey({ autoIncrement: true }),
-   customerId: int('customer_id')
-      .notNull()
-      .references(() => customersTable.id),
-   externalId: text('external_id').unique().notNull(),
-   status: text().notNull(),
-   totalToPay: int('total_to_pay').notNull(),
-   totalPaid: int('total_paid').notNull(),
-   packages: int().notNull().default(1),
-   fulfilledAt: int('fulfilled_at', { mode: 'timestamp_ms' })
-      .notNull()
-      .$defaultFn(() => new Date()),
-   preparedAt: int('prepared_at', { mode: 'timestamp_ms' })
-      .notNull()
-      .$defaultFn(() => new Date()),
-   createdAt: int('created_at', { mode: 'timestamp_ms' })
-      .notNull()
-      .$defaultFn(() => new Date()),
-});
+export const ordersTable = sqliteTable(
+   'orders',
+   {
+      id: int().primaryKey({ autoIncrement: true }),
+      customerId: int('customer_id')
+         .notNull()
+         .references(() => customersTable.id),
+      externalId: text('external_id').notNull(),
+      src: text('source').notNull(),
+      status: text().notNull(),
+      totalToPay: int('total_to_pay').notNull(),
+      totalPaid: int('total_paid').notNull(),
+      paymentMethod: text('payment_method').notNull(),
+      packages: int().notNull().default(1),
+      fulfilledAt: int('fulfilled_at', { mode: 'timestamp_ms' }).$defaultFn(
+         () => new Date(),
+      ),
+      preparedAt: int('prepared_at', { mode: 'timestamp_ms' }).$defaultFn(
+         () => new Date(),
+      ),
+      createdAt: int('created_at', { mode: 'timestamp_ms' })
+         .notNull()
+         .$defaultFn(() => new Date()),
+   },
+   (t) => [unique('source_external_id').on(t.externalId, t.src)],
+);
 
 export const receiptsTable = sqliteTable('receipts', {
    id: int().primaryKey({ autoIncrement: true }),
-   orderId: int('order_id').references(() => ordersTable.id),
+   orderId: int('order_id')
+      .notNull()
+      .references(() => ordersTable.id),
    number: text().notNull().unique(),
    fiscalNumber: int('fiscal_number'),
    recipientFirstName: text('recipient_first_name').notNull(),
@@ -62,7 +70,6 @@ export const receiptsTable = sqliteTable('receipts', {
 export const positionsTable = sqliteTable(
    'positions',
    {
-      id: int().primaryKey({ autoIncrement: true }),
       receiptId: int('receipt_id').references(() => receiptsTable.id),
       orderId: int('order_id')
          .notNull()
@@ -71,7 +78,6 @@ export const positionsTable = sqliteTable(
          .notNull()
          .references(() => offersTable.id),
 
-      title: text().notNull(),
       quantity: int().notNull(),
       price: int().notNull(),
       clientTag: text('client_tag'),
@@ -124,53 +130,53 @@ export const relations = defineRelations(
    },
    (r) => ({
       customersTable: {
-         address: r.one.addressesTable({
+         address: r.one.addressesTable(),
+         orders: r.many.ordersTable(),
+      },
+      addressesTable: {
+         habitant: r.one.customersTable({
             from: r.addressesTable.customerId,
             to: r.customersTable.id,
          }),
-         orders: r.many.ordersTable({
+         order: r.one.ordersTable({
+            from: r.addressesTable.orderId,
+            to: r.ordersTable.id,
+         }),
+      },
+      ordersTable: {
+         customer: r.one.customersTable({
             from: r.ordersTable.customerId,
             to: r.customersTable.id,
          }),
-      },
-      addressesTable: {
-         habitant: r.one.customersTable(),
-         order: r.one.ordersTable(),
-      },
-      ordersTable: {
-         customer: r.one.customersTable(),
-         receipt: r.one.receiptsTable({
-            from: r.receiptsTable.orderId,
-            to: r.ordersTable.id,
-         }),
+         receipt: r.one.receiptsTable(),
          positions: r.many.offersTable({
             from: r.ordersTable.id.through(r.positionsTable.orderId),
             to: r.offersTable.id.through(r.positionsTable.offerId),
          }),
-         deliveryAddress: r.one.addressesTable({
-            from: r.addressesTable.orderId,
-            to: r.ordersTable.id,
-         }),
+         deliveryAddress: r.one.addressesTable(),
       },
       receiptsTable: {
          positions: r.many.offersTable({
             from: r.receiptsTable.id.through(r.positionsTable.receiptId),
             to: r.offersTable.id.through(r.positionsTable.offerId),
          }),
-         order: r.one.ordersTable(),
+         order: r.one.ordersTable({
+            from: r.receiptsTable.orderId,
+            to: r.ordersTable.id,
+         }),
       },
       positionsTable: {
-         orderId: r.one.ordersTable({
-            from: r.positionsTable.offerId,
+         order: r.one.ordersTable({
+            from: r.positionsTable.orderId,
             to: r.ordersTable.id,
             optional: false,
          }),
-         receiptId: r.one.receiptsTable({
+         receipt: r.one.receiptsTable({
             from: r.positionsTable.receiptId,
             to: r.receiptsTable.id,
             optional: false,
          }),
-         offerId: r.one.offersTable({
+         offer: r.one.offersTable({
             from: r.positionsTable.offerId,
             to: r.offersTable.id,
             optional: false,

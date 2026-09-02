@@ -2,7 +2,6 @@ import fs from 'fs';
 import { recordReceipt, dbWapro as db } from '@wae/wapro';
 import { closeConnection } from '@wae/wapro';
 import { WaproConfig, Mapping, Order } from '@wae/types';
-import { generateReceipts } from './commands/generate-receipts';
 import { getAllOffers } from './commands/get-all-offers';
 import { syncOffers } from './commands/sync-offers';
 import { getPendingOrders } from '@wae/allegro';
@@ -11,7 +10,6 @@ import { convertImgSrcToS128b } from './commands/convertImgSrcToS128b';
 
 const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'create-receipts': createReceiptsCommand,
-   'generate-receipts': generateReceiptsCommand,
    'get-all-offers': getAllOffersCommand,
    'sync-offers': syncOffersCommand,
    'get-pending-orders': getPendingOrdersCommand,
@@ -31,21 +29,6 @@ const config: WaproConfig = {
    counterPartyId: 1,
    stockId: 1,
 };
-
-function generateReceiptsCommand(
-   pathToOrdersData: string,
-   pathToMappingObj: string,
-) {
-   const orders: Order[] = JSON.parse(
-      fs.readFileSync(pathToOrdersData, 'utf-8'),
-   );
-   const map: Mapping = JSON.parse(fs.readFileSync(pathToMappingObj, 'utf-8'));
-
-   const receipts = generateReceipts(orders, map, config);
-   const jsonReceiptsData = JSON.stringify(receipts, null, 3);
-
-   process.stdout.write(jsonReceiptsData);
-}
 
 async function createReceiptsCommand(arg: string) {
    if (!db) {

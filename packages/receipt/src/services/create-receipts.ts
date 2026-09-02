@@ -1,4 +1,4 @@
-import { WaproConfig, Mapping, Tx } from '@wae/types';
+import { WaproConfig, Mapping, Tx, offerInputSchema } from '@wae/types';
 import { dbWapro, recordReceipt, RecordReceiptOutput } from '@wae/wapro';
 import * as v from 'valibot';
 import { db, positionsTable, productsTable, receiptsTable } from '@wae/db';
@@ -33,12 +33,18 @@ export const createReceiptInputSchema = v.object({
          ...v.omit(saveReceiptInputSchema.entries.positions.item, [
             'offerId',
             'clientTag',
-            'id',
          ]).entries,
          externalId: v.nonNullish(
-            v.pick(productInputSchema, ['externalId']).entries.externalId,
+            v.pick(offerInputSchema, ['externalId']).entries.externalId,
          ),
+         title: v.pick(offerInputSchema, ['title']).entries.title,
       }),
+   ),
+   createdAt: v.pipe(
+      v.string(),
+      v.isoTimestamp(),
+      v.transform((v) => new Date(v)),
+      v.instance(Date),
    ),
 });
 
@@ -46,7 +52,7 @@ export const createReceiptsInputSchema = v.array(createReceiptInputSchema);
 
 export const createReceiptOutputSchema = saveReceiptOutputSchema;
 
-export type CreateReceiptInput = v.InferInput<typeof createReceiptInputSchema>;
+export type CreateReceiptInput = v.InferOutput<typeof createReceiptInputSchema>;
 export type CreateReceiptOutput = SaveReceiptOutput;
 
 export async function createReceipts(

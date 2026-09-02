@@ -22,6 +22,7 @@ import { offer } from './offer';
 import { receipt } from './receipt';
 import { product } from './product';
 import { type HandledStatusCodes } from '@wae/core';
+import { order } from './order';
 
 const app = new Hono()
    .use(
@@ -39,6 +40,7 @@ const app = new Hono()
    .route('/offer', offer)
    .route('/receipt', receipt)
    .route('/product', product)
+   .route('/order', order)
    .onError((error, c) => {
       let message = null;
       let code = null;

@@ -3,7 +3,12 @@ import { CreateReceiptInput, CreateReceiptOutput } from '@wae/receipt';
 import { ApiResponse } from '@wae/types';
 
 export async function recordReceipts(receiptsData: CreateReceiptInput[]) {
-   const response = await client.receipt.record.$post({ json: receiptsData });
+   const response = await client.receipt.record.$post({
+      json: receiptsData.map((i) => ({
+         ...i,
+         createdAt: i.createdAt.toISOString(),
+      })),
+   });
 
    if (!response.ok) {
       const result = await response.json();

@@ -30,7 +30,7 @@ const checkTokenFreshness = (token: string): boolean => {
 
    try {
       const validPayload = v.parse(allegroJwtPayloadSchema, payload);
-      const isFresh = validPayload.exp * 1000 <= Date.now();
+      const isFresh = validPayload.exp * 1000 >= Date.now();
 
       return isFresh;
    } catch (error) {
@@ -44,6 +44,10 @@ export async function obtainAuthTokens(): Promise<{
 }> {
    const { refreshToken, accessToken, setRefreshToken, setAccessToken } =
       store.getState();
+
+   if (accessToken) {
+      console.log('Access token freshness: ', checkTokenFreshness(accessToken));
+   }
 
    if (refreshToken && accessToken && checkTokenFreshness(accessToken)) {
       return { accessToken, refreshToken };

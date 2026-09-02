@@ -6,9 +6,17 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
 import { Receipt } from '@/components/features/receipt';
-import { useOrders } from '@/entities/order';
 import { ReceiptModel, useReceipts } from '@/entities/receipt';
 import { recordReceipts } from '@/entities/receipt';
+import {
+   normilizePositions,
+   useOrdersStore,
+} from '@/entities/order/orders.store';
+import currency from 'currency.js';
+import { useEffect } from 'react';
+import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
+import { type PositionModel } from '@/entities/order/orders.store';
+import { fetchMockPendingOrders } from '@/entities/order/fetch-mock-pending-orders';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -19,7 +27,25 @@ export function ReceiptFeed({
 }: {
    initReceipts: ReceiptModel[];
 }) {
-   const orders = useOrders();
+   const { orders, addMany } = useOrdersStore();
+
+   useEffect(() => {
+      const promise = fetchMockPendingOrders();
+
+      promise.then((pendingOrders) => {
+         addMany(
+            pendingOrders.map((order) => ({
+               ...order,
+               positions: normilizePositions(order.positions),
+               createdAt: new Date(order.createdAt),
+               preparedAt: new Date(order.preparedAt),
+               fulfilledAt: new Date(order.fulfilledAt),
+            })),
+         );
+      });
+   }, []);
+
+   const ordersList = Object.values(orders);
    const { receipts, selectAll, unselectAll, changeStatusForMany, setNumber } =
       useReceipts(initReceipts);
    console.log('Receipts: ', receipts);
@@ -28,7 +54,7 @@ export function ReceiptFeed({
    );
 
    const selectAllHandler = () => {
-      const isSelectedAll = selected.length === orders.length;
+      const isSelectedAll = selected.length === ordersList.length;
 
       if (isSelectedAll) {
          unselectAll();
@@ -57,16 +83,14 @@ export function ReceiptFeed({
 
       const selectedIds = selectedReceipts.map((i) => i.orderId);
 
-      const selectedOrders = orders
+      const selectedOrders = ordersList
          .filter((order) =>
-            selectedReceipts.find(
-               (r) => r.orderId === order.orderId.toString(),
-            ),
+            selectedReceipts.find((r) => r.orderId === order.externalId),
          )
-         .map((i) => ({
-            ...i,
+         .map((order) => ({
+            ...order,
             fiscalNumber: selectedReceipts.find(
-               (j) => j.orderId === i.orderId.toString(),
+               (r) => r.orderId === order.externalId,
             )!.fiscalNumber,
          }));
 
@@ -74,7 +98,22 @@ export function ReceiptFeed({
 
       try {
          changeStatusForMany(selectedIds, 'RECORDING');
-         const receipts = await recordReceipts(selectedOrders);
+         const receipts = await recordReceipts(
+            selectedOrders.map((order) => ({
+               ...order,
+               orderId: Number(order.externalId),
+               recipientFirstName: order.customer.firstName!,
+               recipientLastName: order.customer.lastName!,
+               positions: Object.values(order.positions).map((p) => ({
+                  quantity: p.quantity,
+                  orderId: p.orderId,
+                  price: p.price,
+                  externalId: p.offer.externalId,
+                  title: p.offer.title,
+               })),
+               packagesMade: order.packages,
+            })),
+         );
 
          changeStatusForMany(selectedIds, 'RECORDED');
          distributeNumbers(
@@ -97,7 +136,7 @@ export function ReceiptFeed({
                onClick={selectAllHandler}
             >
                <Checkbox
-                  checked={selected.length === orders.length}
+                  checked={selected.length === ordersList.length}
                   className="cursor-pointer"
                />
                <span className="">Select all</span>
@@ -132,10 +171,10 @@ export function ReceiptFeed({
          <Separator />
          <div className="overflow-y-scroll min-h-0 flex-1">
             {Object.values(receipts).length
-               ? orders.map((order, i) => (
-                    <Fragment key={order.orderId}>
+               ? ordersList.map((order, i) => (
+                    <Fragment key={order.externalId}>
                        <Receipt order={order} />
-                       {i + 1 === orders.length ? null : <Separator />}
+                       {i + 1 === ordersList.length ? null : <Separator />}
                     </Fragment>
                  ))
                : null}
