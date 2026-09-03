@@ -67,6 +67,7 @@ export function Receipt({ order }: { order: OrderModel }) {
             {
                order: {
                   ...order,
+                  items: Object.values(order.positions),
                   fulfilledAt: order.fulfilledAt?.toISOString(),
                   preparedAt: order.preparedAt?.toISOString(),
                },

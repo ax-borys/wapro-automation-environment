@@ -17,11 +17,7 @@ import currency from 'currency.js';
 
 const orderValidationSchema = v.object({
    ...v.omit(orderInputSchema, ['id', 'customerId']).entries,
-   deliveryAddress: v.omit(addressSchema, [
-      'customerId',
-      'orderId',
-      'clientTag',
-   ]),
+   address: v.omit(addressSchema, ['customerId', 'orderId', 'clientTag']),
    customer: v.omit(customerSchema, ['id', 'clientTag']),
    packages: v.pipe(v.number(), v.minValue(1)),
    positions: v.array(
@@ -40,7 +36,7 @@ const orderValidationSchema = v.object({
    createdAt: v.date(),
 });
 
-type Order = v.InferInput<typeof orderValidationSchema>;
+type Order = v.InferOutput<typeof orderValidationSchema>;
 
 export async function getPendingOrders(): Promise<Order[]> {
    const { userAgent } = store.getState();
@@ -60,13 +56,10 @@ export async function getPendingOrders(): Promise<Order[]> {
 
    const orders: Order[] = filteredOrders.map((order) => ({
       externalId: order.id,
-      status:
-         order.status === 'READY_FOR_PROCESSING'
-            ? 'READY_FOR_PROCESSING'
-            : 'NEW',
+      status: 'READY_FOR_PROCESSING' as const,
       totalPaid: currency(order.payment.paidAmount?.amount || 0).intValue,
       totalToPay: currency(order.summary.totalToPay.amount).intValue,
-      deliveryAddress: {
+      address: {
          city: order.delivery.address.city,
          street: order.delivery.address.street,
          postalCode: order.delivery.address.zipCode,

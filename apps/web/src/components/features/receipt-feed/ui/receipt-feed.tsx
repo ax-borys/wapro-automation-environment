@@ -36,11 +36,10 @@ export function ReceiptFeed({
          addMany(
             pendingOrders.map((order) => ({
                ...order,
-               address: order.deliveryAddress,
-               positions: normilizePositions(order.positions),
+               positions: normilizePositions(order.items),
                createdAt: new Date(order.createdAt),
                preparedAt: new Date(order.preparedAt),
-               fulfilledAt: new Date(order.fulfilledAt),
+               fulfilledAt: null,
             })),
          );
       });
@@ -108,8 +107,10 @@ export function ReceiptFeed({
             selectedOrders.map((order) => ({
                order: {
                   ...order,
+                  items: Object.values(order.positions),
                   fulfilledAt: order.fulfilledAt?.toISOString(),
                   preparedAt: order.preparedAt?.toISOString(),
+                  createdAt: order.createdAt?.toISOString(),
                },
                receipt: {
                   ...order,

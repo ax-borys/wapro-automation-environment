@@ -3,46 +3,24 @@ import * as allegro from '@wae/allegro';
 import { ApiResponse, Offer, Product, ReceiptPosition } from '@wae/types';
 import { getAllOffers } from '@wae/offer';
 import { customAlphabet } from 'nanoid';
+import { addOrderInputSchema, addOrders } from '@wae/order';
+import * as v from 'valibot';
 
 const generateId = customAlphabet('0123456789', 10);
 
 export const order = new Hono()
    .get('/orders/pending', async (c) => {
-      const orders = await allegro.getPendingOrders();
+      const allegroOrders = await allegro.getPendingOrders();
 
-      const offers = await getAllOffers();
+      const validatedAllegroOrders = v.parse(
+         v.array(addOrderInputSchema),
+         allegroOrders,
+      );
 
-      const customerId = Number(generateId());
-      const orderId = Number(generateId());
-      const completeOrders = orders.map((order) => ({
-         ...order,
-         id: orderId,
-         customerId: customerId,
-         fulfilledAt: new Date(),
-         customer: {
-            ...order.customer,
-            id: customerId,
-         },
-         positions: order.positions.map((position) => {
-            const offer = offers.find(
-               (offer) => offer.externalId === position.externalOfferId,
-            );
+      const orders = await addOrders(validatedAllegroOrders);
 
-            if (!offer) {
-               throw new Error('Offers are not synchronized');
-            }
-
-            return {
-               orderId,
-               offer,
-               quantity: position.quantity,
-               price: position.price,
-            };
-         }),
-      }));
-
-      return c.json<ApiResponse<typeof completeOrders>>({
-         data: completeOrders,
+      return c.json<ApiResponse<typeof orders>>({
+         data: orders,
          error: null,
       });
    })

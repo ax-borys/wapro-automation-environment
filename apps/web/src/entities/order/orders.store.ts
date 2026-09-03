@@ -3,10 +3,7 @@ import { Portal } from 'radix-ui';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-export type PositionModel = Omit<
-   OrderPoisition,
-   'clientTag' | 'receiptId' | 'offerId'
-> & {
+export type PositionModel = Omit<OrderPoisition, 'clientTag' | 'receiptId'> & {
    offer: Offer;
 };
 
