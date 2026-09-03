@@ -65,17 +65,25 @@ export function Receipt({ order }: { order: OrderModel }) {
       try {
          const [receipt] = await recordReceipts([
             {
-               ...order,
-               orderId: order.id,
-               fiscalNumber,
-               recipientFirstName: order.customer.firstName!,
-               recipientLastName: order.customer.lastName!,
-               positions: Object.values(order.positions).map((p) => ({
-                  ...p,
-                  title: p.offer.title,
-                  externalId: p.offer.externalId,
-               })),
-               packagesMade: order.packages,
+               order: {
+                  ...order,
+                  fulfilledAt: order.fulfilledAt?.toISOString(),
+                  preparedAt: order.preparedAt?.toISOString(),
+               },
+               receipt: {
+                  ...order,
+                  orderId: order.id,
+                  fiscalNumber,
+                  recipientFirstName: order.customer.firstName!,
+                  recipientLastName: order.customer.lastName!,
+                  positions: Object.values(order.positions).map((p) => ({
+                     ...p,
+                     title: p.offer.title,
+                     externalId: p.offer.externalId,
+                  })),
+                  packagesMade: order.packages,
+                  createdAt: order.createdAt.toISOString(),
+               },
             },
          ]);
          console.log(order);

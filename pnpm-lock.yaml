@@ -250,6 +250,9 @@ importers:
       '@wae/offer':
         specifier: workspace:*
         version: link:../../packages/offer
+      '@wae/order':
+        specifier: workspace:*
+        version: link:../../packages/order
       '@wae/receipt':
         specifier: workspace:*
         version: link:../../packages/receipt
@@ -537,6 +540,9 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../db
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../types
       drizzle-orm:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)

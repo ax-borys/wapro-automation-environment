@@ -4,10 +4,12 @@ import * as v from 'valibot';
 
 export const orderSchema = createSelectSchema(ordersTable, {
    paymentMethod: v.picklist(['PREPAID', 'POSTPAID']),
+   status: v.picklist(['NEW', 'READY_FOR_PROCESSING', 'FULFILLED']),
 });
 
 export const orderInputSchema = createInsertSchema(ordersTable, {
    paymentMethod: v.picklist(['PREPAID', 'POSTPAID']),
+   status: v.picklist(['NEW', 'READY_FOR_PROCESSING', 'FULFILLED']),
 });
 
 export type Order = v.InferOutput<typeof orderSchema>;

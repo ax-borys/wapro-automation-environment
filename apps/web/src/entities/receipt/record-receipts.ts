@@ -1,14 +1,12 @@
 import { client } from '@/lib/client';
 import { CreateReceiptInput, CreateReceiptOutput } from '@wae/receipt';
 import { ApiResponse } from '@wae/types';
+import { InferRequestType } from 'hono/client';
 
-export async function recordReceipts(receiptsData: CreateReceiptInput[]) {
-   const response = await client.receipt.record.$post({
-      json: receiptsData.map((i) => ({
-         ...i,
-         createdAt: i.createdAt.toISOString(),
-      })),
-   });
+type RecordReceiptInput = InferRequestType<typeof client.receipt.record.$post>;
+
+export async function recordReceipts(input: RecordReceiptInput['json']) {
+   const response = await client.receipt.record.$post({ json: input });
 
    if (!response.ok) {
       const result = await response.json();

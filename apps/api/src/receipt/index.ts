@@ -9,6 +9,7 @@ import { ApiResponse, WaproConfig } from '@wae/types';
 import { Hono } from 'hono';
 import { valibotJsonMiddleware } from '../helpers/valibot-middleware';
 import * as v from 'valibot';
+import { addOrderInputSchema, addOrders } from '@wae/order';
 
 const config: WaproConfig = {
    companyId: 1,
@@ -17,6 +18,13 @@ const config: WaproConfig = {
    counterPartyId: 1,
    stockId: 1,
 };
+
+const recordReceiptInputSchema = v.object({
+   receipt: createReceiptInputSchema,
+   order: addOrderInputSchema,
+});
+
+type Test = v.InferInput<typeof recordReceiptInputSchema>;
 
 export const receipt = new Hono()
    .post('/', valibotJsonMiddleware(getReceiptsInputSchema), async (c) => {
@@ -31,11 +39,15 @@ export const receipt = new Hono()
    })
    .post(
       '/record',
-      valibotJsonMiddleware(v.array(createReceiptInputSchema)),
+      valibotJsonMiddleware(v.array(recordReceiptInputSchema)),
       async (c) => {
-         const createReceiptsInput = c.req.valid('json');
+         const input = c.req.valid('json');
 
-         const receipts = await createReceipts(createReceiptsInput, config);
+         const orders = await addOrders(input.map((i) => i.order));
+         const receipts = await createReceipts(
+            input.map((i) => i.receipt),
+            config,
+         );
 
          return c.json<ApiResponse<typeof receipts>>(
             {

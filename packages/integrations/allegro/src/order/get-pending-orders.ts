@@ -12,13 +12,17 @@ import { fetchInvoices } from './fetch-invoices';
 import { fetchOrders } from './fetch-orders';
 import { RawOrder } from './types';
 import * as v from 'valibot';
-import { addressInputSchema, customerInputSchema } from '@wae/types';
+import { addressSchema, customerInputSchema } from '@wae/types';
 import currency from 'currency.js';
 
 const orderValidationSchema = v.object({
    ...v.omit(orderInputSchema, ['id', 'customerId']).entries,
-   deliveryAddress: v.omit(addressInputSchema, ['customerId', 'orderId']),
-   customer: v.omit(customerSchema, ['id']),
+   deliveryAddress: v.omit(addressSchema, [
+      'customerId',
+      'orderId',
+      'clientTag',
+   ]),
+   customer: v.omit(customerSchema, ['id', 'clientTag']),
    packages: v.pipe(v.number(), v.minValue(1)),
    positions: v.array(
       v.object({
@@ -56,7 +60,10 @@ export async function getPendingOrders(): Promise<Order[]> {
 
    const orders: Order[] = filteredOrders.map((order) => ({
       externalId: order.id,
-      status: order.status,
+      status:
+         order.status === 'READY_FOR_PROCESSING'
+            ? 'READY_FOR_PROCESSING'
+            : 'NEW',
       totalPaid: currency(order.payment.paidAmount?.amount || 0).intValue,
       totalToPay: currency(order.summary.totalToPay.amount).intValue,
       deliveryAddress: {
@@ -64,6 +71,7 @@ export async function getPendingOrders(): Promise<Order[]> {
          street: order.delivery.address.street,
          postalCode: order.delivery.address.zipCode,
          countryCode: order.delivery.address.countryCode,
+         apartament: null,
       },
       customer: {
          phoneNumber: order.delivery.address.phoneNumber,

@@ -10,16 +10,20 @@ export const customersTable = sqliteTable('customers', {
    email: text(),
    phoneNumber: text(),
    externalId: text('external_id').unique(),
+   clientTag: text('client_tag'),
 });
 
 export const addressesTable = sqliteTable('addresses', {
-   customerId: int('customer_id').references(() => customersTable.id),
+   customerId: int('customer_id')
+      .notNull()
+      .references(() => customersTable.id),
    orderId: int('order_id'),
    postalCode: text('postal_code').notNull(),
    street: text().notNull(),
    apartament: text(),
    countryCode: text('country_tag').notNull(),
    city: text().notNull(),
+   clientTag: text('client_tag'),
 });
 
 export const ordersTable = sqliteTable(
@@ -45,6 +49,7 @@ export const ordersTable = sqliteTable(
       createdAt: int('created_at', { mode: 'timestamp_ms' })
          .notNull()
          .$defaultFn(() => new Date()),
+      clientTag: text('client_tag'),
    },
    (t) => [unique('source_external_id').on(t.externalId, t.src)],
 );

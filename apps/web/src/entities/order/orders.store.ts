@@ -1,4 +1,4 @@
-import { Customer, Offer, Order, OrderPoisition } from '@wae/types';
+import { Address, Customer, Offer, Order, OrderPoisition } from '@wae/types';
 import { Portal } from 'radix-ui';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -10,8 +10,9 @@ export type PositionModel = Omit<
    offer: Offer;
 };
 
-export type OrderModel = Order & {
-   customer: Customer;
+export type OrderModel = Omit<Order, 'clientTag'> & {
+   address: Omit<Address, 'clientTag' | 'orderId' | 'customerId'>;
+   customer: Omit<Customer, 'clientTag'>;
    positions: Record<PositionModel['offer']['id'], PositionModel>;
 };
 

@@ -1,4 +1,4 @@
-import { ordersTable } from '@wae/db/dist/schemas';
+import { ordersTable } from '@wae/db';
 import { createInsertSchema, createSelectSchema } from 'drizzle-orm/valibot';
 import * as v from 'valibot';
 

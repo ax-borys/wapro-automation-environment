@@ -16,6 +16,7 @@
       "@wae/core": "workspace:*",
       "@wae/db": "workspace:*",
       "@wae/offer": "workspace:*",
+      "@wae/order": "workspace:*",
       "@wae/receipt": "workspace:*",
       "@wae/wapro": "workspace:*",
       "drizzle-orm": "1.0.0-rc.4",

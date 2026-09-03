@@ -36,6 +36,7 @@ export function ReceiptFeed({
          addMany(
             pendingOrders.map((order) => ({
                ...order,
+               address: order.deliveryAddress,
                positions: normilizePositions(order.positions),
                createdAt: new Date(order.createdAt),
                preparedAt: new Date(order.preparedAt),
@@ -105,18 +106,26 @@ export function ReceiptFeed({
          changeStatusForMany(selectedIds, 'RECORDING');
          const receipts = await recordReceipts(
             selectedOrders.map((order) => ({
-               ...order,
-               orderId: Number(order.externalId),
-               recipientFirstName: order.customer.firstName!,
-               recipientLastName: order.customer.lastName!,
-               positions: Object.values(order.positions).map((p) => ({
-                  quantity: p.quantity,
-                  orderId: p.orderId,
-                  price: p.price,
-                  externalId: p.offer.externalId,
-                  title: p.offer.title,
-               })),
-               packagesMade: order.packages,
+               order: {
+                  ...order,
+                  fulfilledAt: order.fulfilledAt?.toISOString(),
+                  preparedAt: order.preparedAt?.toISOString(),
+               },
+               receipt: {
+                  ...order,
+                  orderId: Number(order.externalId),
+                  recipientFirstName: order.customer.firstName!,
+                  recipientLastName: order.customer.lastName!,
+                  positions: Object.values(order.positions).map((p) => ({
+                     quantity: p.quantity,
+                     orderId: p.orderId,
+                     price: p.price,
+                     externalId: p.offer.externalId,
+                     title: p.offer.title,
+                  })),
+                  packagesMade: order.packages,
+                  createdAt: order.createdAt.toISOString(),
+               },
             })),
          );
 
