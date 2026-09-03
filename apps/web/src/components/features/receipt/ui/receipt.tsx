@@ -66,7 +66,7 @@ export function Receipt({ order }: { order: OrderModel }) {
          const [receipt] = await recordReceipts([
             {
                ...order,
-               orderId: 1,
+               orderId: order.id,
                fiscalNumber,
                recipientFirstName: order.customer.firstName!,
                recipientLastName: order.customer.lastName!,
@@ -153,14 +153,23 @@ export function Receipt({ order }: { order: OrderModel }) {
                         name={item.offer.title}
                         quantity={item.quantity}
                         tax="23"
-                        net={currency(item.price).divide(1.23).value}
-                        gross={currency(item.price).value}
+                        net={
+                           currency(item.price, { fromCents: true }).divide(
+                              1.23,
+                           ).value
+                        }
+                        gross={currency(item.price, { fromCents: true }).value}
                      />
                   ))}
                </ReceiptCardTableBody>
                <ReceiptCardTableFooter
-                  totalNet={currency(order.totalPaid).divide(1.23).value}
-                  totalGross={currency(order.totalPaid).value}
+                  totalNet={
+                     currency(order.totalPaid, { fromCents: true }).divide(1.23)
+                        .value
+                  }
+                  totalGross={
+                     currency(order.totalPaid, { fromCents: true }).value
+                  }
                />
             </ReceiptCardTable>
          </ReceiptCardBody>

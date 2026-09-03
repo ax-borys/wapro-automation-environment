@@ -5,12 +5,5 @@ import { ReceiptModel } from '@/entities/receipt';
 import currency from 'currency.js';
 
 export default async function AllegroOrdersPage() {
-   const pendingOrders = await fetchMockPendingOrders();
-
-   const initReceipts: ReceiptModel[] = pendingOrders.map((order) => ({
-      orderId: order.externalId,
-      status: 'RECORD',
-   }));
-
-   return <ReceiptFeed initReceipts={initReceipts} />;
+   return <ReceiptFeed initReceipts={[]} />;
 }

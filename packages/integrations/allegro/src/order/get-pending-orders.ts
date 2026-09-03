@@ -49,7 +49,7 @@ export async function getPendingOrders(): Promise<Order[]> {
 
    for (const order of rawOrders) {
       const result = await fetchInvoices(accessToken, order.id);
-      await wait(500);
+      await wait(10);
       if (result.hasExternalInvoices) continue;
       filteredOrders.push(order);
    }

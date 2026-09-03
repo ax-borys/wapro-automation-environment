@@ -10,7 +10,7 @@ export type PositionModel = Omit<
    offer: Offer;
 };
 
-export type OrderModel = Omit<Order, 'id'> & {
+export type OrderModel = Order & {
    customer: Customer;
    positions: Record<PositionModel['offer']['id'], PositionModel>;
 };

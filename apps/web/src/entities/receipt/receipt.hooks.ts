@@ -1,12 +1,16 @@
+'use client';
+import { useEffect } from 'react';
 import { ReceiptModel, useReceiptsStore } from './receipt.store';
 
 export const useReceipts = (initialReceipts: ReceiptModel[]) => {
    const receiptsExist = useReceiptsStore((s) => s.ensureReceipts)();
    const addReceipt = useReceiptsStore((s) => s.add);
 
-   if (!receiptsExist) {
-      initialReceipts.forEach((receipt) => addReceipt(receipt));
-   }
+   useEffect(() => {
+      if (!receiptsExist) {
+         initialReceipts.forEach((receipt) => addReceipt(receipt));
+      }
+   }, [initialReceipts]);
 
    return useReceiptsStore();
 };
@@ -18,9 +22,11 @@ export const useReceipt = (
    const receiptExists = useReceiptsStore((s) => s.ensureReceipt)(id);
    const addReceipt = useReceiptsStore((s) => s.add);
 
-   if (!receiptExists) {
-      addReceipt(initialReceipt);
-   }
+   useEffect(() => {
+      if (!receiptExists) {
+         addReceipt(initialReceipt);
+      }
+   }, [initialReceipt]);
 
    return {
       receipt: useReceiptsStore((s) => s.receipts[id]),

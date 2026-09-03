@@ -30,7 +30,7 @@ export function ReceiptFeed({
    const { orders, addMany } = useOrdersStore();
 
    useEffect(() => {
-      const promise = fetchMockPendingOrders();
+      const promise = fetchPendingOrders();
 
       promise.then((pendingOrders) => {
          addMany(
@@ -47,7 +47,12 @@ export function ReceiptFeed({
 
    const ordersList = Object.values(orders);
    const { receipts, selectAll, unselectAll, changeStatusForMany, setNumber } =
-      useReceipts(initReceipts);
+      useReceipts(
+         ordersList.map((o) => ({
+            orderId: o.externalId,
+            status: 'RECORD',
+         })),
+      );
    console.log('Receipts: ', receipts);
    const selected = Object.values(receipts).filter(
       (receipt) => receipt.selected,
