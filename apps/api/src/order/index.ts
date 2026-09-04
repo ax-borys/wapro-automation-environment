@@ -3,8 +3,16 @@ import * as allegro from '@wae/allegro';
 import { ApiResponse, Offer, Product, ReceiptPosition } from '@wae/types';
 import { getAllOffers } from '@wae/offer';
 import { customAlphabet } from 'nanoid';
-import { addOrderInputSchema, addOrders } from '@wae/order';
+import { addOrderInputSchema, addOrders, obtainOrders } from '@wae/order';
 import * as v from 'valibot';
+import {
+   addressesTable,
+   customersTable,
+   db,
+   ordersTable,
+   positionsTable,
+   receiptsTable,
+} from '@wae/db';
 
 const generateId = customAlphabet('0123456789', 10);
 
@@ -12,10 +20,25 @@ export const order = new Hono()
    .get('/orders/pending', async (c) => {
       const allegroOrders = await allegro.getPendingOrders();
 
+      console.log('Validating allegro-orders...');
       const validatedAllegroOrders = v.parse(
          v.array(addOrderInputSchema),
-         allegroOrders,
+         allegroOrders.map((order) => ({
+            ...order,
+            items: order.positions.map((position) => ({
+               ...position,
+            })),
+            preparedAt: order.preparedAt?.toISOString() || null,
+            createdAt: order.createdAt?.toISOString() || null,
+         })),
       );
+      console.log('Validation completed.');
+
+      await db.delete(addressesTable);
+      await db.delete(positionsTable);
+      await db.delete(receiptsTable);
+      await db.delete(ordersTable);
+      await db.delete(customersTable);
 
       const orders = await addOrders(validatedAllegroOrders);
 

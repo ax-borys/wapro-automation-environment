@@ -70,6 +70,7 @@ async function getAllOffersCommand() {
 
 async function syncOffersCommand() {
    const offers = await syncOffers();
+   console.log(offers);
    process.stdout.write(JSON.stringify(offers, null, 3));
 }
 

@@ -19,13 +19,6 @@ const config: WaproConfig = {
    stockId: 1,
 };
 
-const recordReceiptInputSchema = v.object({
-   receipt: createReceiptInputSchema,
-   order: addOrderInputSchema,
-});
-
-type Test = v.InferInput<typeof recordReceiptInputSchema>;
-
 export const receipt = new Hono()
    .post('/', valibotJsonMiddleware(getReceiptsInputSchema), async (c) => {
       const getReceiptsInput = c.req.valid('json');
@@ -39,15 +32,11 @@ export const receipt = new Hono()
    })
    .post(
       '/record',
-      valibotJsonMiddleware(v.array(recordReceiptInputSchema)),
+      valibotJsonMiddleware(v.array(createReceiptInputSchema)),
       async (c) => {
          const input = c.req.valid('json');
 
-         const orders = await addOrders(input.map((i) => i.order));
-         const receipts = await createReceipts(
-            input.map((i) => i.receipt),
-            config,
-         );
+         const receipts = await createReceipts(input, config);
 
          return c.json<ApiResponse<typeof receipts>>(
             {
