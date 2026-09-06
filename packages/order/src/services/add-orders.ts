@@ -266,13 +266,15 @@ export async function addOrders(
                addressSchema,
                addresses.find((a) => a.clientTag === order.clientTag),
             ),
-            positions: positions.map((p) => ({
-               ...p,
-               offer: v.parse(
-                  offerSchema,
-                  offers.find((offer) => offer.id === p.offerId),
-               ),
-            })),
+            positions: positions
+               .filter((p) => p.orderId === order.id)
+               .map((p) => ({
+                  ...p,
+                  offer: v.parse(
+                     offerSchema,
+                     offers.find((offer) => offer.id === p.offerId),
+                  ),
+               })),
          }),
       );
 
