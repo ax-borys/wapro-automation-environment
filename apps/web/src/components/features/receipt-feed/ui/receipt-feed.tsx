@@ -42,6 +42,9 @@ export function ReceiptFeed({
    } = useReceiptsStore();
 
    useEffect(() => {
+      // Update only user refreshes page manually.
+
+      if (Object.values(orders).length) return;
       const promise = fetchPendingOrders();
 
       promise.then((pendingOrders) => {
@@ -60,6 +63,7 @@ export function ReceiptFeed({
                fulfilledAt: null,
             })),
          );
+
          addManyReceipts(
             pendingOrders.map((order) => ({
                orderId: order.id,
@@ -95,7 +99,7 @@ export function ReceiptFeed({
    };
 
    const distributeNumbers = (
-      receiptsInfo: Pick<ReceiptModel, 'orderId' | 'number'>[],
+      receiptsInfo: { orderId: number; number: string }[],
    ) => {
       for (const receiptInfo of receiptsInfo) {
          setNumber(receiptInfo.orderId, receiptInfo.number);
