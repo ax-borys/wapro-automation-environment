@@ -72,7 +72,7 @@ export const columns = columnHelper.columns([
       header: () => <div className="text-center">Payment method</div>,
       cell: ({ row: r }) => {
          const value = r.getValue(
-            'order.paymentMethod',
+            'order_paymentMethod',
          ) as ReceiptRecorded['order']['paymentMethod'];
 
          return (

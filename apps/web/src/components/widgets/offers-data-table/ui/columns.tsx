@@ -5,6 +5,7 @@ import { DataTableFeatures } from '@/components/ui/data-table/data-table-feature
 import { EditProductDialog } from '@/components/ui/edit-dialog';
 import { OfferModel, ProductModel } from '@/entities/offer';
 import {
+   BusIcon,
    CheckFatIcon,
    CheckIcon,
    CircleIcon,
@@ -15,6 +16,7 @@ import {
    PulseIcon,
    SealCheckIcon,
    SealIcon,
+   TruckIcon,
    WarningIcon,
 } from '@phosphor-icons/react';
 import { XIcon } from '@phosphor-icons/react/dist/ssr';
@@ -31,7 +33,7 @@ import Image from 'next/image';
 
 export type OfferData = Pick<
    OfferModel,
-   'title' | 'imgSrc' | 'active' | 'approved' | 'items' | 'id'
+   'title' | 'imgSrc' | 'active' | 'approved' | 'items' | 'id' | 'externalId'
 >;
 
 const columnHelper = createColumnHelper<DataTableFeatures, OfferData>();
@@ -41,16 +43,21 @@ export const columns = columnHelper.columns([
       header: () => <div>Preview</div>,
       cell: ({ row: r }) => {
          const imgUrl = r.getValue('imgSrc') as string;
+         const externalId = r.original.externalId;
 
          return (
             <div className="flex items-center rounded-xl overfllow-clip s-20 justrify-center p-2 bg-white">
-               <Image
-                  src={imgUrl}
-                  alt="preview"
-                  width={96}
-                  height={96}
-                  className="w-[68px] h-auto object-cover rounded-md"
-               />
+               {externalId === 'delivery' ? (
+                  <TruckIcon size="w-[68px]" />
+               ) : (
+                  <Image
+                     src={imgUrl}
+                     alt="preview"
+                     width={96}
+                     height={96}
+                     className="w-[68px] h-auto object-cover rounded-md"
+                  />
+               )}
             </div>
          );
       },

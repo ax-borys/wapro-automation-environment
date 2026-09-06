@@ -26,7 +26,10 @@ import { useEffect, useState } from 'react';
 
 type ProductData = Pick<ProductModel, 'name' | 'id' | 'externalId' | 'stock'>;
 
-type OfferData = Pick<OfferModel, 'title' | 'imgSrc' | 'items' | 'id'>;
+type OfferData = Pick<
+   OfferModel,
+   'title' | 'imgSrc' | 'items' | 'id' | 'externalId'
+>;
 export function EditOffer({
    offer,
    trigger,
@@ -140,7 +143,11 @@ export function EditOffer({
                   <EditIcon /> Edit offer
                </EditOfferDialogTitle>
             </EditOfferDialogHeader>
-            <EditOfferDialogObject imgSrc={draft.imgSrc} title={draft.title} />
+            <EditOfferDialogObject
+               delivery={!!draft.externalId}
+               imgSrc={draft.imgSrc}
+               title={draft.title}
+            />
             <Separator />
             <EditOfferDialogProducts>
                {Object.values(draft.items).length ? (

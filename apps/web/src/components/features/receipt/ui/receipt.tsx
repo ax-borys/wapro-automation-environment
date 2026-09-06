@@ -18,10 +18,12 @@ import {
 import currency from 'currency.js';
 import { Button } from '@/components/ui/button';
 import {
+   BusIcon,
    CashRegisterIcon,
    FloppyDiskIcon,
    ReceiptIcon,
    SpinnerIcon,
+   TruckIcon,
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
@@ -40,6 +42,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { DialogClose } from 'radix-ui/dialog';
 import { useReceipt } from '@/entities/receipt';
+import Image from 'next/image';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -135,7 +138,6 @@ export function Receipt({ order }: { order: OrderModel }) {
                   {Object.values(order.positions).map((item, i) => (
                      <ReceiptCardTablePosition
                         key={item.offer.externalId + i}
-                        imgSrc={item.offer.imgSrc}
                         name={item.offer.title}
                         quantity={item.quantity}
                         tax="23"
@@ -145,7 +147,18 @@ export function Receipt({ order }: { order: OrderModel }) {
                            ).value
                         }
                         gross={currency(item.price, { fromCents: true }).value}
-                     />
+                     >
+                        {item.offer.externalId === 'delivery' ? (
+                           <TruckIcon className="size-6 mx-0.75" />
+                        ) : (
+                           <Image
+                              src={item.offer.imgSrc}
+                              alt="Product preview"
+                              width={30}
+                              height={30}
+                           />
+                        )}
+                     </ReceiptCardTablePosition>
                   ))}
                </ReceiptCardTableBody>
                <ReceiptCardTableFooter

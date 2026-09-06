@@ -195,15 +195,14 @@ export function ReceiptCardTableBody({
 
 export function ReceiptCardTablePosition({
    className,
-   imgSrc,
    name,
    quantity,
    tax,
    net,
    gross,
+   children,
    ...props
 }: React.ComponentProps<typeof TableRow> & {
-   imgSrc: string;
    name: string;
    quantity: number;
    tax: '8' | '23';
@@ -213,7 +212,7 @@ export function ReceiptCardTablePosition({
    return (
       <TableRow className={cn(className)} {...props}>
          <TableCell className="font-medium text-sm flex items-center gap-2">
-            <Image src={imgSrc} alt="Product preview" width={30} height={30} />
+            {children}
             <div className="overflow-scroll">{name}</div>
          </TableCell>
          <TableCell className="text-center">x{quantity}</TableCell>

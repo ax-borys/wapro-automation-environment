@@ -22,26 +22,34 @@ export async function getPendingOrdersMock(): Promise<Order[]> {
       positions: [
          {
             offer: {
-               externalId: '2',
-               src: 'http://localhost:8082/public/rtx5080.png',
+               externalId: '1',
+               src: 'allegro',
             },
-            quantity: 2,
-            price: 650000,
+            quantity: 1,
+            price: 2500000,
          },
          {
             offer: {
-               externalId: '3',
-               src: 'http://localhost:8082/public/rtx5070.jpg',
+               externalId: '2',
+               src: 'allegro',
+            },
+            quantity: 2,
+            price: 600000,
+         },
+         {
+            offer: {
+               externalId: 'delivery',
+               src: 'allegro',
             },
             quantity: 1,
-            price: 450000,
+            price: 1000,
          },
       ],
       externalId: 'order-2026-000125',
       src: 'allegro',
       status: 'READY_FOR_PROCESSING',
-      totalToPay: 1750000,
-      totalPaid: 1750000,
+      totalToPay: 2500000 + 2 * 600000 + 1000,
+      totalPaid: 2500000 + 2 * 600000 + 1000,
       paymentMethod: 'PREPAID',
       packages: 1,
       fulfilledAt: null,
@@ -67,26 +75,26 @@ export async function getPendingOrdersMock(): Promise<Order[]> {
       positions: [
          {
             offer: {
-               externalId: '2',
-               src: 'http://localhost:8082/public/rtx5080.png',
+               externalId: '3',
+               src: 'allegro',
             },
             quantity: 2,
-            price: 650000,
+            price: 450000,
          },
          {
             offer: {
-               externalId: '3',
-               src: 'http://localhost:8082/public/rtx5070.jpg',
+               externalId: '4',
+               src: 'allegro',
             },
             quantity: 1,
-            price: 450000,
+            price: 2000000,
          },
       ],
       externalId: 'order-2026-000124',
       src: 'allegro',
       status: 'READY_FOR_PROCESSING',
-      totalToPay: 1750000,
-      totalPaid: 1750000,
+      totalToPay: 2 * 450000 + 2000000,
+      totalPaid: 2 * 450000 + 2000000,
       paymentMethod: 'PREPAID',
       packages: 1,
       fulfilledAt: null,
@@ -94,5 +102,50 @@ export async function getPendingOrdersMock(): Promise<Order[]> {
       createdAt: new Date('2026-09-01T09:15:00Z'),
    };
 
-   return [order, order2];
+   const order3: Order = {
+      address: {
+         postalCode: '00-950',
+         street: 'Marszałkowska 12',
+         countryCode: 'PL',
+         city: 'Warsaw',
+      },
+      customer: {
+         firstName: 'Anna',
+         lastName: 'Kowalska',
+         companyName: null,
+         email: 'anna.kowalska@example.com',
+         phoneNumber: '+48123456789',
+         externalId: 'cust-10293',
+      },
+      positions: [
+         {
+            offer: {
+               externalId: '2',
+               src: 'allegro',
+            },
+            quantity: 2,
+            price: 650000,
+         },
+         {
+            offer: {
+               externalId: '3',
+               src: 'allegro',
+            },
+            quantity: 1,
+            price: 450000,
+         },
+      ],
+      externalId: 'order-2026-000126',
+      src: 'allegro',
+      status: 'READY_FOR_PROCESSING',
+      totalToPay: 2 * 650000 + 450000,
+      totalPaid: 2 * 650000 + 450000,
+      paymentMethod: 'PREPAID',
+      packages: 1,
+      fulfilledAt: null,
+      preparedAt: new Date('2026-09-03T14:30:00Z'),
+      createdAt: new Date('2026-09-01T09:15:00Z'),
+   };
+
+   return [order, order2, order3];
 }
