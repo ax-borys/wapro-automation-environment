@@ -1,5 +1,11 @@
-import { Address, Customer, Offer, Order, OrderPoisition } from '@wae/types';
-import { Portal } from 'radix-ui';
+import {
+   Address,
+   Customer,
+   Offer,
+   Order,
+   OrderPoisition,
+   Receipt,
+} from '@wae/types';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
@@ -11,6 +17,7 @@ export type OrderModel = Omit<Order, 'clientTag'> & {
    address: Omit<Address, 'clientTag' | 'orderId' | 'customerId'>;
    customer: Omit<Customer, 'clientTag'>;
    positions: Record<PositionModel['offer']['id'], PositionModel>;
+   receipt: Omit<Receipt, 'clientTag'> | null;
 };
 
 export type OrdersStore = {
@@ -43,11 +50,11 @@ export const useOrdersStore = create<OrdersStore>()(
       orders: {},
       add: (order) =>
          set((draft) => {
-            draft.orders[order.externalId] = order;
+            draft.orders[order.id] = order;
          }),
       addMany: (orders) =>
          set((draft) => {
-            orders.forEach((order) => (draft.orders[order.externalId] = order));
+            orders.forEach((order) => (draft.orders[order.id] = order));
          }),
       remove: (orderId) =>
          set((draft) => {

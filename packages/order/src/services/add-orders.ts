@@ -13,6 +13,9 @@ import {
    orderPositionInputSchema,
    orderPositionSchema,
    orderSchema,
+   PositionInput,
+   positionInputSchema,
+   positionSchema,
 } from '@wae/types';
 import {
    addressesTable,
@@ -24,9 +27,11 @@ import {
 } from '@wae/db';
 import { obtainCustomers } from './obtain-customers';
 import { inArray } from 'drizzle-orm';
+import { nanoid } from 'nanoid';
 
 export const addOrderInputSchema = v.object({
-   ...v.omit(orderInputSchema, ['createdAt', 'customerId', 'id']).entries,
+   ...v.omit(orderInputSchema, ['createdAt', 'customerId', 'id', 'clientTag'])
+      .entries,
    preparedAt: v.optional(
       v.nullable(
          v.union([
@@ -51,18 +56,18 @@ export const addOrderInputSchema = v.object({
          ]),
       ),
    ),
-   customer: v.omit(customerInputSchema, ['id']),
-   address: v.omit(addressInputSchema, ['customerId', 'orderId']),
-   items: v.pipe(
+   customer: v.omit(customerInputSchema, ['id', 'clientTag']),
+   address: v.omit(addressInputSchema, ['customerId', 'orderId', 'clientTag']),
+   positions: v.pipe(
       v.array(
          v.object({
-            ...v.omit(orderPositionSchema, [
+            ...v.omit(positionInputSchema, [
                'clientTag',
-               'orderId',
                'receiptId',
                'offerId',
+               'orderId',
             ]).entries,
-            externalOfferId: offerInputSchema.entries.externalId,
+            offer: v.pick(offerInputSchema, ['externalId', 'src']),
          }),
       ),
       v.nonEmpty(),
@@ -70,14 +75,17 @@ export const addOrderInputSchema = v.object({
 });
 
 export const addOrderReturnSchema = v.object({
-   ...v.omit(orderSchema, ['fulfilledAt']).entries,
+   ...orderSchema.entries,
    customer: customerSchema,
    address: addressSchema,
-   items: v.array(
-      v.object({
-         ...orderPositionSchema.entries,
-         offer: offerSchema,
-      }),
+   positions: v.pipe(
+      v.array(
+         v.object({
+            ...positionSchema.entries,
+            offer: offerSchema,
+         }),
+      ),
+      v.nonEmpty(),
    ),
    preparedAt: v.union([
       v.pipe(
@@ -95,6 +103,16 @@ export const addOrderReturnSchema = v.object({
       ),
       v.pipe(v.date()),
    ]),
+   fulfilledAt: v.nullable(
+      v.union([
+         v.pipe(
+            v.string(),
+            v.isoTimestamp(),
+            v.transform((v) => new Date(v)),
+         ),
+         v.pipe(v.date()),
+      ]),
+   ),
 });
 
 type AddOrderInputSchema = v.InferOutput<typeof addOrderInputSchema>;
@@ -104,15 +122,30 @@ type AddOrderReturnOutput = v.InferOutput<typeof addOrderReturnSchema>;
 export async function addOrders(
    input: AddOrderInputSchema[],
 ): Promise<AddOrderReturnOutput[]> {
-   const inputMap = new Map<string, AddOrderInputSchema>();
+   const inputMap = new Map<
+      string,
+      Omit<AddOrderInputSchema, 'positions'> & {
+         positions: (AddOrderInputSchema['positions'][number] & {
+            clientTag: string;
+         })[];
+         address: { clientTag: string };
+         clientTag: string;
+      }
+   >();
 
    input.forEach((e, i) =>
       inputMap.set(String(i), {
          ...e,
          clientTag: String(i),
-         customer: { ...e.customer, clientTag: String(i) },
+         customer: {
+            ...e.customer,
+            externalId: e.customer.externalId ?? nanoid(),
+         },
          address: { ...e.address, clientTag: String(i) },
-         items: e.items.map((j) => ({ ...j, clientTag: String(i) })),
+         positions: e.positions.map((position) => ({
+            ...position,
+            clientTag: String(i),
+         })),
       }),
    );
 
@@ -124,8 +157,9 @@ export async function addOrders(
          ...i,
          customerId: v.parse(
             customerSchema,
-            customers.find((c) => c.clientTag === i.clientTag),
+            customers.find((c) => i.customer.externalId === c.externalId),
          ).id,
+         preparedAt: i.preparedAt ?? new Date(),
       }));
 
       const existingOrders = await tx.select().from(ordersTable);
@@ -152,11 +186,13 @@ export async function addOrders(
          ...i.address,
          customerId: v.parse(
             customerSchema,
-            customers.find((c) => c.clientTag === i.clientTag),
+            customers.find((c) => i.customer.externalId === c.externalId),
          ).id,
          orderId: v.parse(
             orderSchema,
-            orders.find((o) => o.externalId === i.externalId),
+            orders.find(
+               (o) => o.externalId === i.externalId && o.src === i.src,
+            ),
          ).id,
       }));
 
@@ -164,11 +200,11 @@ export async function addOrders(
          .insert(addressesTable)
          .values(addressesInput)
          .returning();
-      console.log('Addresses: ', addresses);
 
       const externalOffersIds = new Set(
-         input.flatMap((i) => i.items.map((i) => i.externalOfferId)),
+         input.flatMap((i) => i.positions.map((i) => i.offer.externalId)),
       );
+
       const offers = await tx
          .select()
          .from(offersTable)
@@ -178,61 +214,31 @@ export async function addOrders(
          throw new Error('Offers are not synchronized');
       }
 
-      const items: Record<Order['id'], AddOrderReturnOutput['items']> = {};
+      console.log(offers);
+      console.log(orders);
 
-      validatedOrders.forEach((order) => {
-         const inputOrderItems = v.parse(
-            v.object({
-               ...addOrderInputSchema.entries,
-               preparedAt: v.optional(v.nullable(v.date())),
-               fulfilledAt: v.optional(v.nullable(v.date())),
-            }),
-            [...inputMap.values()].find((i) => i.clientTag === order.clientTag),
-         ).items;
-
-         console.log('Mapping orderItems...');
-         const orderItems: AddOrderReturnOutput['items'] = inputOrderItems.map(
-            (i) => ({
-               offerId: v.parse(
-                  offerSchema,
-                  offers.find(
-                     (offer) => offer.externalId === i.externalOfferId,
-                  ),
-               ).id,
-               clientTag: null,
-               offer: v.parse(
-                  offerSchema,
-                  offers.find(
-                     (offer) => offer.externalId === i.externalOfferId,
-                  ),
-               ),
-               orderId: order.id,
-               price: i.price,
-               quantity: i.quantity,
-               receiptId: null,
-            }),
-         );
-         console.log('Mapping completed.');
-
-         items[order.id] = orderItems;
-      });
-
-      const positionsInput: OrderPoisitionInput[] = Object.keys(items).flatMap(
-         (orderId) => {
-            const orderPositionsInput: OrderPoisitionInput[] = items[
-               Number(orderId)
-            ].map((item): OrderPoisitionInput => {
-               const position: OrderPoisitionInput = {
-                  offerId: item.offerId,
-                  orderId: Number(orderId),
-                  price: item.price,
-                  quantity: item.quantity,
-               };
-
-               return position;
-            });
-            return orderPositionsInput;
-         },
+      console.log('Building positions...');
+      const positionsInput: PositionInput[] = [...inputMap.values()].flatMap(
+         (order) =>
+            order.positions.map(
+               (position): PositionInput => ({
+                  orderId: v.parse(
+                     orderSchema,
+                     orders.find((o) => o.clientTag === order.clientTag),
+                  ).id,
+                  offerId: v.parse(
+                     offerSchema,
+                     offers.find(
+                        (o) =>
+                           o.externalId === position.offer.externalId &&
+                           o.src === 'curl',
+                     ),
+                  ).id,
+                  price: position.price,
+                  quantity: position.quantity,
+                  clientTag: position.clientTag,
+               }),
+            ),
       );
 
       console.log('Validatig positions input...');
@@ -244,24 +250,31 @@ export async function addOrders(
 
       const positions = await tx
          .insert(positionsTable)
-         .values(validatedPositionsInput);
+         .values(validatedPositionsInput)
+         .returning();
 
       console.log('Positions: ', positions);
 
-      const completeOrders = validatedOrders.map((order) => ({
-         ...order,
-         fulfilledAt: null,
-         preparedAt: new Date(),
-         customer: v.parse(
-            customerSchema,
-            customers.find((c) => c.clientTag === order.clientTag),
-         ),
-         address: v.parse(
-            addressSchema,
-            addresses.find((c) => c.clientTag === order.clientTag),
-         ),
-         items: items[order.id],
-      }));
+      const completeOrders: AddOrderReturnInput[] = validatedOrders.map(
+         (order): AddOrderReturnInput => ({
+            ...order,
+            customer: v.parse(
+               customerSchema,
+               customers.find((c) => c.id === order.customerId),
+            ),
+            address: v.parse(
+               addressSchema,
+               addresses.find((a) => a.clientTag === order.clientTag),
+            ),
+            positions: positions.map((p) => ({
+               ...p,
+               offer: v.parse(
+                  offerSchema,
+                  offers.find((offer) => offer.id === p.offerId),
+               ),
+            })),
+         }),
+      );
 
       const validatedCompleteOrders = v.parse(
          v.array(addOrderReturnSchema),

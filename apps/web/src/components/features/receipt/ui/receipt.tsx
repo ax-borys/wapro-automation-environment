@@ -47,10 +47,7 @@ async function wait(delay = 3000) {
 
 export function Receipt({ order }: { order: OrderModel }) {
    const { receipt, changeStatus, setNumber, setFiscalNumber, selectToggle } =
-      useReceipt(order.externalId, {
-         orderId: order.externalId,
-         status: 'RECORD',
-      });
+      useReceipt(order.id);
 
    const { number, status, fiscalNumber, selected } = receipt;
 
@@ -65,18 +62,8 @@ export function Receipt({ order }: { order: OrderModel }) {
       try {
          const [receipt] = await recordReceipts([
             {
-               ...order,
                orderId: order.id,
-               fiscalNumber,
-               recipientFirstName: order.customer.firstName!,
-               recipientLastName: order.customer.lastName!,
-               positions: Object.values(order.positions).map((p) => ({
-                  ...p,
-                  title: p.offer.title,
-                  externalId: p.offer.externalId,
-               })),
-               packagesMade: order.packages,
-               createdAt: order.createdAt.toISOString(),
+               fiscalNumber: String(fiscalNumber),
             },
          ]);
          console.log(order);
@@ -100,7 +87,7 @@ export function Receipt({ order }: { order: OrderModel }) {
       const parsedFiscalNumber = Number.parseInt(fiscalNumber);
 
       if (parsedFiscalNumber) {
-         setFiscalNumber(parsedFiscalNumber);
+         setFiscalNumber(`W${String(parsedFiscalNumber).padStart(6, '0')}`);
       } else if (fiscalNumber === '') {
          setFiscalNumber(null);
       } else if (fiscalNumber === '') {
@@ -132,9 +119,7 @@ export function Receipt({ order }: { order: OrderModel }) {
                   </Button>
                ) : null}
                {fiscalNumber ? (
-                  <BadgeFiskalNumber
-                     value={`W${String(fiscalNumber).padStart(6, '0')}`}
-                  />
+                  <BadgeFiskalNumber value={fiscalNumber} />
                ) : null}
                {order.paymentMethod === 'PREPAID' ? (
                   <BadgePaid />

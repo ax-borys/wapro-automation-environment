@@ -7,6 +7,7 @@ import { syncOffers } from './commands/sync-offers';
 import { getPendingOrders } from '@wae/allegro';
 import { syncProducts } from './commands/sync-products';
 import { convertImgSrcToS128b } from './commands/convertImgSrcToS128b';
+import { getCustomers } from './commands/get-customers';
 
 const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'create-receipts': createReceiptsCommand,
@@ -15,6 +16,10 @@ const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'get-pending-orders': getPendingOrdersCommand,
    'sync-products': syncProductsCommand,
    'convert-imgs': convertImgSrcCommnd,
+   'show-customers': async () => {
+      const customers = await getCustomers();
+      process.stdout.write(JSON.stringify(customers, null, 3));
+   },
 };
 
 async function convertImgSrcCommnd() {

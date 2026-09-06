@@ -4,6 +4,9 @@ import {
    productInputSchema,
    receiptPositionInputSchema,
    customerSchema,
+   orderSchema,
+   positionSchema,
+   offerSchema,
 } from '@wae/types';
 import { obtainAuthTokens } from '../auth';
 import { store } from '../store/store';
@@ -14,26 +17,23 @@ import { RawOrder } from './types';
 import * as v from 'valibot';
 import { addressSchema, customerInputSchema } from '@wae/types';
 import currency from 'currency.js';
+import { originalImgSrcTos128b } from '../utils/originalImgSrcTos128b';
 
-const orderValidationSchema = v.object({
-   ...v.omit(orderInputSchema, ['id', 'customerId']).entries,
+export const orderValidationSchema = v.object({
+   ...v.omit(orderSchema, ['id', 'customerId', 'clientTag']).entries,
    address: v.omit(addressSchema, ['customerId', 'orderId', 'clientTag']),
    customer: v.omit(customerSchema, ['id', 'clientTag']),
-   packages: v.pipe(v.number(), v.minValue(1)),
    positions: v.array(
       v.object({
-         ...v.omit(receiptPositionInputSchema, [
+         ...v.omit(positionSchema, [
             'clientTag',
             'receiptId',
             'offerId',
             'orderId',
          ]).entries,
-         externalOfferId: v.pick(offerInputSchema, ['externalId']).entries
-            .externalId,
+         offer: v.pick(offerSchema, ['externalId', 'src']),
       }),
    ),
-   preparedAt: v.date(),
-   createdAt: v.date(),
 });
 
 type Order = v.InferOutput<typeof orderValidationSchema>;
@@ -64,7 +64,6 @@ export async function getPendingOrders(): Promise<Order[]> {
          street: order.delivery.address.street,
          postalCode: order.delivery.address.zipCode,
          countryCode: order.delivery.address.countryCode,
-         apartament: null,
       },
       customer: {
          phoneNumber: order.delivery.address.phoneNumber,
@@ -76,12 +75,16 @@ export async function getPendingOrders(): Promise<Order[]> {
       },
       packages: order.delivery.calculatedNumberOfPackages || 1,
       positions: order.lineItems.map((i) => ({
-         externalOfferId: i.offer.id,
          quantity: i.quantity,
          price: currency(i.price.amount).intValue,
+         offer: {
+            src: 'allegro',
+            externalId: i.offer.id,
+         },
       })),
       src: 'allegro',
       paymentMethod: order.payment.type === 'ONLINE' ? 'PREPAID' : 'POSTPAID',
+      fulfilledAt: null,
       preparedAt: new Date(order.updatedAt),
       createdAt: new Date(),
    }));

@@ -14,7 +14,7 @@ export type GetAllOffersWithItemsOutput = (Offer & {
 export async function getAllOffersWithItems(): Promise<GetAllOffersWithItemsOutput> {
    const offersWithItems = await db.query.offersTable.findMany({
       with: {
-         items: true,
+         products: true,
       },
    });
 
@@ -29,14 +29,14 @@ export async function getAllOffersWithItems(): Promise<GetAllOffersWithItemsOutp
             ),
             inArray(
                itemsTable.productId,
-               offersWithItems.flatMap((o) => o.items.map((i) => i.id)),
+               offersWithItems.flatMap((o) => o.products.map((i) => i.id)),
             ),
          ),
       );
 
    const offersWithItemsAndQuantity = offersWithItems.map((o) => ({
       ...o,
-      items: o.items.map((i) => ({
+      items: o.products.map((i) => ({
          ...i,
          quantity: items.find((i) => i.offerId === o.id)!.quantity,
       })),

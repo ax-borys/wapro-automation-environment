@@ -1,123 +1,138 @@
 import { positionsTable, receiptsTable } from '@wae/db';
-import { createInsertSchema, createSelectSchema } from 'drizzle-orm/valibot';
 import * as v from 'valibot';
-import { offerDoesntExist } from '../errors';
-import { Tx } from '@wae/types';
-import currency from 'currency.js';
-
-const receiptInputSchema = createInsertSchema(receiptsTable);
-const positionInputSchema = createInsertSchema(positionsTable);
-const receiptOutputSchema = createSelectSchema(receiptsTable);
-const positionOutputSchema = createSelectSchema(positionsTable);
+import { positionWasNotInitialized } from '../errors';
+import {
+   Position,
+   positionInputSchema,
+   positionSchema,
+   receiptInputSchema,
+   receiptSchema,
+   Tx,
+} from '@wae/types';
+import { and, eq, or } from 'drizzle-orm';
 
 export const saveReceiptInputSchema = v.object({
-   ...receiptInputSchema.entries,
-   totalPaid: v.pipe(
-      v.number(),
-      v.minValue(0),
-      v.check(
-         (value) =>
-            currency(value).intValue === currency(value).multiply(100).value,
-         'Must be decimal with maximum 2 numbers after floating point',
+   ...v.omit(receiptInputSchema, ['id', 'createdAt', 'clientTag']).entries,
+   positions: v.pipe(
+      v.array(
+         v.object({
+            ...v.omit(positionInputSchema, [
+               'receiptId',
+               'price',
+               'clientTag',
+               'quantity',
+               'orderId',
+            ]).entries,
+         }),
       ),
-   ),
-   positions: v.array(
-      v.object({
-         ...v.omit(positionInputSchema, ['receiptId']).entries,
-         price: v.pipe(
-            v.number(),
-            v.minValue(0),
-            v.check(
-               (value) =>
-                  currency(value).intValue ===
-                  currency(value).multiply(100).value,
-               'Price must be a decimal with maximum 2 numbers after floating point.',
-            ),
-         ),
-      }),
+      v.nonEmpty(),
    ),
 });
 
 export const saveReceiptOutputSchema = v.object({
-   ...receiptInputSchema.entries,
+   ...receiptSchema.entries,
    positions: v.array(
       v.object({
-         ...positionInputSchema.entries,
+         ...positionSchema.entries,
+         receiptId: receiptSchema.entries.id,
       }),
    ),
 });
 
 export type SaveReceiptInput = v.InferInput<typeof saveReceiptInputSchema>;
-export type SaveReceiptOutput = v.InferOutput<typeof saveReceiptOutputSchema>;
+export type SaveReceiptReturnInput = v.InferInput<
+   typeof saveReceiptOutputSchema
+>;
+export type SaveReceiptReturnOutput = v.InferOutput<
+   typeof saveReceiptOutputSchema
+>;
 
 export async function saveReceipts(
    tx: Tx,
    receiptsInput: SaveReceiptInput[],
-): Promise<SaveReceiptOutput[]> {
+): Promise<SaveReceiptReturnOutput[]> {
    return await tx.transaction(async () => {
-      const taggedReceiptsInput: SaveReceiptInput[] = receiptsInput.map(
-         (r, i) => ({ ...r, clientTag: i.toString() }),
-      );
-
-      const taggedPositionsInput = taggedReceiptsInput.flatMap((ri) =>
-         ri.positions.map((p) => ({ ...p, clientTag: ri.clientTag })),
-      );
-
-      const offers = await tx.query.offersTable.findMany({
-         where: {
-            id: {
-               in: taggedPositionsInput.map((position) => position.offerId),
-            },
-         },
-      });
-
-      for (const position of receiptsInput.flatMap((ri) => ri.positions)) {
-         const exists = offers
-            .map((offer) => offer.id)
-            .includes(position.offerId);
-
-         if (!exists) {
-            throw offerDoesntExist(position.offerId);
-         }
-      }
+      const taggedInput: (Omit<SaveReceiptInput, 'positions'> & {
+         clientTag: string;
+         positions: (SaveReceiptInput['positions'][number] & {
+            clientTag: string;
+         })[];
+      })[] = receiptsInput.map((receipt, i) => ({
+         ...receipt,
+         clientTag: String(i),
+         positions: receipt.positions.map((position) => ({
+            ...position,
+            clientTag: String(i),
+         })),
+      }));
 
       const receipts = await tx
          .insert(receiptsTable)
-         .values(
-            taggedReceiptsInput.map((i) => ({
-               ...i,
-               totalPaid: currency(i.totalPaid).intValue,
-            })),
-         )
+         .values(taggedInput)
          .returning();
 
-      const mappedReceiptsIds: Record<
-         NonNullable<(typeof receipts)[number]['clientTag']>,
-         (typeof receipts)[number]['id']
-      > = {};
+      const mappedReceipts = new Map(
+         receipts.map((receipt) => [receipt.clientTag, receipt]),
+      );
 
-      for (const receipt of receipts) {
-         mappedReceiptsIds[receipt.clientTag as string] = receipt.id;
-      }
-
-      const completePositionsInput = taggedPositionsInput.map((i) => ({
-         ...i,
-         price: currency(i.price).intValue,
-         receiptId: mappedReceiptsIds[i.clientTag as string],
-      }));
+      const positionsCondition = or(
+         ...taggedInput.flatMap((receipt) =>
+            receipt.positions.map((position) =>
+               and(
+                  eq(positionsTable.orderId, receipt.orderId),
+                  eq(positionsTable.offerId, position.offerId),
+               ),
+            ),
+         ),
+      );
 
       const positions = await tx
-         .insert(positionsTable)
-         .values(completePositionsInput)
-         .returning();
+         .select()
+         .from(positionsTable)
+         .where(positionsCondition);
+
+      const key = (key1: string | number, key2: string | number) =>
+         String(key1) + String(key2);
+
+      const mappedPositions = new Map(
+         positions.map((i) => [key(i.orderId, i.offerId), i]),
+      );
+
+      const updatedPositions: Position[] = [];
+      for (const taggedPosition of taggedInput.flatMap((i) => i.positions)) {
+         const receipt = v.parse(
+            receiptSchema,
+            mappedReceipts.get(taggedPosition.clientTag),
+         );
+
+         const position = mappedPositions.get(
+            key(receipt.orderId, taggedPosition.offerId),
+         );
+
+         if (!position) {
+            throw positionWasNotInitialized(
+               receipt.orderId,
+               taggedPosition.offerId,
+            );
+         }
+
+         const [updatedPosition] = await tx
+            .update(positionsTable)
+            .set({ receiptId: receipt.id })
+            .returning();
+
+         updatedPositions.push(updatedPosition);
+      }
 
       const result = receipts.map((receipt) => ({
          ...receipt,
-         positions: positions.filter(
+         positions: updatedPositions.filter(
             (position) => position.clientTag === receipt.clientTag,
          ),
       }));
 
-      return result;
+      const validatedResult = v.parse(v.array(saveReceiptOutputSchema), result);
+
+      return validatedResult;
    });
 }

@@ -6,7 +6,11 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
 import { Receipt } from '@/components/features/receipt';
-import { ReceiptModel, useReceipts } from '@/entities/receipt';
+import {
+   ReceiptModel,
+   useReceipts,
+   useReceiptsStore,
+} from '@/entities/receipt';
 import { recordReceipts } from '@/entities/receipt';
 import {
    normilizePositions,
@@ -28,6 +32,14 @@ export function ReceiptFeed({
    initReceipts: ReceiptModel[];
 }) {
    const { orders, addMany } = useOrdersStore();
+   const {
+      receipts,
+      addMany: addManyReceipts,
+      selectAll,
+      unselectAll,
+      changeStatusForMany,
+      setNumber,
+   } = useReceiptsStore();
 
    useEffect(() => {
       const promise = fetchPendingOrders();
@@ -36,23 +48,37 @@ export function ReceiptFeed({
          addMany(
             pendingOrders.map((order) => ({
                ...order,
-               positions: normilizePositions(order.items),
+               receipt: order.receipt
+                  ? {
+                       ...order.receipt,
+                       createdAt: new Date(order.receipt.createdAt),
+                    }
+                  : null,
+               positions: normilizePositions(order.positions),
                createdAt: new Date(order.createdAt),
                preparedAt: new Date(order.preparedAt),
                fulfilledAt: null,
+            })),
+         );
+         addManyReceipts(
+            pendingOrders.map((order) => ({
+               orderId: order.id,
+               ...(order.receipt
+                  ? {
+                       status: 'RECORDED',
+                       fiscalNumber: order.receipt.fiscalNumber,
+                       number: order.receipt.number,
+                    }
+                  : { status: 'RECORD' }),
             })),
          );
       });
    }, []);
 
    const ordersList = Object.values(orders);
-   const { receipts, selectAll, unselectAll, changeStatusForMany, setNumber } =
-      useReceipts(
-         ordersList.map((o) => ({
-            orderId: o.externalId,
-            status: 'RECORD',
-         })),
-      );
+   ordersList.sort((a, b) => (a.receipt && b.receipt ? 0 : a.receipt ? 1 : -1));
+
+   console.log('Orders: ', orders);
    console.log('Receipts: ', receipts);
    const selected = Object.values(receipts).filter(
       (receipt) => receipt.selected,
@@ -81,7 +107,7 @@ export function ReceiptFeed({
          (
             r,
          ): r is Omit<ReceiptModel, 'fiscalNumber'> & {
-            fiscalNumber: number;
+            fiscalNumber: string;
          } =>
             (r.selected && r.status === 'RECORD' && r.fiscalNumber) as boolean,
       );
@@ -90,13 +116,12 @@ export function ReceiptFeed({
 
       const selectedOrders = ordersList
          .filter((order) =>
-            selectedReceipts.find((r) => r.orderId === order.externalId),
+            selectedReceipts.find((r) => r.orderId === order.id),
          )
          .map((order) => ({
             ...order,
-            fiscalNumber: selectedReceipts.find(
-               (r) => r.orderId === order.externalId,
-            )!.fiscalNumber,
+            fiscalNumber: selectedReceipts.find((r) => r.orderId === order.id)!
+               .fiscalNumber,
          }));
 
       if (!selectedOrders.length) return;
@@ -105,26 +130,15 @@ export function ReceiptFeed({
          changeStatusForMany(selectedIds, 'RECORDING');
          const receipts = await recordReceipts(
             selectedOrders.map((order) => ({
-               ...order,
-               orderId: Number(order.externalId),
-               recipientFirstName: order.customer.firstName!,
-               recipientLastName: order.customer.lastName!,
-               positions: Object.values(order.positions).map((p) => ({
-                  quantity: p.quantity,
-                  orderId: p.orderId,
-                  price: p.price,
-                  externalId: p.offer.externalId,
-                  title: p.offer.title,
-               })),
-               packagesMade: order.packages,
-               createdAt: order.createdAt.toISOString(),
+               orderId: order.id,
+               fiscalNumber: String(order.fiscalNumber),
             })),
          );
 
          changeStatusForMany(selectedIds, 'RECORDED');
          distributeNumbers(
             receipts.map((i) => ({
-               orderId: i.orderId.toString(),
+               orderId: i.orderId,
                number: i.number,
             })),
          );
@@ -178,7 +192,7 @@ export function ReceiptFeed({
          <div className="overflow-y-scroll min-h-0 flex-1">
             {Object.values(receipts).length
                ? ordersList.map((order, i) => (
-                    <Fragment key={order.externalId}>
+                    <Fragment key={order.id}>
                        <Receipt order={order} />
                        {i + 1 === ordersList.length ? null : <Separator />}
                     </Fragment>

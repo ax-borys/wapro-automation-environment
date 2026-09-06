@@ -1,17 +1,19 @@
+import { Order } from '@wae/types';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
 export type ReceiptModel = {
-   orderId: string;
+   orderId: Order['id'];
    status: 'RECORD' | 'RECORDING' | 'RECORDED';
    selected?: boolean;
    number?: string | null;
-   fiscalNumber?: number | null;
+   fiscalNumber?: string | null;
 };
 
 type ReceiptsStore = {
    receipts: Record<ReceiptModel['orderId'], ReceiptModel>;
    add: (receipt: ReceiptModel) => void;
+   addMany: (receipts: ReceiptModel[]) => void;
    remove: (id: ReceiptModel['orderId']) => void;
    clear: () => void;
    changeStatus: (
@@ -47,6 +49,12 @@ export const useReceiptsStore = create<ReceiptsStore>()(
       add: (receipt) =>
          set((s) => {
             s.receipts[receipt.orderId] = receipt;
+         }),
+      addMany: (receipts) =>
+         set((s) => {
+            receipts.forEach(
+               (receipt) => (s.receipts[receipt.orderId] = receipt),
+            );
          }),
       remove: (id) =>
          set((s) => {

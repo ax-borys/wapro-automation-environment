@@ -9,7 +9,6 @@ import { ApiResponse, WaproConfig } from '@wae/types';
 import { Hono } from 'hono';
 import { valibotJsonMiddleware } from '../helpers/valibot-middleware';
 import * as v from 'valibot';
-import { addOrderInputSchema, addOrders } from '@wae/order';
 
 const config: WaproConfig = {
    companyId: 1,

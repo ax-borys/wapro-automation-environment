@@ -1,43 +1,57 @@
-import { db, receiptsTable } from '@wae/db';
-import currency from 'currency.js';
-import { and, gte, lt, lte } from 'drizzle-orm';
-import { createSelectSchema } from 'drizzle-orm/valibot';
+import { db } from '@wae/db';
+import { customerSchema, orderSchema, receiptSchema } from '@wae/types';
 import * as v from 'valibot';
 
-const receiptOutputSchema = createSelectSchema(receiptsTable);
 export const getReceiptsInputSchema = v.object({
    dateRange: v.nullish(
       v.object({
-         from: v.nullish(v.pipe(v.string(), v.isoDate())),
-         to: v.nullish(v.pipe(v.string(), v.isoDate())),
+         from: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+         to: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
       }),
    ),
 });
 
+export const getReceiptsOutputSchema = v.object({
+   ...receiptSchema.entries,
+   order: v.object({ ...orderSchema.entries, customer: customerSchema }),
+});
+
 export type GetReceiptsInput = v.InferInput<typeof getReceiptsInputSchema>;
-export type GetReceiptOutput = v.InferOutput<typeof receiptOutputSchema>;
+export type GetReceiptOutput = v.InferOutput<typeof getReceiptsOutputSchema>;
 
 export async function getReceipts({
    dateRange,
 }: GetReceiptsInput): Promise<GetReceiptOutput[]> {
-   const conditions = [
-      dateRange?.from
-         ? gte(receiptsTable.createdAt, new Date(dateRange.from))
-         : undefined,
-      dateRange?.to
-         ? lte(receiptsTable.createdAt, new Date(dateRange.to))
-         : undefined,
-   ];
+   const range: any = {};
 
-   const receipts = await db
-      .select()
-      .from(receiptsTable)
-      .where(and(...conditions));
+   if (dateRange?.from) {
+      range.gte = new Date(dateRange.from);
+   }
 
-   const normilized = receipts.map((i) => ({
-      ...i,
-      totalPaid: currency(i.totalPaid, { fromCents: true }).value,
-   }));
+   if (dateRange?.to) {
+      range.lte = new Date(dateRange.to);
+   }
 
-   return normilized;
+   const receipts = await db.query.receiptsTable.findMany({
+      with: {
+         order: {
+            with: {
+               customer: true,
+            },
+         },
+      },
+      where: {
+         createdAt: {
+            ...range,
+            isNotNull: true,
+         },
+      },
+   });
+
+   const receiptsWithOrder = v.parse(
+      v.array(getReceiptsOutputSchema),
+      receipts,
+   );
+
+   return receiptsWithOrder;
 }

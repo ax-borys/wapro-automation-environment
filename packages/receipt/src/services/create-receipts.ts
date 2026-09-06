@@ -1,51 +1,30 @@
-import { WaproConfig, Mapping, Tx, offerInputSchema } from '@wae/types';
+import {
+   WaproConfig,
+   Mapping,
+   orderWithPositionsWithOfferSchema,
+} from '@wae/types';
 import { dbWapro, recordReceipt, RecordReceiptOutput } from '@wae/wapro';
 import * as v from 'valibot';
 import { db, positionsTable, productsTable, receiptsTable } from '@wae/db';
 import { createInsertSchema } from 'drizzle-orm/valibot';
-import { positionHasNoMatchedOffer } from '../errors';
+import { orderDoesntExist, positionHasNoMatchedOffer } from '../errors';
 import { GenerateReceiptInput } from '../schema';
 import { generateReceipts } from './generate-receipts';
 import {
    SaveReceiptInput,
    saveReceiptInputSchema,
-   SaveReceiptOutput,
    saveReceiptOutputSchema,
+   SaveReceiptReturnOutput,
    saveReceipts,
 } from './save-receipts';
+import currency from 'currency.js';
 
 const receiptInputSchema = createInsertSchema(receiptsTable);
-const positionInputSchema = createInsertSchema(positionsTable);
-const productInputSchema = createInsertSchema(productsTable);
 
 export const createReceiptInputSchema = v.object({
-   ...v.omit(saveReceiptInputSchema, [
-      'id',
-      'number',
-      'clientTag',
-      'fiscalNumber',
-      'paymentMethod',
-   ]).entries,
+   ...v.omit(saveReceiptInputSchema, ['number', 'fiscalNumber', 'positions'])
+      .entries,
    fiscalNumber: v.nonNullish(receiptInputSchema.entries.fiscalNumber),
-   paymentMethod: v.picklist(['PREPAID', 'POSTPAID']),
-   positions: v.array(
-      v.object({
-         ...v.omit(saveReceiptInputSchema.entries.positions.item, [
-            'offerId',
-            'clientTag',
-         ]).entries,
-         externalId: v.nonNullish(
-            v.pick(offerInputSchema, ['externalId']).entries.externalId,
-         ),
-         title: v.pick(offerInputSchema, ['title']).entries.title,
-      }),
-   ),
-   createdAt: v.pipe(
-      v.string(),
-      v.isoTimestamp(),
-      v.transform((v) => new Date(v)),
-      v.instance(Date),
-   ),
 });
 
 export const createReceiptsInputSchema = v.array(createReceiptInputSchema);
@@ -53,90 +32,104 @@ export const createReceiptsInputSchema = v.array(createReceiptInputSchema);
 export const createReceiptOutputSchema = saveReceiptOutputSchema;
 
 export type CreateReceiptInput = v.InferOutput<typeof createReceiptInputSchema>;
-export type CreateReceiptOutput = SaveReceiptOutput;
+export type CreateReceiptReturnOutput = SaveReceiptReturnOutput;
 
 export async function createReceipts(
-   receipts: CreateReceiptInput[],
+   receiptsInput: CreateReceiptInput[],
    config: WaproConfig,
-): Promise<CreateReceiptOutput[]> {
-   return await db.transaction(async (tx) => {
-      const items = await tx.query.itemsTable.findMany({
-         with: {
-            offer: true,
-            product: true,
-         },
-         where: {
-            offer: {
-               externalId: {
-                  in: receipts.flatMap((receipt) =>
-                     receipt.positions.map((position) => position.externalId),
-                  ),
+): Promise<CreateReceiptReturnOutput[]> {
+   const orders = await db.query.ordersTable.findMany({
+      with: {
+         positions: {
+            with: {
+               offer: {
+                  with: {
+                     items: {
+                        with: {
+                           product: true,
+                        },
+                     },
+                  },
                },
             },
          },
-      });
+      },
+      where: {
+         id: {
+            in: receiptsInput.map((receipt) => receipt.orderId),
+         },
+      },
+   });
 
-      const offers = items
-         .map((item) => item.offer)
-         .filter(
-            (offer, i, arr) => !arr.slice(0, i).find((o) => o.id === offer.id),
+   const mappedOrders = new Map(orders.map((order) => [order.id, order]));
+
+   // check whether each receipt input has created order
+   for (const receipt of receiptsInput) {
+      const order = mappedOrders.get(receipt.orderId);
+
+      if (!order) {
+         throw orderDoesntExist(receipt.orderId);
+      }
+   }
+
+   const taggedReceiptsInput: (CreateReceiptInput & { clientTag: string })[] =
+      receiptsInput.map((receipt, i) => ({ ...receipt, clientTag: String(i) }));
+
+   const generateReceiptsInput: GenerateReceiptInput[] =
+      taggedReceiptsInput.map((receipt) => {
+         const order = v.parse(
+            orderWithPositionsWithOfferSchema,
+            mappedOrders.get(receipt.orderId),
          );
 
-      // Check whether every position in each receipt has offerId referencing to offer.id in DB
-
-      const positions = receipts.flatMap((receipt) => receipt.positions);
-
-      for (const position of positions) {
-         const isMapped = offers
-            .map((offer) => offer.externalId)
-            .includes(position.externalId);
-
-         if (!isMapped) {
-            throw positionHasNoMatchedOffer(
-               position.externalId,
-               position.title,
-            );
-         }
-      }
-
-      const map: Mapping = {};
-
-      offers.forEach(
-         (offer) =>
-            (map[offer.externalId as NonNullable<typeof offer.externalId>] = {
-               offerName: offer.title,
-               products: items
-                  .filter((item) => item.offerId === offer.id)
-                  .map((item) => ({
-                     sid: item.productId,
-                     quantity: item.quantity,
-                     vat: item.product.tax.toString() as '0' | '8' | '23',
-                  })),
-            }),
-      );
-
-      const taggedReceipts = receipts.map((r, i) => ({ id: i, ...r }));
-
-      const generateReceiptsInput: GenerateReceiptInput[] = taggedReceipts.map(
-         (receipt) => ({
-            id: receipt.id,
-            paymentMethod: receipt.paymentMethod,
-            items: receipt.positions.map((position) => ({
-               offerId: position.externalId,
-               price: position.price,
+         return {
+            id: Number(receipt.clientTag),
+            paymentMethod: order.paymentMethod,
+            items: order.positions.map((position) => ({
+               offerId: String(position.offerId),
+               price: currency(position.price, { fromCents: true }).value,
                quantity: position.quantity,
             })),
-            total: receipt.totalPaid,
-         }),
-      );
+            total: currency(order.totalPaid, { fromCents: true }).value,
+         };
+      });
 
-      const generatedReceipts = generateReceipts(
-         generateReceiptsInput,
-         map,
-         config,
-      );
+   const itemsWithDuplicates = orders.flatMap((order) =>
+      order.positions.flatMap((position) => position.offer.items),
+   );
 
-      const savedReceipts = await dbWapro.transaction(async (tx2) => {
+   const items = [
+      ...new Set(itemsWithDuplicates.map((item) => JSON.stringify(item))),
+   ].map((item) => JSON.parse(item) as (typeof itemsWithDuplicates)[number]);
+
+   const generateReceiptsMap: Mapping = {};
+
+   items.forEach((item) => {
+      const record = generateReceiptsMap[item.offerId];
+      const data: Mapping[string]['products'][number] = {
+         quantity: item.quantity,
+         sid: Number(item.product.externalId),
+         vat: String(item.product.tax) as '0' | '8' | '23',
+      };
+
+      if (record) {
+         record.products.push(data);
+      } else {
+         generateReceiptsMap[item.offerId] = {
+            offerName: item.product.name,
+            products: [data],
+         };
+      }
+   });
+
+   const generatedReceipts = generateReceipts(
+      generateReceiptsInput,
+      generateReceiptsMap,
+      config,
+   );
+
+   const savedReceipts = await db.transaction(async (tx) => {
+      return await dbWapro.transaction(async (tx2) => {
          const receiptsInfo: Record<number, RecordReceiptOutput> = {};
 
          for (const generatedReceipt of generatedReceipts) {
@@ -144,26 +137,26 @@ export async function createReceipts(
             receiptsInfo[result.id] = result;
          }
 
-         const saveReceiptsInput: SaveReceiptInput[] = taggedReceipts.map(
+         const saveReceiptsInput: SaveReceiptInput[] = taggedReceiptsInput.map(
             (receipt) => {
                return {
                   ...receipt,
-                  id: undefined,
-                  number: receiptsInfo[receipt.id].receiptNumber,
-                  orderId: receipt.orderId,
-                  positions: receipt.positions.map((position) => ({
-                     ...position,
-                     offerId: offers.find(
-                        (offer) => offer.externalId === position.externalId,
-                     )!.id,
-                  })),
+                  number: receiptsInfo[Number(receipt.clientTag)].receiptNumber,
+                  positions: v
+                     .parse(
+                        orderWithPositionsWithOfferSchema,
+                        mappedOrders.get(receipt.orderId),
+                     )
+                     .positions.map((position) => ({
+                        offerId: position.offerId,
+                     })),
                };
             },
          );
 
          return await saveReceipts(tx, saveReceiptsInput);
       });
-
-      return savedReceipts;
    });
+
+   return savedReceipts;
 }

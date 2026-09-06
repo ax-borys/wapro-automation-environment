@@ -1,6 +1,5 @@
 export {
    type CreateReceiptInput,
-   type CreateReceiptOutput,
    createReceiptInputSchema,
    createReceiptsInputSchema,
    createReceiptOutputSchema,

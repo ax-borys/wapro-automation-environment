@@ -1,83 +1,57 @@
-import { db, offersTable, ordersTable, positionsTable } from '@wae/db';
-import { addOrderInputSchema, addOrderReturnSchema } from './add-orders';
+import {
+   addOrderInputSchema,
+   addOrderReturnSchema,
+   addOrders,
+} from './add-orders';
 import * as v from 'valibot';
-import { and, eq, inArray, or } from 'drizzle-orm';
-import { addressSchema, customerSchema, orderPositionSchema } from '@wae/types';
-import { orderInputSchema } from '../types';
+import {
+   buildSrcExternalIdQueryCondition,
+   filterNewOrdersBySrcExternalId,
+} from '../utils/filter-orders';
+import { db } from '@wae/db';
+import { receiptSchema } from '@wae/types';
 
-const obtainOrderInputSchema = addOrderInputSchema;
-const obtainOrderReturnSchema = addOrderReturnSchema;
+export const obtainOrderInputSchema = addOrderInputSchema;
+export const obtainOrderReturnSchema = v.object({
+   ...addOrderReturnSchema.entries,
+   receipt: v.nullable(receiptSchema),
+});
 
-type ObtainOrderInput = v.InferOutput<typeof obtainOrderInputSchema>;
-type ObtainOrderReturnInput = v.InferInput<typeof obtainOrderReturnSchema>;
+type ObtainOrderOutput = v.InferOutput<typeof obtainOrderInputSchema>;
 type ObtainOrderReturnOutput = v.InferOutput<typeof obtainOrderReturnSchema>;
 
 export async function obtainOrders(
-   input: ObtainOrderInput[],
+   input: ObtainOrderOutput[],
 ): Promise<ObtainOrderReturnOutput[]> {
+   const condition = buildSrcExternalIdQueryCondition(input);
+
    const existingOrders = await db.query.ordersTable.findMany({
       with: {
          customer: true,
-         deliveryAddress: true,
-         positions: true,
+         address: true,
          receipt: true,
+         positions: {
+            with: {
+               offer: true,
+            },
+         },
       },
+      where: condition,
    });
 
-   const conditions = existingOrders.map((order) =>
-      and(
-         eq(positionsTable.orderId, order.id),
-         inArray(
-            positionsTable.offerId,
-            order.positions.map((position) => position.id),
-         ),
-      ),
-   );
+   const newOrdersInput = filterNewOrdersBySrcExternalId(input, existingOrders);
 
-   const positions = await db
-      .select()
-      .from(positionsTable)
-      .where(or(...conditions));
-   console.log(existingOrders);
+   const newOrders: typeof existingOrders = [];
 
-   console.log('Validating existing orders...');
-   const validatedExistingOrders = v.parse(
-      v.array(obtainOrderReturnSchema),
-      existingOrders.map(
-         (order): ObtainOrderReturnInput => ({
-            ...order,
-            items: order.positions.map(
-               (offer): ObtainOrderReturnInput['items'][number] => ({
-                  clientTag: null,
-                  offer: offer,
-                  offerId: offer.id,
-                  orderId: order.id,
-                  price: v.parse(
-                     orderPositionSchema,
-                     positions.find(
-                        (pos) =>
-                           pos.offerId === offer.id && pos.orderId === order.id,
-                     ),
-                  ).price,
-                  quantity: v.parse(
-                     orderPositionSchema,
-                     positions.find(
-                        (pos) =>
-                           pos.offerId === offer.id && pos.orderId === order.id,
-                     ),
-                  ).quantity,
-                  receiptId: order.receipt?.id || null,
-               }),
-            ),
-            status: 'READY_FOR_PROCESSING',
-            paymentMethod: 'PREPAID',
-            address: v.parse(addressSchema, order.deliveryAddress),
-            customer: v.parse(customerSchema, order.customer),
-            preparedAt: order.preparedAt || new Date(),
-         }),
-      ),
-   );
-   console.log('Validation completed.');
+   if (newOrdersInput.length) {
+      const orders = await addOrders(newOrdersInput);
 
-   return validatedExistingOrders;
+      orders.forEach((order) => newOrders.push({ ...order, receipt: null }));
+   }
+
+   const orders = [...existingOrders, ...newOrders];
+
+   const validatedOrders = v.parse(v.array(obtainOrderReturnSchema), orders);
+
+   return validatedOrders;
 }

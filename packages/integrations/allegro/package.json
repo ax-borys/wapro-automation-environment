@@ -19,6 +19,7 @@
       "immer": "^11.1.18",
       "jsonwebtoken": "^9.0.3",
       "jwt": "^0.2.0",
+      "nanoid": "^6.0.1",
       "valibot": "^1.4.2",
       "zustand": "^5.0.15"
    }

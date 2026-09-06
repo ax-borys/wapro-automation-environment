@@ -1,7 +1,6 @@
 import { Hono } from 'hono';
 import * as allegro from '@wae/allegro';
 import { ApiResponse, Offer, Product, ReceiptPosition } from '@wae/types';
-import { getAllOffers } from '@wae/offer';
 import { customAlphabet } from 'nanoid';
 import { addOrderInputSchema, addOrders, obtainOrders } from '@wae/order';
 import * as v from 'valibot';
@@ -16,9 +15,16 @@ import {
 
 const generateId = customAlphabet('0123456789', 10);
 
+async function wipeOrders() {
+   await db.delete(addressesTable);
+   await db.delete(positionsTable);
+   await db.delete(receiptsTable);
+   await db.delete(ordersTable);
+   await db.delete(customersTable);
+}
 export const order = new Hono()
    .get('/orders/pending', async (c) => {
-      const allegroOrders = await allegro.getPendingOrders();
+      const allegroOrders = await allegro.getPendingOrdersMock();
 
       console.log('Validating allegro-orders...');
       const validatedAllegroOrders = v.parse(
@@ -34,13 +40,7 @@ export const order = new Hono()
       );
       console.log('Validation completed.');
 
-      await db.delete(addressesTable);
-      await db.delete(positionsTable);
-      await db.delete(receiptsTable);
-      await db.delete(ordersTable);
-      await db.delete(customersTable);
-
-      const orders = await addOrders(validatedAllegroOrders);
+      const orders = await obtainOrders(validatedAllegroOrders);
 
       return c.json<ApiResponse<typeof orders>>({
          data: orders,

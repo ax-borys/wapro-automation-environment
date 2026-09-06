@@ -1,6 +1,4 @@
 import { client } from '@/lib/client';
-import { CreateReceiptInput, CreateReceiptOutput } from '@wae/receipt';
-import { ApiResponse } from '@wae/types';
 import { InferRequestType } from 'hono/client';
 
 type RecordReceiptInput = InferRequestType<typeof client.receipt.record.$post>;

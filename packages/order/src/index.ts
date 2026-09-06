@@ -4,4 +4,5 @@ export default function helloWorld() {
 
 export * from './types';
 export * from './services/add-orders';
+export * from './utils/filter-orders';
 export * from './services/obtain-orders';

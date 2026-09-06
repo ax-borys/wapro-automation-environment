@@ -44,7 +44,12 @@ export function ReceiptsDataTable({
       });
 
       result.then((r) =>
-         setData(r.map((i) => ({ ...i, createdAt: new Date(i.createdAt) }))),
+         setData(
+            r.map((i) => ({
+               ...i,
+               createdAt: new Date(i.createdAt),
+            })),
+         ),
       );
    }, [date]);
 

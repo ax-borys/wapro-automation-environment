@@ -48,7 +48,19 @@ export async function obtainCustomers(
          ),
    );
 
-   const nonExistingCustomersInput = input.filter((i) => {
+   const nonExistingCustomersInput = input.filter((i, idx, arr) => {
+      const alreadyExists = input
+         .slice(0, idx)
+         .find((j) =>
+            i.externalId
+               ? i.externalId === j.externalId && i.id === j.id
+               : false,
+         );
+
+      if (alreadyExists) {
+         return false;
+      }
+
       const matchedById = i.id ? existingIds.has(i.id) : false;
       const matchedByExternalId = i.externalId
          ? existingExternalIds.has(i.externalId)
@@ -57,10 +69,17 @@ export async function obtainCustomers(
       return !matchedById && !matchedByExternalId;
    });
 
-   const customers = await tx
-      .insert(customersTable)
-      .values(nonExistingCustomersInput)
-      .returning();
+   const customers: Customer[] = [];
+   if (nonExistingCustomersInput.length) {
+      const newCustomers = await tx
+         .insert(customersTable)
+         .values(nonExistingCustomersInput)
+         .returning();
+
+      newCustomers.forEach((customer) => {
+         customers.push(customer);
+      });
+   }
 
    return [...existingCustomers, ...customers];
 }
