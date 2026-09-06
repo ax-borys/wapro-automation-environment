@@ -46,7 +46,7 @@ export const columns = columnHelper.columns([
          const externalId = r.original.externalId;
 
          return (
-            <div className="flex items-center rounded-xl overfllow-clip s-20 justrify-center p-2 bg-white">
+            <div className="flex items-center rounded-xl overfllow-clip s-20 justrify-center p-2 bg-white dark:text-background">
                {externalId === 'delivery' ? (
                   <TruckIcon size="w-[68px]" />
                ) : (

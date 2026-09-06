@@ -89,7 +89,7 @@ export function EditOfferDialogObject({
 }) {
    return (
       <div className="flex w-full h-auto items-center gap-6">
-         <div className="flex items-center justrify-center size-auto shrink-0 bg-white p-2 rounded-md">
+         <div className="flex items-center justrify-center size-auto shrink-0 bg-white p-2 rounded-md dark:text-background">
             {delivery ? (
                <TruckIcon className="size-12.5" />
             ) : (

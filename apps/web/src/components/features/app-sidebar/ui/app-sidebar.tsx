@@ -22,11 +22,13 @@ import {
    SidebarMenuSubButton,
    SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { PlugsIcon } from '@phosphor-icons/react';
+import { MoonIcon, PlugsIcon, SunIcon } from '@phosphor-icons/react';
 import { AtomIcon, ChevronLeft, ChevronRight, Notebook } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import Link from 'next/link';
 
 export function AppSidebar() {
+   const theme = useTheme();
    return (
       <Sidebar collapsible="icon">
          <SidebarHeader className="">
@@ -44,6 +46,17 @@ export function AppSidebar() {
                      platform v0.0.1
                   </span>
                </div>
+               <Button
+                  variant={'outline'}
+                  className="ml-7"
+                  onClick={() =>
+                     theme.resolvedTheme === 'light'
+                        ? theme.setTheme('dark')
+                        : theme.setTheme('light')
+                  }
+               >
+                  <SunIcon weight="bold" />
+               </Button>
             </div>
          </SidebarHeader>
          <SidebarContent>

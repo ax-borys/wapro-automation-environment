@@ -144,7 +144,7 @@ export function EditOffer({
                </EditOfferDialogTitle>
             </EditOfferDialogHeader>
             <EditOfferDialogObject
-               delivery={!!draft.externalId}
+               delivery={draft.externalId === 'delivery'}
                imgSrc={draft.imgSrc}
                title={draft.title}
             />
