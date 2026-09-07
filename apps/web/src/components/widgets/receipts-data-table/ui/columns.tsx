@@ -7,7 +7,7 @@ import {
    BadgeReceiptNumber,
 } from '@/components/ui/receipt-card';
 import { createColumnHelper } from '@tanstack/react-table';
-import { GetReceiptOutput } from '@wae/receipt';
+import { GetReceiptOutput, GetReceiptsInput } from '@wae/receipt';
 import currency from 'currency.js';
 
 export type ReceiptRecorded = {
@@ -19,6 +19,7 @@ export type ReceiptRecorded = {
       packages: GetReceiptOutput['order']['packages'];
       paymentMethod: GetReceiptOutput['order']['paymentMethod'];
       totalPaid: GetReceiptOutput['order']['totalPaid'];
+      totalToPay: GetReceiptOutput['order']['totalToPay'];
    };
    number: GetReceiptOutput['number'];
    fiscalNumber: GetReceiptOutput['fiscalNumber'];
@@ -82,10 +83,10 @@ export const columns = columnHelper.columns([
          );
       },
    }),
-   columnHelper.accessor('order.totalPaid', {
+   columnHelper.accessor('order.totalToPay', {
       header: () => <div className="text-right">Total</div>,
       cell: ({ row: r }) => {
-         const total = r.getValue('order_totalPaid') as number;
+         const total = r.getValue('order_totalToPay') as number;
          const formatted = currency(total, {
             decimal: ',',
             symbol: 'zł',

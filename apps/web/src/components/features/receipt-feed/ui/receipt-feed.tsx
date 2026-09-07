@@ -163,7 +163,12 @@ export function ReceiptFeed({
                   checked={selected.length === ordersList.length}
                   className="cursor-pointer"
                />
-               <span className="">Select all</span>
+               <span className="">
+                  Select all{' '}
+                  {Object.values(receipts).length && !selected.length
+                     ? `(${Object.values(receipts).length})`
+                     : null}
+               </span>
             </div>
             {selected.length ? (
                <>

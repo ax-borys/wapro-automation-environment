@@ -214,9 +214,6 @@ export async function addOrders(
          throw new Error('Offers are not synchronized');
       }
 
-      console.log(offers);
-      console.log(orders);
-
       console.log('Building positions...');
       const positionsInput: PositionInput[] = [...inputMap.values()].flatMap(
          (order) =>
@@ -231,7 +228,7 @@ export async function addOrders(
                      offers.find(
                         (o) =>
                            o.externalId === position.offer.externalId &&
-                           o.src === 'curl',
+                           o.src === position.offer.src,
                      ),
                   ).id,
                   price: position.price,

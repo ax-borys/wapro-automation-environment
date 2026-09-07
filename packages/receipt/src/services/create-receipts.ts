@@ -86,11 +86,11 @@ export async function createReceipts(
             id: Number(receipt.clientTag),
             paymentMethod: order.paymentMethod,
             items: order.positions.map((position) => ({
-               offerId: String(position.offerId),
+               offerId: String(position.offer.id),
                price: currency(position.price, { fromCents: true }).value,
                quantity: position.quantity,
             })),
-            total: currency(order.totalPaid, { fromCents: true }).value,
+            total: currency(order.totalToPay, { fromCents: true }).value,
          };
       });
 

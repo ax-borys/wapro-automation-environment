@@ -24,7 +24,7 @@ async function wipeOrders() {
 }
 export const order = new Hono()
    .get('/orders/pending', async (c) => {
-      const allegroOrders = await allegro.getPendingOrdersMock();
+      const allegroOrders = await allegro.getPendingOrders();
 
       console.log('Validating allegro-orders...');
       const validatedAllegroOrders = v.parse(

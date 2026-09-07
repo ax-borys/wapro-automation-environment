@@ -35,6 +35,7 @@ out/
 tmp/
 **/sensetive/
 **/sensitive/
+**/drizzle/
 
 config.json
 local.db

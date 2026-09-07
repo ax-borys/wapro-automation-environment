@@ -156,6 +156,7 @@ export function Receipt({ order }: { order: OrderModel }) {
                               alt="Product preview"
                               width={30}
                               height={30}
+                              className="rounded-sm"
                            />
                         )}
                      </ReceiptCardTablePosition>
@@ -163,11 +164,12 @@ export function Receipt({ order }: { order: OrderModel }) {
                </ReceiptCardTableBody>
                <ReceiptCardTableFooter
                   totalNet={
-                     currency(order.totalPaid, { fromCents: true }).divide(1.23)
-                        .value
+                     currency(order.totalToPay, { fromCents: true }).divide(
+                        1.23,
+                     ).value
                   }
                   totalGross={
-                     currency(order.totalPaid, { fromCents: true }).value
+                     currency(order.totalToPay, { fromCents: true }).value
                   }
                />
             </ReceiptCardTable>

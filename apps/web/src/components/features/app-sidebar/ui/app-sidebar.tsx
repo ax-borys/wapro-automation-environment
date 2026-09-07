@@ -48,7 +48,7 @@ export function AppSidebar() {
                </div>
                <Button
                   variant={'outline'}
-                  className="ml-7"
+                  className="ml-7 size-8"
                   onClick={() =>
                      theme.resolvedTheme === 'light'
                         ? theme.setTheme('dark')
