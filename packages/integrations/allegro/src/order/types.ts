@@ -15,9 +15,9 @@ export type RawOrder = {
       lastName: string | null;
       companyName: string | null;
       guest: boolean;
-      personalIdentity: string;
-      phoneNumber: string;
-      address: Address;
+      personalIdentity: string | null;
+      phoneNumber: string | null;
+      address: Address | null;
    };
    payment: {
       type: 'ONLINE' | 'CASH_ON_DELIVERY';
@@ -52,11 +52,22 @@ export type RawOrder = {
          countryCode: string;
          companyName: string | null;
          phoneNumber: string | null;
-      };
+      } | null;
       cost: {
          amount: string;
          currency: 'PLN';
       };
+      pickupPoint: {
+         id: string | null;
+         name: string | null;
+         description: string | null;
+         address: {
+            street: string;
+            zipCode: string;
+            city: string;
+            countryCode: string;
+         } | null;
+      } | null;
       calculatedNumberOfPackages: number;
    };
    invoice: {
