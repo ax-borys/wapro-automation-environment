@@ -1,6 +1,4 @@
 import * as v from 'valibot';
-import { orderValidationSchema } from './get-pending-orders';
-
 type Order = v.InferOutput<typeof orderValidationSchema>;
 
 export async function getPendingOrdersMock(): Promise<Order[]> {

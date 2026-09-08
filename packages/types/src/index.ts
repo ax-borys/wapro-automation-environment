@@ -8,6 +8,8 @@ export * from './domain/product';
 export * from './domain/item';
 export * from './domain/position';
 export * from './domain/address';
+export * from './domain/delivery';
+export * from './domain/recipient';
 
 export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type { WaproConfig } from './wapro-types.ts';
