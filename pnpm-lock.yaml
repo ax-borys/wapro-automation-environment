@@ -238,12 +238,18 @@ importers:
       '@types/mssql':
         specifier: ^12.3.0
         version: 12.3.0(supports-color@7.2.0)
+      '@wae/address':
+        specifier: workspace:*
+        version: link:../../packages/address
       '@wae/allegro':
         specifier: workspace:*
         version: link:../../packages/integrations/allegro
       '@wae/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@wae/customer':
+        specifier: workspace:*
+        version: link:../../packages/customer
       '@wae/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -425,6 +431,24 @@ importers:
         specifier: ^5
         version: 5.9.3
 
+  packages/address:
+    dependencies:
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../db
+      '@wae/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../types
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
+
   packages/api-types:
     dependencies:
       '@wae/api':
@@ -436,6 +460,24 @@ importers:
       hono:
         specifier: ^4.13.2
         version: 4.13.2
+
+  packages/customer:
+    dependencies:
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../db
+      '@wae/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../types
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
 
   packages/db:
     dependencies:
@@ -523,6 +565,21 @@ importers:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4
 
+  packages/kernel:
+    dependencies:
+      '@wae/db':
+        specifier: workspace:*
+        version: link:../db
+      '@wae/types':
+        specifier: workspace:*
+        version: link:../types
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
+
   packages/offer:
     dependencies:
       '@wae/core':
@@ -543,6 +600,9 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../db
+      '@wae/kernel':
+        specifier: workspace:*
+        version: link:../kernel
       '@wae/types':
         specifier: workspace:*
         version: link:../types

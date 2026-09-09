@@ -23,7 +23,7 @@ export const customersTable = sqliteTable('customers', {
    clientTag: text('client_tag'),
 });
 
-export const recipientsTable = sqliteTable('recepients', {
+export const recipientsTable = sqliteTable('recipients', {
    id: int().primaryKey({ autoIncrement: true }),
    addressId: int()
       .notNull()
@@ -44,6 +44,7 @@ export const deliveriesTable = sqliteTable('deliveries', {
    pointId: text('point_id'),
    pointName: text('point_name'),
    pointDescription: text('point_description'),
+   clientTag: text('client_tag'),
 });
 
 export const ordersTable = sqliteTable(
@@ -188,7 +189,7 @@ export const relations = defineRelations(
          }),
          orders: r.many.ordersTable(),
       },
-      recepientsTable: {
+      recipientsTable: {
          address: r.one.addressesTable({
             from: r.recipientsTable.addressId,
             to: r.addressesTable.id,
@@ -204,7 +205,7 @@ export const relations = defineRelations(
             from: r.ordersTable.customerId,
             to: r.customersTable.id,
          }),
-         recepient: r.one.receiptsTable({
+         recipient: r.one.recipientsTable({
             from: r.ordersTable.recepientId,
             to: r.recipientsTable.id,
          }),

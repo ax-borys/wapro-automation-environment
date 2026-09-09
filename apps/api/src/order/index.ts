@@ -12,6 +12,9 @@ import {
    positionsTable,
    receiptsTable,
 } from '@wae/db';
+import { NotNull } from 'drizzle-orm';
+import { obtainAddresses } from '@wae/address';
+import { obtainCustomers } from '@wae/customer';
 
 const generateId = customAlphabet('0123456789', 10);
 
@@ -26,19 +29,42 @@ export const order = new Hono()
    .get('/orders/pending', async (c) => {
       const allegroOrders = await allegro.getPendingOrders();
 
-      console.log('Validating allegro-orders...');
-      const validatedAllegroOrders = v.parse(
-         v.array(addOrderInputSchema),
-         allegroOrders.map((order) => ({
-            ...order,
-            items: order.positions.map((position) => ({
-               ...position,
-            })),
-            preparedAt: order.preparedAt?.toISOString() || null,
-            createdAt: order.createdAt?.toISOString() || null,
-         })),
+      const customerAddresses = await obtainAddresses(
+         allegroOrders
+            .filter(
+               (
+                  order,
+               ): order is typeof order & {
+                  customer: typeof order.customer & {
+                     address: NonNullable<typeof order.customer.address>;
+                  };
+               } => order.customer.address !== null,
+            )
+            .map((order) => order.customer.address),
       );
-      console.log('Validation completed.');
+
+      const customers = await obtainCustomers(
+         allegroOrders.map((order) => {
+            const customerAddress = order.customer.address
+               ? customerAddresses.find(
+                    (address) => address.clientTag === order.clientTag,
+                 )
+               : null;
+
+            return {
+               ...order.customer,
+               addressId: customerAddress ? customerAddress.id : null,
+            };
+         }),
+      );
+
+      const recipientAddresses = await obtainAddresses(
+         allegroOrders.map((order) => order.recipient.address),
+      );
+
+      const deliveryAddresses = await obtainAddresses(
+         allegroOrders.map((order) => order.delivery.address),
+      );
 
       const orders = await obtainOrders(validatedAllegroOrders);
 

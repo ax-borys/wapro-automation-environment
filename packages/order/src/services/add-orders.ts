@@ -2,8 +2,6 @@ import * as v from 'valibot';
 import {
    addressInputSchema,
    addressSchema,
-   customerInputSchema,
-   customerSchema,
    offerInputSchema,
    offerSchema,
    Order,
@@ -16,22 +14,13 @@ import {
    PositionInput,
    positionInputSchema,
    positionSchema,
+   recipientFullInputSchema,
 } from '@wae/types';
-import {
-   addressesTable,
-   customersTable,
-   db,
-   offersTable,
-   ordersTable,
-   positionsTable,
-} from '@wae/db';
-import { obtainCustomers } from './obtain-customers';
+import { db, offersTable, ordersTable, positionsTable } from '@wae/db';
 import { inArray } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
 
 export const addOrderInputSchema = v.object({
-   ...v.omit(orderInputSchema, ['createdAt', 'customerId', 'id', 'clientTag'])
-      .entries,
+   ...v.omit(orderInputSchema, ['createdAt', 'id', 'clientTag']).entries,
    preparedAt: v.optional(
       v.nullable(
          v.union([
@@ -56,8 +45,6 @@ export const addOrderInputSchema = v.object({
          ]),
       ),
    ),
-   customer: v.omit(customerInputSchema, ['id', 'clientTag']),
-   address: v.omit(addressInputSchema, ['customerId', 'orderId', 'clientTag']),
    positions: v.pipe(
       v.array(
          v.object({
@@ -76,8 +63,6 @@ export const addOrderInputSchema = v.object({
 
 export const addOrderReturnSchema = v.object({
    ...orderSchema.entries,
-   customer: customerSchema,
-   address: addressSchema,
    positions: v.pipe(
       v.array(
          v.object({
@@ -128,7 +113,6 @@ export async function addOrders(
          positions: (AddOrderInputSchema['positions'][number] & {
             clientTag: string;
          })[];
-         address: { clientTag: string };
          clientTag: string;
       }
    >();
@@ -137,11 +121,6 @@ export async function addOrders(
       inputMap.set(String(i), {
          ...e,
          clientTag: String(i),
-         customer: {
-            ...e.customer,
-            externalId: e.customer.externalId ?? nanoid(),
-         },
-         address: { ...e.address, clientTag: String(i) },
          positions: e.positions.map((position) => ({
             ...position,
             clientTag: String(i),
@@ -150,15 +129,8 @@ export async function addOrders(
    );
 
    const result = await db.transaction(async (tx) => {
-      const customersInput = [...inputMap.values()].map((i) => i.customer);
-      const customers = await obtainCustomers(tx, customersInput);
-
       const ordersInput = [...inputMap.values()].map((i) => ({
          ...i,
-         customerId: v.parse(
-            customerSchema,
-            customers.find((c) => i.customer.externalId === c.externalId),
-         ).id,
          preparedAt: i.preparedAt ?? new Date(),
       }));
 
@@ -181,25 +153,6 @@ export async function addOrders(
       console.log('Validation orders...');
       const validatedOrders = v.parse(v.array(orderSchema), orders);
       console.log('Validation completed.');
-
-      const addressesInput = [...inputMap.values()].map((i) => ({
-         ...i.address,
-         customerId: v.parse(
-            customerSchema,
-            customers.find((c) => i.customer.externalId === c.externalId),
-         ).id,
-         orderId: v.parse(
-            orderSchema,
-            orders.find(
-               (o) => o.externalId === i.externalId && o.src === i.src,
-            ),
-         ).id,
-      }));
-
-      const addresses = await tx
-         .insert(addressesTable)
-         .values(addressesInput)
-         .returning();
 
       const externalOffersIds = new Set(
          input.flatMap((i) => i.positions.map((i) => i.offer.externalId)),
@@ -255,14 +208,6 @@ export async function addOrders(
       const completeOrders: AddOrderReturnInput[] = validatedOrders.map(
          (order): AddOrderReturnInput => ({
             ...order,
-            customer: v.parse(
-               customerSchema,
-               customers.find((c) => c.id === order.customerId),
-            ),
-            address: v.parse(
-               addressSchema,
-               addresses.find((a) => a.clientTag === order.clientTag),
-            ),
             positions: positions
                .filter((p) => p.orderId === order.id)
                .map((p) => ({

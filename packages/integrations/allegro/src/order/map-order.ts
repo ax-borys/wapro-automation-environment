@@ -17,57 +17,45 @@ import currency from 'currency.js';
 
 const customerSchema = v.union([
    v.object({
-      ...v.omit(customerFullSchema, ['clientTag', 'id', 'addressId']).entries,
-      address: v.nullable(v.omit(addressSchema, ['id', 'clientTag'])),
+      ...v.omit(customerFullSchema, ['id', 'addressId']).entries,
+      address: v.nullable(v.omit(addressSchema, ['id'])),
    }),
    v.object({
-      ...v.omit(customerWithFullNameSchema, ['clientTag', 'id', 'addressId'])
-         .entries,
-      address: v.nullable(v.omit(addressSchema, ['id', 'clientTag'])),
+      ...v.omit(customerWithFullNameSchema, ['id', 'addressId']).entries,
+      address: v.nullable(v.omit(addressSchema, ['id'])),
    }),
    v.object({
-      ...v.omit(customerWithCompanyNameSchema, ['clientTag', 'id', 'addressId'])
-         .entries,
-      address: v.nullable(v.omit(addressSchema, ['id', 'clientTag'])),
+      ...v.omit(customerWithCompanyNameSchema, ['id', 'addressId']).entries,
+      address: v.nullable(v.omit(addressSchema, ['id'])),
    }),
 ]);
 
 const recipientSchema = v.union([
    v.object({
-      ...v.omit(recipientFullSchema, ['clientTag', 'id', 'addressId']).entries,
-      address: v.nullable(v.omit(addressSchema, ['id', 'clientTag'])),
+      ...v.omit(recipientFullSchema, ['id', 'addressId']).entries,
+      address: v.omit(addressSchema, ['id']),
    }),
    v.object({
-      ...v.omit(recipientWithFullNameSchema, ['clientTag', 'id', 'addressId'])
-         .entries,
-      address: v.nullable(v.omit(addressSchema, ['id', 'clientTag'])),
+      ...v.omit(recipientWithFullNameSchema, ['id', 'addressId']).entries,
+      address: v.omit(addressSchema, ['id']),
    }),
    v.object({
-      ...v.omit(recipientWithCompanyNameSchema, [
-         'clientTag',
-         'id',
-         'addressId',
-      ]).entries,
-      address: v.nullable(v.omit(addressSchema, ['id', 'clientTag'])),
+      ...v.omit(recipientWithCompanyNameSchema, ['id', 'addressId']).entries,
+      address: v.omit(addressSchema, ['id']),
    }),
 ]);
 
 export const deliveryWithAddressSchema = v.object({
    ...v.omit(deliverySchema, ['id', 'addressId']).entries,
-   address: v.omit(addressSchema, ['id', 'clientTag']),
+   address: v.omit(addressSchema, ['id']),
 });
 
 export const orderValidationSchema = v.object({
-   ...v.omit(orderSchema, [
-      'id',
-      'customerId',
-      'clientTag',
-      'recepientId',
-      'deliveryId',
-   ]).entries,
+   ...v.omit(orderSchema, ['id', 'customerId', 'recepientId', 'deliveryId'])
+      .entries,
    customer: customerSchema,
    recipient: recipientSchema,
-   delivery: v.nullable(deliveryWithAddressSchema),
+   delivery: deliveryWithAddressSchema,
    positions: v.array(
       v.object({
          ...v.omit(positionSchema, [
@@ -90,6 +78,7 @@ export function mapOrder(order: RawOrder): Order {
       street: order.buyer.address?.street || null,
       postalCode: order.buyer.address?.postCode || null,
       countryCode: order.buyer.address?.countryCode || null,
+      clientTag: order.id,
    };
 
    const validatedCustomerAddress = v.safeParse(
@@ -115,6 +104,7 @@ export function mapOrder(order: RawOrder): Order {
       address: validatedCustomerAddress.success
          ? validatedCustomerAddress.output
          : null,
+      clientTag: order.id,
    } as Order['customer'];
 
    const validatedCustomer = v.parse(customerSchema, customer);
@@ -132,10 +122,11 @@ export function mapOrder(order: RawOrder): Order {
       countryCode: order.delivery.address.countryCode,
       postalCode: order.delivery.address.zipCode,
       street: order.delivery.address.street,
+      clientTag: order.id,
    };
 
    const validatedRecipientAddress = v.parse(
-      v.omit(addressSchema, ['clientTag', 'id']),
+      v.omit(addressSchema, ['id']),
       recipientAddress,
    );
 
@@ -146,6 +137,7 @@ export function mapOrder(order: RawOrder): Order {
       lastName: order.delivery.address.lastName,
       email: null,
       phoneNumber: order.delivery.address.phoneNumber,
+      clientTag: order.id,
    };
 
    const validatedRecipient = v.parse(recipientSchema, recipient);
@@ -155,27 +147,31 @@ export function mapOrder(order: RawOrder): Order {
       street: order.delivery.pickupPoint?.address?.street,
       countryCode: order.delivery.pickupPoint?.address?.countryCode,
       postalCode: order.delivery.pickupPoint?.address?.zipCode,
+      clientTag: order.id,
    };
 
    const validatedPickupPointAddress = v.safeParse(
-      v.omit(addressSchema, ['id', 'clientTag']),
+      v.omit(addressSchema, ['id']),
       pickupPointAddress,
    );
 
-   const delivery: Order['delivery'] | null =
-      validatedPickupPointAddress.success
-         ? {
-              pointId: order.delivery.pickupPoint?.id || null,
-              pointName: order.delivery.pickupPoint?.name || null,
-              pointDescription: order.delivery.pickupPoint?.description || null,
-              address: validatedPickupPointAddress.output,
-           }
-         : null;
+   const delivery: Order['delivery'] = validatedPickupPointAddress.success
+      ? {
+           pointId: order.delivery.pickupPoint?.id || null,
+           pointName: order.delivery.pickupPoint?.name || null,
+           pointDescription: order.delivery.pickupPoint?.description || null,
+           address: validatedPickupPointAddress.output,
+           clientTag: order.id,
+        }
+      : {
+           pointId: null,
+           pointName: null,
+           pointDescription: null,
+           address: validatedRecipientAddress,
+           clientTag: order.id,
+        };
 
-   const validatedDelivery = v.parse(
-      v.nullable(deliveryWithAddressSchema),
-      delivery,
-   );
+   const validatedDelivery = v.parse(deliveryWithAddressSchema, delivery);
 
    const mappedOrder: Order = {
       externalId: order.id,
@@ -210,6 +206,7 @@ export function mapOrder(order: RawOrder): Order {
       fulfilledAt: null,
       preparedAt: new Date(order.updatedAt),
       createdAt: new Date(),
+      clientTag: order.id,
    };
 
    const validatedOrder = v.parse(orderValidationSchema, mappedOrder);
