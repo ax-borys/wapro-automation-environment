@@ -10,11 +10,13 @@ export function compareAddresses(
    address2: CompareAddressInput,
 ): boolean {
    let similar = true;
+   const validatedAddress1 = v.parse(compareAddressInputSchema, address1);
+   const validatedAddress2 = v.parse(compareAddressInputSchema, address2);
 
    for (const key in address1) {
       if (
-         address1[key as keyof typeof address1] !==
-         address2[key as keyof typeof address1]
+         validatedAddress1[key as keyof typeof validatedAddress1] !==
+         validatedAddress2[key as keyof typeof validatedAddress2]
       ) {
          similar = false;
       }

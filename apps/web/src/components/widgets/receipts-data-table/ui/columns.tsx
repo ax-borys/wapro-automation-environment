@@ -13,8 +13,9 @@ import currency from 'currency.js';
 export type ReceiptRecorded = {
    order: {
       customer: {
-         firstName: string;
-         lastName: string;
+         firstName: string | null | undefined;
+         lastName: string | null | undefined;
+         companyName: string | null | undefined;
       };
       packages: GetReceiptOutput['order']['packages'];
       paymentMethod: GetReceiptOutput['order']['paymentMethod'];

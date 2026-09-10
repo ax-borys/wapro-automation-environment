@@ -17,15 +17,15 @@ import currency from 'currency.js';
 
 const customerSchema = v.union([
    v.object({
+      ...v.omit(customerWithCompanyNameSchema, ['id', 'addressId']).entries,
+      address: v.nullable(v.omit(addressSchema, ['id'])),
+   }),
+   v.object({
       ...v.omit(customerFullSchema, ['id', 'addressId']).entries,
       address: v.nullable(v.omit(addressSchema, ['id'])),
    }),
    v.object({
       ...v.omit(customerWithFullNameSchema, ['id', 'addressId']).entries,
-      address: v.nullable(v.omit(addressSchema, ['id'])),
-   }),
-   v.object({
-      ...v.omit(customerWithCompanyNameSchema, ['id', 'addressId']).entries,
       address: v.nullable(v.omit(addressSchema, ['id'])),
    }),
 ]);
@@ -82,7 +82,7 @@ export function mapOrder(order: RawOrder): Order {
    };
 
    const validatedCustomerAddress = v.safeParse(
-      v.omit(addressSchema, ['clientTag', 'id']),
+      v.omit(addressSchema, ['id']),
       customerAddress,
    );
 

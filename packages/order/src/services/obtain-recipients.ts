@@ -12,8 +12,8 @@ type ObtainRecipientReturnOutput = v.InferOutput<
    typeof obtainRecipientReturnSchema
 >;
 
-export const obtainDeliveries: (
-   deliveriesInput: ObtainRecipientOutput[],
+export const obtainRecipients: (
+   recipientsInput: ObtainRecipientOutput[],
 ) => Promise<ObtainRecipientReturnOutput[]> = createObtainEntities({
    table: recipientsTable,
    equal: (table, recipient) => eq(table.addressId, recipient.addressId),

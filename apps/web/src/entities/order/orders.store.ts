@@ -1,6 +1,7 @@
 import {
    Address,
    Customer,
+   Delivery,
    Offer,
    Order,
    OrderPoisition,
@@ -14,8 +15,15 @@ export type PositionModel = Omit<OrderPoisition, 'clientTag' | 'receiptId'> & {
 };
 
 export type OrderModel = Omit<Order, 'clientTag'> & {
-   address: Omit<Address, 'clientTag' | 'orderId' | 'customerId'>;
-   customer: Omit<Customer, 'clientTag'>;
+   customer: Omit<Customer, 'clientTag'> & {
+      address:
+         | Omit<Address, 'clientTag' | 'orderId' | 'customerId'>
+         | null
+         | undefined;
+   };
+   delivery: Omit<Delivery, 'clientTag'> & {
+      address: Omit<Address, 'clientTag'>;
+   };
    positions: Record<PositionModel['offer']['id'], PositionModel>;
    receipt: Omit<Receipt, 'clientTag'> | null;
 };

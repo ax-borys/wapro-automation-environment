@@ -9,7 +9,7 @@ import {
    filterNewOrdersBySrcExternalId,
 } from '../utils/filter-orders';
 import { db } from '@wae/db';
-import { receiptSchema } from '@wae/types';
+import { Order, receiptSchema } from '@wae/types';
 
 export const obtainOrderInputSchema = addOrderInputSchema;
 export const obtainOrderReturnSchema = v.object({
@@ -27,14 +27,12 @@ export async function obtainOrders(
 
    const existingOrders = await db.query.ordersTable.findMany({
       with: {
-         customer: true,
-         address: true,
-         receipt: true,
          positions: {
             with: {
                offer: true,
             },
          },
+         receipt: true,
       },
       where: condition,
    });

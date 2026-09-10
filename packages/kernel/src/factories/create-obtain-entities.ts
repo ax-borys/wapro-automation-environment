@@ -73,10 +73,13 @@ export function createObtainEntities<
          },
       );
 
-      const createdEntities: Entity<TReturnSchema>[] = (await db
-         .insert(table)
-         .values(uniqueNonExistingEntitiesInput as InferInsertModel<T>)
-         .returning()) as Entity<TReturnSchema>[];
+      const createdEntities: Entity<TReturnSchema>[] =
+         uniqueNonExistingEntitiesInput.length
+            ? ((await db
+                 .insert(table)
+                 .values(uniqueNonExistingEntitiesInput as InferInsertModel<T>)
+                 .returning()) as Entity<TReturnSchema>[])
+            : [];
 
       const mappedEntities = input.map((entityInput) => {
          const entity = [...createdEntities, ...existingEntities].find(
@@ -90,8 +93,8 @@ export function createObtainEntities<
             : entity;
       });
 
-      const validatedEntities = schema
-         ? v.parse(v.array(schema), mappedEntities)
+      const validatedEntities = returnSchema
+         ? v.parse(v.array(returnSchema), mappedEntities)
          : mappedEntities;
 
       return validatedEntities;

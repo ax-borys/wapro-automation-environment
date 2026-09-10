@@ -176,7 +176,9 @@ export function Receipt({ order }: { order: OrderModel }) {
          </ReceiptCardBody>
          <ReceiptCardFooter
             buyerFullname={
-               order.customer.firstName! + ' ' + order.customer.lastName!
+               order.customer.firstName && order.customer.lastName
+                  ? order.customer.firstName + ' ' + order.customer.lastName
+                  : order.customer.companyName + ''
             }
             orderProcessedAt={new Date(
                order.preparedAt ?? Date.now(),
