@@ -238,26 +238,46 @@ export function ReceiptCardTablePosition({
 }
 
 export function ReceiptCardFooter({
-   buyerFullname,
-   orderProcessedAt,
    children,
    ...props
-}: React.ComponentProps<typeof CardFooter> & {
-   buyerFullname: string;
-   orderProcessedAt: string;
-}) {
+}: React.ComponentProps<typeof CardFooter>) {
    return (
-      <CardFooter {...props}>
-         <Item>
-            <ItemMedia variant={'icon'}>
-               <UserIcon />
-            </ItemMedia>
-            <ItemContent>
-               <ItemTitle>{buyerFullname}</ItemTitle>
-               <ItemDescription>{orderProcessedAt}</ItemDescription>
-            </ItemContent>
-            <ItemActions>{children}</ItemActions>
-         </Item>
+      <CardFooter className="flex justify-between" {...props}>
+         {children}
       </CardFooter>
    );
 }
+
+export function ReceiptCardRecipient({
+   recipientFullName,
+   orderProcessedAt,
+}: {
+   recipientFullName: string;
+   orderProcessedAt: string;
+}) {
+   return (
+      <Item>
+         <ItemMedia variant={'icon'}>
+            <UserIcon />
+         </ItemMedia>
+         <ItemContent>
+            <ItemTitle>{recipientFullName}</ItemTitle>
+            <ItemDescription>{orderProcessedAt}</ItemDescription>
+         </ItemContent>
+      </Item>
+   );
+}
+
+export function ReceiptCardFooterActions({
+   children,
+   className,
+   ...props
+}: React.ComponentProps<'div'>) {
+   return (
+      <div className={cn('flex gap-2')} {...props}>
+         {children}
+      </div>
+   );
+}
+
+export function ReceiptCardDelivery({ classname });
