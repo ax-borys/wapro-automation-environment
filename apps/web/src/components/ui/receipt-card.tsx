@@ -276,7 +276,7 @@ export function ReceiptCardFooterActions({
    ...props
 }: React.ComponentProps<'div'>) {
    return (
-      <div className={cn('flex gap-2')} {...props}>
+      <div className={cn('flex gap-2 w-60 justify-end')} {...props}>
          {children}
       </div>
    );
