@@ -20,6 +20,7 @@ import {
    addressesTable,
    customersTable,
    db,
+   deliveriesTable,
    ordersTable,
    positionsTable,
    receiptsTable,
@@ -31,11 +32,12 @@ import { obtainCustomers } from '@wae/customer';
 const generateId = customAlphabet('0123456789', 10);
 
 async function wipeOrders() {
-   await db.delete(addressesTable);
    await db.delete(positionsTable);
    await db.delete(receiptsTable);
    await db.delete(ordersTable);
+   await db.delete(deliveriesTable);
    await db.delete(customersTable);
+   await db.delete(addressesTable);
 }
 export const order = new Hono()
    .get('/orders/pending', async (c) => {

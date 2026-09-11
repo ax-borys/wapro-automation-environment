@@ -155,17 +155,29 @@ export function mapOrder(order: RawOrder): Order {
       pickupPointAddress,
    );
 
+   const createPointName = (
+      pointId?: string | null,
+      pointName?: string | null,
+      deliveryMethod?: string | null,
+   ) => {
+      return `${deliveryMethod ?? 'Delivery'} ${pointId ? '- ' + pointId : ''}`;
+   };
+
    const delivery: Order['delivery'] = validatedPickupPointAddress.success
       ? {
            pointId: order.delivery.pickupPoint?.id || null,
-           pointName: order.delivery.pickupPoint?.name || null,
+           pointName: createPointName(
+              order.delivery.pickupPoint?.id,
+              order.delivery.pickupPoint?.name,
+              order.delivery.method?.name,
+           ),
            pointDescription: order.delivery.pickupPoint?.description || null,
            address: validatedPickupPointAddress.output,
            clientTag: order.id,
         }
       : {
            pointId: null,
-           pointName: null,
+           pointName: order.delivery?.method?.name || null,
            pointDescription: null,
            address: validatedRecipientAddress,
            clientTag: order.id,

@@ -22,6 +22,7 @@ import {
    HandCoinsIcon,
    ReceiptIcon,
    SealCheckIcon,
+   TruckIcon,
    User,
    UserIcon,
 } from '@phosphor-icons/react';
@@ -36,6 +37,7 @@ import {
 import { cn } from '@/lib/utils';
 import currency from 'currency.js';
 import React from 'react';
+import { Address, Delivery } from '@wae/types';
 
 export function BadgePaid({
    className,
@@ -256,7 +258,7 @@ export function ReceiptCardRecipient({
    orderProcessedAt: string;
 }) {
    return (
-      <Item>
+      <Item className="w-100">
          <ItemMedia variant={'icon'}>
             <UserIcon />
          </ItemMedia>
@@ -279,5 +281,27 @@ export function ReceiptCardFooterActions({
       </div>
    );
 }
-
-export function ReceiptCardDelivery({ classname });
+export function ReceiptCardDeliveryCard({
+   title,
+   address,
+}: {
+   title: string;
+   address: Omit<Address, 'id' | 'clientTag'>;
+}) {
+   return (
+      <Item className="w-100">
+         <ItemMedia variant={'icon'}>
+            <TruckIcon />
+         </ItemMedia>
+         <ItemContent>
+            <ItemTitle>{title}</ItemTitle>
+            <ItemDescription>
+               <span className="block">{address.street}</span>
+               <span className="block">
+                  {address.postalCode} {address.city} {address.countryCode}
+               </span>
+            </ItemDescription>
+         </ItemContent>
+      </Item>
+   );
+}

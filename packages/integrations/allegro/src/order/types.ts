@@ -53,6 +53,10 @@ export type RawOrder = {
          companyName: string | null;
          phoneNumber: string | null;
       } | null;
+      method: {
+         id: string | null;
+         name: string | null;
+      } | null;
       cost: {
          amount: string;
          currency: 'PLN';

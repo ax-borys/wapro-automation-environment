@@ -7,10 +7,11 @@ import {
    BadgeReceiptNumber,
    ReceiptCard,
    ReceiptCardBody,
+   ReceiptCardDeliveryCard,
    ReceiptCardFooter,
    ReceiptCardFooterActions,
-   ReceiptCardFooterRecipient,
    ReceiptCardHeader,
+   ReceiptCardRecipient,
    ReceiptCardTable,
    ReceiptCardTableBody,
    ReceiptCardTableFooter,
@@ -177,7 +178,7 @@ export function Receipt({ order }: { order: OrderModel }) {
             </ReceiptCardTable>
          </ReceiptCardBody>
          <ReceiptCardFooter>
-            <ReceiptCardFooterRecipient
+            <ReceiptCardRecipient
                recipientFullName={
                   order.customer.firstName && order.customer.lastName
                      ? order.customer.firstName + ' ' + order.customer.lastName
@@ -186,6 +187,10 @@ export function Receipt({ order }: { order: OrderModel }) {
                orderProcessedAt={new Date(
                   order.preparedAt ?? Date.now(),
                ).toLocaleString()}
+            />
+            <ReceiptCardDeliveryCard
+               title={order.delivery.pointName || 'Delivery'}
+               address={order.delivery.address}
             />
             <ReceiptCardFooterActions>
                <Dialog>
