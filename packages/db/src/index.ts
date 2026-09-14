@@ -31,4 +31,5 @@ export {
    ordersTable,
    deliveriesTable,
    recipientsTable,
+   invoicesTable,
 } from './schemas';
