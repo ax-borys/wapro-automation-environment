@@ -45,6 +45,13 @@ export const order = new Hono()
       const allegroOrders = await allegro.getPendingOrders();
       console.log('Fetching succeeded.');
 
+      if (!allegroOrders.length) {
+         return c.json<ApiResponse<[]>>({
+            data: [],
+            error: null,
+         });
+      }
+
       console.log("Obtaining customers' addresses...");
       const customerAddresses = await obtainAddresses(
          allegroOrders
