@@ -61,6 +61,7 @@ export const orderValidationSchema = v.object({
          ...v.omit(positionSchema, [
             'clientTag',
             'receiptId',
+            'invoiceId',
             'offerId',
             'orderId',
          ]).entries,

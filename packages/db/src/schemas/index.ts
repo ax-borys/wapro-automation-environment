@@ -101,10 +101,22 @@ export const receiptsTable = sqliteTable('receipts', {
       .$defaultFn(() => new Date()),
 });
 
+export const invoicesTable = sqliteTable('invoices', {
+   id: int().primaryKey({ autoIncrement: true }),
+   orderId: int('order_id')
+      .notNull()
+      .references(() => ordersTable.id),
+   clientTag: text('client_tag'),
+   createdAt: int('created_at', { mode: 'timestamp_ms' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+});
+
 export const positionsTable = sqliteTable(
    'positions',
    {
       receiptId: int('receipt_id').references(() => receiptsTable.id),
+      invoiceId: int('invoice_id').references(() => invoicesTable.id),
       orderId: int('order_id')
          .notNull()
          .references(() => ordersTable.id),
@@ -168,6 +180,7 @@ export const relations = defineRelations(
       addressesTable,
       deliveriesTable,
       recipientsTable,
+      invoicesTable,
    },
    (r) => ({
       addressesTable: {
@@ -215,6 +228,7 @@ export const relations = defineRelations(
          }),
 
          receipt: r.one.receiptsTable(),
+         invoice: r.one.invoicesTable(),
          positions: r.many.positionsTable(),
       },
       receiptsTable: {
@@ -228,6 +242,17 @@ export const relations = defineRelations(
          }),
          positions: r.many.positionsTable(),
       },
+      invoicesTable: {
+         offers: r.many.offersTable({
+            from: r.invoicesTable.id.through(r.positionsTable.invoiceId),
+            to: r.offersTable.id.through(r.positionsTable.offerId),
+         }),
+         order: r.one.ordersTable({
+            from: r.invoicesTable.orderId,
+            to: r.ordersTable.id,
+         }),
+         positions: r.many.positionsTable(),
+      },
       positionsTable: {
          order: r.one.ordersTable({
             from: r.positionsTable.orderId,
@@ -237,7 +262,10 @@ export const relations = defineRelations(
          receipt: r.one.receiptsTable({
             from: r.positionsTable.receiptId,
             to: r.receiptsTable.id,
-            optional: false,
+         }),
+         invoice: r.one.invoicesTable({
+            from: r.positionsTable.invoiceId,
+            to: r.invoicesTable.id,
          }),
          offer: r.one.offersTable({
             from: r.positionsTable.offerId,
@@ -251,6 +279,7 @@ export const relations = defineRelations(
             to: r.productsTable.id.through(r.itemsTable.productId),
          }),
          receipts: r.many.receiptsTable(),
+         invoices: r.many.invoicesTable(),
          positions: r.many.positionsTable(),
          items: r.many.itemsTable(),
       },
