@@ -31,7 +31,7 @@ import {
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
-import { type OrderModel } from '@/entities/order';
+import { useOrdersStore, type OrderModel } from '@/entities/order';
 import {
    Dialog,
    DialogContent,
@@ -53,17 +53,11 @@ async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
-export function Order({ order }: { order: OrderModel; isInvoice?: boolean }) {
-   const {
-      receipt,
-      changeStatus,
-      setNumber,
-      setFiscalNumber,
-      selectToggle,
-      recordReceipt,
-   } = useReceipt(order.id);
+export function Order({ order }: { order: OrderModel }) {
+   const { selectToggle } = useOrdersStore();
+   const { receipt, setFiscalNumber, recordReceipt } = useReceipt(order.id);
 
-   const { number, status, fiscalNumber, selected } = receipt;
+   const { number, status, fiscalNumber } = receipt;
 
    const recordReceiptsHandler = recordReceipt;
 
@@ -94,8 +88,8 @@ export function Order({ order }: { order: OrderModel; isInvoice?: boolean }) {
          <OrderCardHeader>
             <Checkbox
                className="cursor-pointer"
-               checked={selected}
-               onCheckedChange={selectToggle}
+               checked={order.selected}
+               onCheckedChange={() => selectToggle(order.id)}
             />
             <span className="font-medium underline">
                Order #{order.externalId}

@@ -26,6 +26,7 @@ export type OrderModel = Omit<Order, 'clientTag'> & {
    };
    positions: Record<PositionModel['offer']['id'], PositionModel>;
    receipt: Omit<Receipt, 'clientTag'> | null;
+   selected: boolean;
 };
 
 export type OrdersStore = {
@@ -33,6 +34,13 @@ export type OrdersStore = {
    add: (order: OrderModel) => void;
    addMany: (orders: OrderModel[]) => void;
    remove: (orderId: OrderModel['externalId']) => void;
+   select: (id: OrderModel['id']) => void;
+   unselect: (id: OrderModel['id']) => void;
+   selectMany: (ids: OrderModel['id'][]) => void;
+   unselectMany: (ids: OrderModel['id'][]) => void;
+   selectAll: () => void;
+   unselectAll: () => void;
+   selectToggle: (id: OrderModel['id']) => void;
    addPosition: (
       orderId: OrderModel['externalId'],
       position: PositionModel,
@@ -67,6 +75,38 @@ export const useOrdersStore = create<OrdersStore>()(
       remove: (orderId) =>
          set((draft) => {
             delete draft.orders[orderId];
+         }),
+      select: (id) =>
+         set((s) => {
+            s.orders[id].selected = true;
+         }),
+      unselect: (id) =>
+         set((s) => {
+            s.orders[id].selected = false;
+         }),
+      selectToggle: (id) =>
+         set((s) => {
+            s.orders[id].selected = !s.orders[id].selected;
+         }),
+      selectMany: (ids) =>
+         set((s) => {
+            ids.forEach((id) => (s.orders[id].selected = true));
+         }),
+      unselectMany: (ids) =>
+         set((s) => {
+            ids.forEach((id) => (s.orders[id].selected = false));
+         }),
+      selectAll: () =>
+         set((s) => {
+            Object.values(s.orders).forEach((receipt) => {
+               receipt.selected = true;
+            });
+         }),
+      unselectAll: () =>
+         set((s) => {
+            Object.values(s.orders).forEach((receipt) => {
+               receipt.selected = false;
+            });
          }),
       addPosition: (orderId, position) =>
          set((draft) => {

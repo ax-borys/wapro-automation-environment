@@ -52,9 +52,6 @@ export const useReceipt = (id: ReceiptModel['orderId']) => {
       receipt,
       changeStatus,
       recordReceipt,
-      select: useReceiptsStore((s) => s.select).bind(null, id),
-      unselect: useReceiptsStore((s) => s.unselect).bind(null, id),
-      selectToggle: useReceiptsStore((s) => s.selectToggle).bind(null, id),
       setNumber,
       setFiscalNumber: useReceiptsStore((s) => s.setFiscalNumber).bind(
          null,
