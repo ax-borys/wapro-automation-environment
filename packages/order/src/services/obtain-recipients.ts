@@ -21,4 +21,8 @@ export const obtainRecipients: (
    returnSchema: obtainRecipientReturnSchema,
    compare: (recipient1, recipient2) =>
       recipient1.addressId === recipient2.addressId,
+   transform: (recipient, recipientInput) => ({
+      ...recipient,
+      clientTag: recipientInput.clientTag ?? null,
+   }),
 });

@@ -30,7 +30,7 @@ export async function obtainAddresses(
       compare: (address1, address2) => compareAddresses(address1, address2),
       transform: (address, addressInput) => ({
          ...address,
-         clientTag: addressInput.clientTag || null,
+         clientTag: addressInput.clientTag ?? null,
       }),
    });
 
