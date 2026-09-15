@@ -1,7 +1,9 @@
 import { client } from '@/lib/client';
 import { InferRequestType } from 'hono/client';
 
-type RecordReceiptInput = InferRequestType<typeof client.receipt.record.$post>;
+export type RecordReceiptInput = InferRequestType<
+   typeof client.receipt.record.$post
+>;
 
 export async function recordReceipts(input: RecordReceiptInput['json']) {
    const response = await client.receipt.record.$post({ json: input });

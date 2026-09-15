@@ -1,0 +1,275 @@
+'use client';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+   BadgeFiskalNumber,
+   BadgePaid,
+   BadgePickup,
+   BadgeReceiptNumber,
+   OrderCard,
+   OrderCardBody,
+   OrderCardDeliveryCard,
+   OrderCardFooter,
+   OrderCardFooterActions,
+   OrderCardHeader,
+   OrderCardRecipient,
+   OrderCardTable,
+   OrderCardTableBody,
+   OrderCardTableFooter,
+   OrderCardTableHeader,
+   OrderCardTablePosition,
+} from '@/components/ui/order-card';
+import currency from 'currency.js';
+import { Button } from '@/components/ui/button';
+import {
+   BusIcon,
+   CashRegisterIcon,
+   FloppyDiskIcon,
+   InvoiceIcon,
+   ReceiptIcon,
+   SpinnerIcon,
+   TruckIcon,
+} from '@phosphor-icons/react';
+import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
+import { recordReceipts } from '@/entities/receipt/record-receipts';
+import { type OrderModel } from '@/entities/order';
+import {
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
+   DialogTrigger,
+} from '@/components/ui/dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { DialogClose } from 'radix-ui/dialog';
+import { useReceipt } from '@/entities/receipt';
+import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
+
+async function wait(delay = 3000) {
+   return await new Promise((res, rej) => setTimeout(res, delay));
+}
+
+export function Order({ order }: { order: OrderModel; isInvoice?: boolean }) {
+   const {
+      receipt,
+      changeStatus,
+      setNumber,
+      setFiscalNumber,
+      selectToggle,
+      recordReceipt,
+   } = useReceipt(order.id);
+
+   const { number, status, fiscalNumber, selected } = receipt;
+
+   const recordReceiptsHandler = recordReceipt;
+
+   const receiptNumberSubmitHandler: React.SubmitEventHandler<
+      HTMLFormElement
+   > = (e) => {
+      e.preventDefault();
+      const fiscalNumber = (
+         e.target.elements.namedItem('fiscalNumber') as HTMLInputElement
+      )?.value;
+
+      const parsedFiscalNumber = Number.parseInt(fiscalNumber);
+
+      if (parsedFiscalNumber) {
+         setFiscalNumber(`W${String(parsedFiscalNumber).padStart(6, '0')}`);
+      } else if (fiscalNumber === '') {
+         setFiscalNumber(null);
+      } else if (fiscalNumber === '') {
+      }
+   };
+
+   const copyToClipboard = (value: string) => {
+      return navigator.clipboard.writeText(value);
+   };
+
+   return (
+      <OrderCard className="flex h-fit">
+         <OrderCardHeader>
+            <Checkbox
+               className="cursor-pointer"
+               checked={selected}
+               onCheckedChange={selectToggle}
+            />
+            <span className="font-medium underline">
+               Order #{order.externalId}
+            </span>
+            {order.requiredDocumentType === 'INVOICE' ? (
+               <Badge>Invoice</Badge>
+            ) : null}
+            <div className="ml-auto flex gap-2 h-9">
+               {status === 'RECORDED' ? (
+                  <Button
+                     onClick={() => copyToClipboard(number as string)}
+                     className="bg-transparent hover:bg-transparent cursor-pointer px-0"
+                  >
+                     <BadgeReceiptNumber value={number as string} />
+                  </Button>
+               ) : null}
+               {fiscalNumber ? (
+                  <BadgeFiskalNumber value={fiscalNumber} />
+               ) : null}
+               {order.paymentMethod === 'PREPAID' ? (
+                  <BadgePaid />
+               ) : (
+                  <BadgePickup />
+               )}
+            </div>
+         </OrderCardHeader>
+         <OrderCardBody>
+            <OrderCardTable>
+               <OrderCardTableHeader />
+               <OrderCardTableBody>
+                  {Object.values(order.positions).map((item, i) => (
+                     <OrderCardTablePosition
+                        key={item.offer.externalId + i}
+                        name={item.offer.title}
+                        quantity={item.quantity}
+                        tax="23"
+                        net={
+                           currency(item.price, { fromCents: true }).divide(
+                              1.23,
+                           ).value
+                        }
+                        gross={currency(item.price, { fromCents: true }).value}
+                     >
+                        {item.offer.externalId === 'delivery' ? (
+                           <TruckIcon className="size-6 mx-0.75" />
+                        ) : (
+                           <Image
+                              src={item.offer.imgSrc}
+                              alt="Product preview"
+                              width={30}
+                              height={30}
+                              className="rounded-sm"
+                           />
+                        )}
+                     </OrderCardTablePosition>
+                  ))}
+               </OrderCardTableBody>
+               <OrderCardTableFooter
+                  totalNet={
+                     currency(order.totalToPay, { fromCents: true }).divide(
+                        1.23,
+                     ).value
+                  }
+                  totalGross={
+                     currency(order.totalToPay, { fromCents: true }).value
+                  }
+               />
+            </OrderCardTable>
+         </OrderCardBody>
+         <OrderCardFooter>
+            <OrderCardRecipient
+               recipientFullName={
+                  order.customer.firstName && order.customer.lastName
+                     ? order.customer.firstName + ' ' + order.customer.lastName
+                     : order.customer.companyName + ''
+               }
+               orderProcessedAt={new Date(
+                  order.preparedAt ?? Date.now(),
+               ).toLocaleString()}
+            />
+            <OrderCardDeliveryCard
+               title={order.delivery.pointName || 'Delivery'}
+               address={order.delivery.address}
+            />
+            <OrderCardFooterActions>
+               {order.requiredDocumentType === 'INVOICE' ? (
+                  <Button variant={'outline'}>
+                     <InvoiceIcon />
+                     Invoice required
+                  </Button>
+               ) : (
+                  <>
+                     <Dialog>
+                        <form
+                           onSubmit={receiptNumberSubmitHandler}
+                           id={`set-fiscal-number-form-#${receipt.orderId}`}
+                        >
+                           <DialogTrigger asChild>
+                              <Button
+                                 variant={'outline'}
+                                 disabled={receipt.status !== 'RECORD'}
+                              >
+                                 <CashRegisterIcon />
+                              </Button>
+                           </DialogTrigger>
+                           <DialogContent>
+                              <DialogHeader>
+                                 <DialogTitle>
+                                    Enter receipt's fiscal number
+                                 </DialogTitle>
+                              </DialogHeader>
+                              <DialogDescription>
+                                 Make sure you are writing correct fiscal
+                                 number.
+                              </DialogDescription>
+                              <FieldGroup>
+                                 <Field>
+                                    <Label>Fiscal number</Label>
+                                    <Input
+                                       autoFocus={true}
+                                       name="fiscalNumber"
+                                       form={`set-fiscal-number-form-#${receipt.orderId}`}
+                                    />
+                                 </Field>
+                              </FieldGroup>
+                              <DialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
+                                 <DialogClose asChild>
+                                    <Button variant={'outline'}>Cancel</Button>
+                                 </DialogClose>
+                                 <DialogClose asChild>
+                                    <Button
+                                       type="submit"
+                                       form={`set-fiscal-number-form-#${receipt.orderId}`}
+                                    >
+                                       Save changes
+                                    </Button>
+                                 </DialogClose>
+                              </DialogFooter>
+                           </DialogContent>
+                        </form>
+                     </Dialog>
+                     {status === 'RECORD' ? (
+                        <Button
+                           onClick={recordReceiptsHandler}
+                           disabled={fiscalNumber ? false : true}
+                        >
+                           <ReceiptIcon />
+                           Record a receipt
+                        </Button>
+                     ) : status === 'RECORDING' ? (
+                        <Button variant={'secondary'} disabled>
+                           <Marker role="status">
+                              <MarkerIcon className="animate-spin">
+                                 <SpinnerIcon />
+                              </MarkerIcon>
+                              <MarkerContent className="shimmer">
+                                 Recording
+                              </MarkerContent>
+                           </Marker>
+                        </Button>
+                     ) : (
+                        <Button variant={'outline'}>
+                           <Marker role="status">
+                              <MarkerIcon>
+                                 <FloppyDiskIcon />
+                              </MarkerIcon>
+                              <MarkerContent>Recorded</MarkerContent>
+                           </Marker>
+                        </Button>
+                     )}
+                  </>
+               )}
+            </OrderCardFooterActions>
+         </OrderCardFooter>
+      </OrderCard>
+   );
+}

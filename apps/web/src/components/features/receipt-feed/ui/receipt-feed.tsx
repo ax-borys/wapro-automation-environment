@@ -21,6 +21,7 @@ import { useEffect } from 'react';
 import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
 import { type PositionModel } from '@/entities/order/orders.store';
 import { fetchMockPendingOrders } from '@/entities/order/fetch-mock-pending-orders';
+import { Order } from '../../order';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -206,7 +207,7 @@ export function ReceiptFeed({
             {Object.values(receipts).length
                ? ordersList.map((order, i) => (
                     <Fragment key={order.id}>
-                       <Receipt
+                       <Order
                           order={order}
                           isInvoice={order.requiredDocumentType === 'INVOICE'}
                        />

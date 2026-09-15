@@ -17,8 +17,12 @@ import { Button } from './button';
 import { Separator } from './separator';
 import { BadgeCheck } from 'lucide-react';
 import {
+   CashRegisterIcon,
+   CopyIcon,
+   HandCoinsIcon,
    ReceiptIcon,
    SealCheckIcon,
+   TruckIcon,
    User,
    UserIcon,
 } from '@phosphor-icons/react';
@@ -30,74 +34,274 @@ import {
    ItemActions,
    ItemDescription,
 } from './item';
+import { cn } from '@/lib/utils';
+import currency from 'currency.js';
+import React from 'react';
+import { Address, Delivery } from '@wae/types';
 
-export default function OrderCard() {
+export function BadgePaid({
+   className,
+   ...props
+}: React.ComponentProps<typeof Badge>) {
    return (
-      <Card className="ring-0 shadow-none">
-         <CardHeader className="flex items-center gap-4">
-            <Checkbox />
-            <span className="font-medium underline">Order #1232123324</span>
-            <Badge className="ml-auto text-sm p-4 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300">
-               <SealCheckIcon className="size-4!" />
-               Paid
-            </Badge>
-         </CardHeader>
-         <CardContent>
-            <Table className="table-fixed max-w-[75vw]">
-               <TableHeader>
-                  <TableRow>
-                     <TableHead className="w-auto">Name</TableHead>
-                     <TableHead className="w-20 text-right">Quantity</TableHead>
-                     <TableHead className="w-20 text-center">Vat</TableHead>
-                     <TableHead className="w-30 text-right ">Netto</TableHead>
-                     <TableHead className="w-30 text-right">Brutto</TableHead>
-                  </TableRow>
-               </TableHeader>
-               <TableBody>
-                  <TableRow>
-                     <TableCell className="font-medium text-sm flex items-center gap-2">
-                        <Image
-                           src="https://a.allegroimg.com/original/117845/036dd0bf45839a8a9710cdacea58"
-                           alt="Product preview"
-                           width={20}
-                           height={30}
-                        />
-                        <div className="overflow-scroll">
-                           XIREN 1 kg Środek na ślimaki granulat skuteczny na
-                           ślimaki ogrodowe
-                        </div>
-                     </TableCell>
-                     <TableCell className="text-center">x1</TableCell>
-                     <TableCell className="text-center">23%</TableCell>
-                     <TableCell className="text-right">24,39 zł</TableCell>
-                     <TableCell className="text-right">30,00 zł</TableCell>
-                  </TableRow>
-               </TableBody>
-               <TableFooter>
-                  <TableRow>
-                     <TableCell colSpan={3}>Total</TableCell>
-                     <TableCell className="text-right">24,39 zł</TableCell>
-                     <TableCell className="text-right">30,00 zł</TableCell>
-                  </TableRow>
-               </TableFooter>
-            </Table>
-         </CardContent>
-         <CardFooter>
-            <Item>
-               <ItemMedia variant={'icon'}>
-                  <UserIcon />
-               </ItemMedia>
-               <ItemContent>
-                  <ItemTitle>Alex Borysiuk</ItemTitle>
-                  <ItemDescription>21 Sep, Wed, 12:30</ItemDescription>
-               </ItemContent>
-               <ItemActions>
-                  <Button>
-                     <ReceiptIcon /> Record a receipt
-                  </Button>
-               </ItemActions>
-            </Item>
-         </CardFooter>
-      </Card>
+      <Badge
+         className={cn(
+            'ml-auto text-sm p-4 bg-green-50 text-green-700 dark:bg-green-950 dark:text-green-300',
+            className,
+         )}
+      >
+         <SealCheckIcon className="size-4!" />
+         Paid
+      </Badge>
+   );
+}
+
+export function BadgePickup({ ...props }: React.ComponentProps<typeof Badge>) {
+   return (
+      <Badge className="ml-auto p-4 text-sm bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+         <HandCoinsIcon className="size-4!" />
+         Pickup
+      </Badge>
+   );
+}
+
+export function BadgeReceiptNumber({
+   value,
+   ...props
+}: React.ComponentProps<typeof Badge> & {
+   value: string;
+}) {
+   return (
+      <Badge className="ml-auto p-4 underline font-medium bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+         <CopyIcon className="size-4!" />
+         {value}
+      </Badge>
+   );
+}
+
+export function BadgeFiskalNumber({
+   value,
+   ...props
+}: React.ComponentProps<typeof Badge> & {
+   value: number | string;
+}) {
+   return (
+      <Badge className="ml-auto p-4 font-medium bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+         <CashRegisterIcon className="size-4!" />
+         {value}
+      </Badge>
+   );
+}
+
+export function OrderCard({
+   className,
+   ...props
+}: React.ComponentProps<typeof Card>) {
+   return <Card className={cn('ring-0 shadow-none', className)} {...props} />;
+}
+
+export function OrderCardHeader({
+   className,
+   children,
+   ...props
+}: React.ComponentProps<typeof CardHeader>) {
+   return (
+      <CardHeader
+         className={cn('flex items-center gap-4', className)}
+         {...props}
+      >
+         {children}
+      </CardHeader>
+   );
+}
+
+export function OrderCardBody({
+   className,
+   children,
+   ...props
+}: React.ComponentProps<typeof CardHeader>) {
+   return (
+      <CardContent className={cn(className)} {...props}>
+         {children}
+      </CardContent>
+   );
+}
+
+export function OrderCardTable({
+   className,
+   children,
+   ...props
+}: React.ComponentProps<typeof Table>) {
+   return (
+      <Table className={cn('table-fixed max-w-full', className)} {...props}>
+         {children}
+      </Table>
+   );
+}
+
+export function OrderCardTableHeader({
+   ...props
+}: React.ComponentProps<typeof TableHeader>) {
+   return (
+      <TableHeader {...props}>
+         <TableRow>
+            <TableHead className="w-auto">Name</TableHead>
+            <TableHead className="w-20 text-right">Quantity</TableHead>
+            <TableHead className="w-20 text-center">Vat</TableHead>
+            <TableHead className="w-30 text-right ">Netto</TableHead>
+            <TableHead className="w-30 text-right">Brutto</TableHead>
+         </TableRow>
+      </TableHeader>
+   );
+}
+
+export function OrderCardTableFooter({
+   totalNet,
+   totalGross,
+   ...props
+}: React.ComponentProps<typeof TableFooter> & {
+   totalNet: number;
+   totalGross: number;
+}) {
+   return (
+      <TableFooter {...props}>
+         <TableRow>
+            <TableCell colSpan={3}>Total</TableCell>
+            <TableCell className="text-right">
+               {currency(totalNet, {
+                  decimal: ',',
+                  separator: ' ',
+                  pattern: '# !',
+                  symbol: 'zł',
+               }).format()}
+            </TableCell>
+            <TableCell className="text-right">
+               {currency(totalGross, {
+                  decimal: ',',
+                  separator: ' ',
+                  pattern: '# !',
+                  symbol: 'zł',
+               }).format()}
+            </TableCell>
+         </TableRow>
+      </TableFooter>
+   );
+}
+
+export function OrderCardTableBody({
+   children,
+   ...props
+}: React.ComponentProps<typeof TableBody>) {
+   return <TableBody>{children}</TableBody>;
+}
+
+export function OrderCardTablePosition({
+   className,
+   name,
+   quantity,
+   tax,
+   net,
+   gross,
+   children,
+   ...props
+}: React.ComponentProps<typeof TableRow> & {
+   name: string;
+   quantity: number;
+   tax: '8' | '23';
+   net: number;
+   gross: number;
+}) {
+   return (
+      <TableRow className={cn(className)} {...props}>
+         <TableCell className="font-medium text-sm flex items-center gap-2">
+            {children}
+            <div className="overflow-scroll">{name}</div>
+         </TableCell>
+         <TableCell className="text-center">x{quantity}</TableCell>
+         <TableCell className="text-center">{Number.parseInt(tax)}%</TableCell>
+         <TableCell className="text-right">
+            {currency(net, {
+               decimal: ',',
+               separator: ' ',
+               pattern: '# !',
+               symbol: 'zł',
+            }).format()}
+         </TableCell>
+         <TableCell className="text-right">
+            {currency(gross, {
+               decimal: ',',
+               separator: ' ',
+               pattern: '# !',
+               symbol: 'zł',
+            }).format()}
+         </TableCell>
+      </TableRow>
+   );
+}
+
+export function OrderCardFooter({
+   children,
+   ...props
+}: React.ComponentProps<typeof CardFooter>) {
+   return (
+      <CardFooter className="flex justify-between" {...props}>
+         {children}
+      </CardFooter>
+   );
+}
+
+export function OrderCardRecipient({
+   recipientFullName,
+   orderProcessedAt,
+}: {
+   recipientFullName: string;
+   orderProcessedAt: string;
+}) {
+   return (
+      <Item className="w-100">
+         <ItemMedia variant={'icon'}>
+            <UserIcon />
+         </ItemMedia>
+         <ItemContent>
+            <ItemTitle>{recipientFullName}</ItemTitle>
+            <ItemDescription>{orderProcessedAt}</ItemDescription>
+         </ItemContent>
+      </Item>
+   );
+}
+
+export function OrderCardFooterActions({
+   children,
+   className,
+   ...props
+}: React.ComponentProps<'div'>) {
+   return (
+      <div className={cn('flex gap-2 w-60 justify-end')} {...props}>
+         {children}
+      </div>
+   );
+}
+export function OrderCardDeliveryCard({
+   title,
+   address,
+}: {
+   title: string;
+   address: Omit<Address, 'id' | 'clientTag'>;
+}) {
+   return (
+      <Item className="w-100">
+         <ItemMedia variant={'icon'}>
+            <TruckIcon />
+         </ItemMedia>
+         <ItemContent>
+            <ItemTitle>{title}</ItemTitle>
+            <ItemDescription>
+               <span className="block">{address.street}</span>
+               <span className="block">
+                  {address.postalCode} {address.city} {address.countryCode}
+               </span>
+            </ItemDescription>
+         </ItemContent>
+      </Item>
    );
 }
