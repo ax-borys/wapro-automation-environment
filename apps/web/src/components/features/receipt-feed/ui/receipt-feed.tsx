@@ -120,7 +120,11 @@ export function ReceiptFeed({
 
       const selectedOrders = ordersList
          .filter((order) =>
-            selectedReceipts.find((r) => r.orderId === order.id),
+            selectedReceipts.find(
+               (r) =>
+                  r.orderId === order.id &&
+                  order.requiredDocumentType === 'RECEIPT',
+            ),
          )
          .map((order) => ({
             ...order,
@@ -202,7 +206,10 @@ export function ReceiptFeed({
             {Object.values(receipts).length
                ? ordersList.map((order, i) => (
                     <Fragment key={order.id}>
-                       <Receipt order={order} />
+                       <Receipt
+                          order={order}
+                          isInvoice={order.requiredDocumentType === 'INVOICE'}
+                       />
                        {i + 1 === ordersList.length ? null : <Separator />}
                     </Fragment>
                  ))

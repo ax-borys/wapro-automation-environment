@@ -76,7 +76,7 @@ export type RawOrder = {
    };
    invoice: {
       required: boolean;
-   };
+   } | null;
    summary: {
       totalToPay: {
          amount: string;

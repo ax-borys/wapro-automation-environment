@@ -216,6 +216,7 @@ export function mapOrder(order: RawOrder): Order {
       ],
       src: 'allegro',
       paymentMethod: order.payment.type === 'ONLINE' ? 'PREPAID' : 'POSTPAID',
+      requiredDocumentType: order.invoice?.required ? 'INVOICE' : 'RECEIPT',
       fulfilledAt: null,
       preparedAt: new Date(order.updatedAt),
       createdAt: new Date(),

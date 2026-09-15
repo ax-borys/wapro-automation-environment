@@ -140,8 +140,6 @@ export const order = new Hono()
                (recipient) => recipient.clientTag === order.clientTag,
             );
             if (!recipient) {
-               console.log('Recipients: ', recipients);
-               console.log('Order: ', order);
                throw new Error('Failed to obtain recipient.');
             }
             const delivery = deliveries.find(

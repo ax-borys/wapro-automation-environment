@@ -24,6 +24,7 @@ import {
    BusIcon,
    CashRegisterIcon,
    FloppyDiskIcon,
+   InvoiceIcon,
    ReceiptIcon,
    SpinnerIcon,
    TruckIcon,
@@ -46,12 +47,19 @@ import { Input } from '@/components/ui/input';
 import { DialogClose } from 'radix-ui/dialog';
 import { useReceipt } from '@/entities/receipt';
 import Image from 'next/image';
+import { Badge } from '@/components/ui/badge';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
-export function Receipt({ order }: { order: OrderModel }) {
+export function Receipt({
+   order,
+   isInvoice = false,
+}: {
+   order: OrderModel;
+   isInvoice?: boolean;
+}) {
    const { receipt, changeStatus, setNumber, setFiscalNumber, selectToggle } =
       useReceipt(order.id);
 
@@ -115,6 +123,7 @@ export function Receipt({ order }: { order: OrderModel }) {
             <span className="font-medium underline">
                Order #{order.externalId}
             </span>
+            {isInvoice ? <Badge>Invoice</Badge> : null}
             <div className="ml-auto flex gap-2 h-9">
                {status === 'RECORDED' ? (
                   <Button
@@ -193,82 +202,92 @@ export function Receipt({ order }: { order: OrderModel }) {
                address={order.delivery.address}
             />
             <ReceiptCardFooterActions>
-               <Dialog>
-                  <form
-                     onSubmit={receiptNumberSubmitHandler}
-                     id={`set-fiscal-number-form-#${receipt.orderId}`}
-                  >
-                     <DialogTrigger asChild>
-                        <Button
-                           variant={'outline'}
-                           disabled={receipt.status !== 'RECORD'}
-                        >
-                           <CashRegisterIcon />
-                        </Button>
-                     </DialogTrigger>
-                     <DialogContent>
-                        <DialogHeader>
-                           <DialogTitle>
-                              Enter receipt's fiscal number
-                           </DialogTitle>
-                        </DialogHeader>
-                        <DialogDescription>
-                           Make sure you are writing correct fiscal number.
-                        </DialogDescription>
-                        <FieldGroup>
-                           <Field>
-                              <Label>Fiscal number</Label>
-                              <Input
-                                 autoFocus={true}
-                                 name="fiscalNumber"
-                                 form={`set-fiscal-number-form-#${receipt.orderId}`}
-                              />
-                           </Field>
-                        </FieldGroup>
-                        <DialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
-                           <DialogClose asChild>
-                              <Button variant={'outline'}>Cancel</Button>
-                           </DialogClose>
-                           <DialogClose asChild>
-                              <Button
-                                 type="submit"
-                                 form={`set-fiscal-number-form-#${receipt.orderId}`}
-                              >
-                                 Save changes
-                              </Button>
-                           </DialogClose>
-                        </DialogFooter>
-                     </DialogContent>
-                  </form>
-               </Dialog>
-               {status === 'RECORD' ? (
-                  <Button
-                     onClick={recordReceiptsHandler}
-                     disabled={fiscalNumber ? false : true}
-                  >
-                     <ReceiptIcon />
-                     Record a receipt
-                  </Button>
-               ) : status === 'RECORDING' ? (
-                  <Button variant={'secondary'} disabled>
-                     <Marker role="status">
-                        <MarkerIcon className="animate-spin">
-                           <SpinnerIcon />
-                        </MarkerIcon>
-                        <MarkerContent className="shimmer">
-                           Recording
-                        </MarkerContent>
-                     </Marker>
+               {isInvoice ? (
+                  <Button variant={'outline'}>
+                     <InvoiceIcon />
+                     Invoice required
                   </Button>
                ) : (
-                  <Button variant={'outline'}>
-                     <Marker role="status">
-                        <MarkerIcon>
-                           <FloppyDiskIcon />
-                        </MarkerIcon>
-                        <MarkerContent>Recorded</MarkerContent>
-                     </Marker>
-                  </Button>
+                  <>
+                     <Dialog>
+                        <form
+                           onSubmit={receiptNumberSubmitHandler}
+                           id={`set-fiscal-number-form-#${receipt.orderId}`}
+                        >
+                           <DialogTrigger asChild>
+                              <Button
+                                 variant={'outline'}
+                                 disabled={receipt.status !== 'RECORD'}
+                              >
+                                 <CashRegisterIcon />
+                              </Button>
+                           </DialogTrigger>
+                           <DialogContent>
+                              <DialogHeader>
+                                 <DialogTitle>
+                                    Enter receipt's fiscal number
+                                 </DialogTitle>
+                              </DialogHeader>
+                              <DialogDescription>
+                                 Make sure you are writing correct fiscal
+                                 number.
+                              </DialogDescription>
+                              <FieldGroup>
+                                 <Field>
+                                    <Label>Fiscal number</Label>
+                                    <Input
+                                       autoFocus={true}
+                                       name="fiscalNumber"
+                                       form={`set-fiscal-number-form-#${receipt.orderId}`}
+                                    />
+                                 </Field>
+                              </FieldGroup>
+                              <DialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
+                                 <DialogClose asChild>
+                                    <Button variant={'outline'}>Cancel</Button>
+                                 </DialogClose>
+                                 <DialogClose asChild>
+                                    <Button
+                                       type="submit"
+                                       form={`set-fiscal-number-form-#${receipt.orderId}`}
+                                    >
+                                       Save changes
+                                    </Button>
+                                 </DialogClose>
+                              </DialogFooter>
+                           </DialogContent>
+                        </form>
+                     </Dialog>
+                     {status === 'RECORD' ? (
+                        <Button
+                           onClick={recordReceiptsHandler}
+                           disabled={fiscalNumber ? false : true}
+                        >
+                           <ReceiptIcon />
+                           Record a receipt
+                        </Button>
+                     ) : status === 'RECORDING' ? (
+                        <Button variant={'secondary'} disabled>
+                           <Marker role="status">
+                              <MarkerIcon className="animate-spin">
+                                 <SpinnerIcon />
+                              </MarkerIcon>
+                              <MarkerContent className="shimmer">
+                                 Recording
+                              </MarkerContent>
+                           </Marker>
+                        </Button>
+                     ) : (
+                        <Button variant={'outline'}>
+                           <Marker role="status">
+                              <MarkerIcon>
+                                 <FloppyDiskIcon />
+                              </MarkerIcon>
+                              <MarkerContent>Recorded</MarkerContent>
+                           </Marker>
+                        </Button>
+                     )}
+                  </>
                )}
             </ReceiptCardFooterActions>
          </ReceiptCardFooter>
