@@ -3,3 +3,5 @@ export {
    type PositionModel,
    useOrdersStore,
 } from './orders.store';
+
+export { useOrder } from './hooks/use-order';

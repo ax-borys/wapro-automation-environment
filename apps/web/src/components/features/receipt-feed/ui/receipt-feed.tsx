@@ -190,7 +190,7 @@ export function ReceiptFeed({
             {Object.values(receipts).length
                ? ordersList.map((order, i) => (
                     <Fragment key={order.id}>
-                       <Order order={order} />
+                       <Order id={order.id} />
                        {i + 1 === ordersList.length ? null : <Separator />}
                     </Fragment>
                  ))

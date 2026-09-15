@@ -31,7 +31,7 @@ import {
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
-import { useOrdersStore, type OrderModel } from '@/entities/order';
+import { useOrder, useOrdersStore, type OrderModel } from '@/entities/order';
 import {
    Dialog,
    DialogContent,
@@ -53,8 +53,8 @@ async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
-export function Order({ order }: { order: OrderModel }) {
-   const { selectToggle } = useOrdersStore();
+export function Order({ id }: { id: OrderModel['id'] }) {
+   const { order, selectToggle } = useOrder(id);
    const { receipt, setFiscalNumber, recordReceipt } = useReceipt(order.id);
 
    const { number, status, fiscalNumber } = receipt;
@@ -89,7 +89,7 @@ export function Order({ order }: { order: OrderModel }) {
             <Checkbox
                className="cursor-pointer"
                checked={order.selected}
-               onCheckedChange={() => selectToggle(order.id)}
+               onCheckedChange={() => selectToggle()}
             />
             <span className="font-medium underline">
                Order #{order.externalId}
