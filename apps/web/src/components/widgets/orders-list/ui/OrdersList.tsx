@@ -5,32 +5,21 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
-import {
-   ReceiptModel,
-   useReceipts,
-   useReceiptsStore,
-} from '@/entities/receipt';
+import { useReceiptsStore } from '@/entities/receipt';
 import { recordReceipts } from '@/entities/receipt';
 import {
    normilizePositions,
    useOrdersStore,
 } from '@/entities/order/orders.store';
-import currency from 'currency.js';
 import { useEffect } from 'react';
 import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
-import { type PositionModel } from '@/entities/order/orders.store';
-import { fetchMockPendingOrders } from '@/entities/order/fetch-mock-pending-orders';
-import { Order } from '../../order';
+import { Order } from '@/components/features/order';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
-export function ReceiptFeed({
-   initReceipts,
-}: {
-   initReceipts: ReceiptModel[];
-}) {
+export function OrdersList() {
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
    const {
       receipts,
