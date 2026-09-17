@@ -2,9 +2,11 @@ import {
    Address,
    Customer,
    Delivery,
+   Item,
    Offer,
    Order,
    OrderPoisition,
+   Product,
    Receipt,
    Recipient,
 } from '@wae/types';
@@ -12,7 +14,7 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
 export type PositionModel = Omit<OrderPoisition, 'clientTag' | 'receiptId'> & {
-   offer: Offer;
+   offer: Offer & { items: (Item & { product: Product })[] };
 };
 
 export type OrderModel = Omit<Order, 'clientTag'> & {

@@ -71,20 +71,7 @@ export const useReceiptsStore = create<ReceiptsStore>()(
          }),
       setFiscalNumber: (id, value) =>
          set((s) => {
-            const receiptsList = Object.values(s.receipts).filter(
-               (receipt) => receipt.orderId >= id,
-            );
-            receiptsList.sort((a, b) => a.orderId - b.orderId);
-
-            receiptsList.forEach((receipt, idx) => {
-               if (receipt.status !== 'RECORD' || !value) return;
-
-               const prefix = value[0];
-               const number = Number.parseInt(value.slice(1));
-               const newValue = prefix + String(number + idx).padStart(6, '0');
-
-               s.receipts[receipt.orderId].fiscalNumber = newValue;
-            });
+            s.receipts[id].fiscalNumber = value;
          }),
       ensureReceipt: (id) => {
          return get().receipts[id] ? true : false;

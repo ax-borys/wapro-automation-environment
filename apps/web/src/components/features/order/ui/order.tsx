@@ -45,7 +45,7 @@ import { Field, FieldGroup } from '@/components/ui/field';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { DialogClose } from 'radix-ui/dialog';
-import { useReceipt } from '@/entities/receipt';
+import { ReceiptModel, useReceipt } from '@/entities/receipt';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 
@@ -53,7 +53,13 @@ async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
-export function Order({ id }: { id: OrderModel['id'] }) {
+export function Order({
+   id,
+   onChangeFiscalNumber,
+}: {
+   id: OrderModel['id'];
+   onChangeFiscalNumber?: (value: string | null) => void;
+}) {
    const { order, selectToggle } = useOrder(id);
    const { receipt, setFiscalNumber, recordReceipt } = useReceipt(order.id);
 
@@ -72,10 +78,12 @@ export function Order({ id }: { id: OrderModel['id'] }) {
       const parsedFiscalNumber = Number.parseInt(fiscalNumber);
 
       if (parsedFiscalNumber) {
-         setFiscalNumber(`W${String(parsedFiscalNumber).padStart(6, '0')}`);
+         const value = `W${String(parsedFiscalNumber).padStart(6, '0')}`;
+         setFiscalNumber(value);
+         onChangeFiscalNumber?.(value);
       } else if (fiscalNumber === '') {
          setFiscalNumber(null);
-      } else if (fiscalNumber === '') {
+         onChangeFiscalNumber?.(null);
       }
    };
 

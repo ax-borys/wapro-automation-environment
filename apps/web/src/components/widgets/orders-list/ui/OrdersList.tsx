@@ -15,6 +15,7 @@ import {
 import { useEffect } from 'react';
 import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
 import { Order } from '@/components/features/order';
+import { sortOrders } from '@/entities/order';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -27,6 +28,7 @@ export function OrdersList() {
       addMany: addManyReceipts,
       changeStatusForMany,
       setNumber,
+      setFiscalNumber,
    } = useReceiptsStore();
 
    useEffect(() => {
@@ -70,25 +72,29 @@ export function OrdersList() {
 
    const ordersList = Object.values(orders);
 
-   const sortOrders = (a: OrderModel, b: OrderModel) => {
-      if (a.receipt) {
-         return 1;
-      } else if (b.receipt) {
-         return -1;
-      }
-
-      const createdAtDiff = b.createdAt.getTime() - a.createdAt.getTime();
-
-      if (createdAtDiff) {
-         return createdAtDiff;
-      }
-
-      const preparedAtDiff = a.preparedAt.getTime() - b.preparedAt.getTime();
-
-      return preparedAtDiff;
-   };
-
    ordersList.sort(sortOrders);
+
+   const generateBulkFiscalNumber = (
+      orderId: OrderModel['id'],
+      value: string,
+   ) => {
+      const sortedReceipts = ordersList.map((order) => receipts[order.id]);
+      const currentReceiptIndex = sortedReceipts
+         .map((receipt) => receipt.orderId)
+         .indexOf(orderId);
+
+      if (currentReceiptIndex === -1) return;
+
+      const restReceipts = sortedReceipts.slice(currentReceiptIndex + 1);
+
+      restReceipts.forEach((receipt, i) => {
+         if (receipt.status === 'RECORDED') return;
+         const prefix = value[0];
+         const newValue = `${prefix}${String(Number.parseInt(value.slice(1)) + i + 1).padStart(6, '0')}`;
+
+         setFiscalNumber(receipt.orderId, newValue);
+      });
+   };
 
    const selectedOrders = ordersList.filter((order) => order.selected);
 
@@ -199,7 +205,14 @@ export function OrdersList() {
             {Object.values(receipts).length
                ? ordersList.map((order, i) => (
                     <Fragment key={order.id}>
-                       <Order id={order.id} />
+                       <Order
+                          id={order.id}
+                          onChangeFiscalNumber={(value) => {
+                             if (!value) return;
+
+                             generateBulkFiscalNumber(order.id, value);
+                          }}
+                       />
                        {i + 1 === ordersList.length ? null : <Separator />}
                     </Fragment>
                  ))
