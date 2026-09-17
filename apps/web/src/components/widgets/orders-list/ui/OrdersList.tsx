@@ -9,6 +9,7 @@ import { useReceiptsStore } from '@/entities/receipt';
 import { recordReceipts } from '@/entities/receipt';
 import {
    normilizePositions,
+   OrderModel,
    useOrdersStore,
 } from '@/entities/order/orders.store';
 import { useEffect } from 'react';
@@ -68,7 +69,26 @@ export function OrdersList() {
    }, []);
 
    const ordersList = Object.values(orders);
-   ordersList.sort((a, b) => (a.receipt && b.receipt ? 0 : a.receipt ? 1 : -1));
+
+   const sortOrders = (a: OrderModel, b: OrderModel) => {
+      if (a.receipt) {
+         return 1;
+      } else if (b.receipt) {
+         return -1;
+      }
+
+      const createdAtDiff = b.createdAt.getTime() - a.createdAt.getTime();
+
+      if (createdAtDiff) {
+         return createdAtDiff;
+      }
+
+      const preparedAtDiff = a.preparedAt.getTime() - b.preparedAt.getTime();
+
+      return preparedAtDiff;
+   };
+
+   ordersList.sort(sortOrders);
 
    const selectedOrders = ordersList.filter((order) => order.selected);
 
