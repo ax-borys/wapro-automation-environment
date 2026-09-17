@@ -2,6 +2,7 @@ import * as v from 'valibot';
 import {
    addressInputSchema,
    addressSchema,
+   itemSchema,
    offerInputSchema,
    offerSchema,
    Order,
@@ -14,6 +15,7 @@ import {
    PositionInput,
    positionInputSchema,
    positionSchema,
+   productSchema,
    recipientFullInputSchema,
 } from '@wae/types';
 import { db, offersTable, ordersTable, positionsTable } from '@wae/db';
@@ -61,13 +63,23 @@ export const addOrderInputSchema = v.object({
    ),
 });
 
+const offerWithItemsAndProductSchema = v.object({
+   ...offerSchema.entries,
+   items: v.array(
+      v.object({
+         ...itemSchema.entries,
+         product: productSchema,
+      }),
+   ),
+});
+
 export const addOrderReturnSchema = v.object({
    ...orderSchema.entries,
    positions: v.pipe(
       v.array(
          v.object({
             ...positionSchema.entries,
-            offer: offerSchema,
+            offer: offerWithItemsAndProductSchema,
          }),
       ),
       v.nonEmpty(),
@@ -158,11 +170,20 @@ export async function addOrders(
          input.flatMap((i) => i.positions.map((i) => i.offer.externalId)),
       );
 
-      const offers = await tx
-         .select()
-         .from(offersTable)
-         .where(inArray(offersTable.externalId, [...externalOffersIds]));
-
+      const offers = await tx.query.offersTable.findMany({
+         with: {
+            items: {
+               with: {
+                  product: true,
+               },
+            },
+         },
+         where: {
+            externalId: {
+               in: [...externalOffersIds],
+            },
+         },
+      });
       if (externalOffersIds.size > offers.length) {
          throw new Error('Offers are not synchronized');
       }
@@ -213,7 +234,7 @@ export async function addOrders(
                .map((p) => ({
                   ...p,
                   offer: v.parse(
-                     offerSchema,
+                     offerWithItemsAndProductSchema,
                      offers.find((offer) => offer.id === p.offerId),
                   ),
                })),

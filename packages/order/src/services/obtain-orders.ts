@@ -29,7 +29,15 @@ export async function obtainOrders(
       with: {
          positions: {
             with: {
-               offer: true,
+               offer: {
+                  with: {
+                     items: {
+                        with: {
+                           product: true,
+                        },
+                     },
+                  },
+               },
             },
          },
          receipt: true,
