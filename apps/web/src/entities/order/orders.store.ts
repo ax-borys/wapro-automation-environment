@@ -6,6 +6,7 @@ import {
    Order,
    OrderPoisition,
    Receipt,
+   Recipient,
 } from '@wae/types';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
@@ -26,6 +27,7 @@ export type OrderModel = Omit<Order, 'clientTag'> & {
    };
    positions: Record<PositionModel['offer']['id'], PositionModel>;
    receipt: Omit<Receipt, 'clientTag'> | null;
+   recipient: Omit<Recipient, 'clientTag' | 'addressId'>;
    selected: boolean;
 };
 

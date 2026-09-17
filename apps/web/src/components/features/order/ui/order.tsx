@@ -162,9 +162,11 @@ export function Order({ id }: { id: OrderModel['id'] }) {
          <OrderCardFooter>
             <OrderCardRecipient
                recipientFullName={
-                  order.customer.firstName && order.customer.lastName
-                     ? order.customer.firstName + ' ' + order.customer.lastName
-                     : order.customer.companyName + ''
+                  order.recipient.firstName && order.recipient.lastName
+                     ? order.recipient.firstName +
+                       ' ' +
+                       order.recipient.lastName
+                     : order.recipient.companyName + ''
                }
                orderProcessedAt={new Date(
                   order.preparedAt ?? Date.now(),

@@ -169,6 +169,14 @@ export const order = new Hono()
             (address) => address.id === customer.addressId,
          );
 
+         const recipient = recipients.find(
+            (recipient) => recipient.id === order.recepientId,
+         );
+
+         if (!recipient) {
+            throw new Error('Failed to obtain recipient.');
+         }
+
          const delivery = deliveries.find(
             (delivery) => delivery.id === order.deliveryId,
          );
@@ -188,6 +196,7 @@ export const order = new Hono()
          return {
             ...order,
             customer: { ...customer, address: customerAddress },
+            recipient,
             delivery: {
                ...delivery,
                address: deliveryAddress,
