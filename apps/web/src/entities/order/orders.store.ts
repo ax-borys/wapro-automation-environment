@@ -12,9 +12,10 @@ import {
 } from '@wae/types';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { OfferModel, ProductModel } from '../offer';
 
 export type PositionModel = Omit<OrderPoisition, 'clientTag' | 'receiptId'> & {
-   offer: Offer & { items: (Item & { product: Product })[] };
+   offer: OfferModel;
 };
 
 export type OrderModel = Omit<Order, 'clientTag'> & {

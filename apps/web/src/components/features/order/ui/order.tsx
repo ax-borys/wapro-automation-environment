@@ -28,6 +28,7 @@ import {
    ReceiptIcon,
    SpinnerIcon,
    TruckIcon,
+   WarningIcon,
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import { recordReceipts } from '@/entities/receipt/record-receipts';
@@ -48,6 +49,9 @@ import { DialogClose } from 'radix-ui/dialog';
 import { ReceiptModel, useReceipt } from '@/entities/receipt';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
+import { EditOffer } from '../../edit-offer';
+import { useOffersStore } from '@/entities/offer';
+import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -62,6 +66,8 @@ export function Order({
 }) {
    const { order, selectToggle } = useOrder(id);
    const { receipt, setFiscalNumber, recordReceipt } = useReceipt(order.id);
+   const { offers } = useOffersStore();
+   useGetAndStoreOffers();
 
    const { number, status, fiscalNumber } = receipt;
 
@@ -131,7 +137,6 @@ export function Order({
                   {Object.values(order.positions).map((item, i) => (
                      <OrderCardTablePosition
                         key={item.offer.externalId + i}
-                        name={item.offer.title}
                         quantity={item.quantity}
                         tax="23"
                         net={
@@ -141,17 +146,37 @@ export function Order({
                         }
                         gross={currency(item.price, { fromCents: true }).value}
                      >
-                        {item.offer.externalId === 'delivery' ? (
-                           <TruckIcon className="size-6 mx-0.75" />
-                        ) : (
-                           <Image
-                              src={item.offer.imgSrc}
-                              alt="Product preview"
-                              width={30}
-                              height={30}
-                              className="rounded-sm"
-                           />
-                        )}
+                        <>
+                           {item.offer.externalId === 'delivery' ? (
+                              <TruckIcon className="size-6 mx-0.75" />
+                           ) : (
+                              <Image
+                                 src={item.offer.imgSrc}
+                                 alt="Product preview"
+                                 width={30}
+                                 height={30}
+                                 className="rounded-sm"
+                              />
+                           )}
+                           <div className="overflow-scroll">
+                              {item.offer.title}
+                           </div>
+                           {!Object.values(
+                              (offers[item.offer.id] ?? item.offer).items,
+                           ).length ? (
+                              <EditOffer
+                                 trigger={
+                                    <Button
+                                       variant={'destructive'}
+                                       className="cursor-pointer"
+                                    >
+                                       <WarningIcon className="w-fit" />{' '}
+                                    </Button>
+                                 }
+                                 offer={offers[item.offer.id] ?? item.offer}
+                              />
+                           ) : null}
+                        </>
                      </OrderCardTablePosition>
                   ))}
                </OrderCardTableBody>

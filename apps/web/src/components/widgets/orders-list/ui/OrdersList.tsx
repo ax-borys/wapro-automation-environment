@@ -16,6 +16,7 @@ import { useEffect } from 'react';
 import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
 import { Order } from '@/components/features/order';
 import { sortOrders } from '@/entities/order';
+import { normilizeItems } from '@/entities/offer';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -48,7 +49,20 @@ export function OrdersList() {
                     }
                   : null,
                selected: false,
-               positions: normilizePositions(order.positions),
+               positions: normilizePositions(
+                  order.positions.map((position) => ({
+                     ...position,
+                     offer: {
+                        ...position.offer,
+                        items: normilizeItems(
+                           position.offer.items.flatMap((item) => ({
+                              ...item.product,
+                              quantity: item.quantity,
+                           })),
+                        ),
+                     },
+                  })),
+               ),
                createdAt: new Date(order.createdAt),
                preparedAt: new Date(order.preparedAt),
                fulfilledAt: null,
@@ -78,7 +92,11 @@ export function OrdersList() {
       orderId: OrderModel['id'],
       value: string,
    ) => {
-      const sortedReceipts = ordersList.map((order) => receipts[order.id]);
+      const filtredOrders = ordersList.filter(
+         (order) => order.requiredDocumentType === 'RECEIPT',
+      );
+
+      const sortedReceipts = filtredOrders.map((order) => receipts[order.id]);
       const currentReceiptIndex = sortedReceipts
          .map((receipt) => receipt.orderId)
          .indexOf(orderId);
@@ -119,7 +137,8 @@ export function OrdersList() {
    const recordSelectedReceipts = async () => {
       const selectedReceipts = selectedOrders
          .filter((order) => order.requiredDocumentType === 'RECEIPT')
-         .map((order) => receipts[order.id]);
+         .map((order) => receipts[order.id])
+         .filter((receipt) => receipt.status === 'RECORD');
 
       const selectedReceiptsIds = selectedReceipts.map(
          (receipt) => receipt.orderId,

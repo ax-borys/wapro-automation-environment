@@ -197,7 +197,6 @@ export function OrderCardTableBody({
 
 export function OrderCardTablePosition({
    className,
-   name,
    quantity,
    tax,
    net,
@@ -205,7 +204,6 @@ export function OrderCardTablePosition({
    children,
    ...props
 }: React.ComponentProps<typeof TableRow> & {
-   name: string;
    quantity: number;
    tax: '8' | '23';
    net: number;
@@ -215,7 +213,6 @@ export function OrderCardTablePosition({
       <TableRow className={cn(className)} {...props}>
          <TableCell className="font-medium text-sm flex items-center gap-2">
             {children}
-            <div className="overflow-scroll">{name}</div>
          </TableCell>
          <TableCell className="text-center">x{quantity}</TableCell>
          <TableCell className="text-center">{Number.parseInt(tax)}%</TableCell>

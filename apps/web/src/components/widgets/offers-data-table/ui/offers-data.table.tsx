@@ -20,24 +20,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react';
 import { useDataTable } from '@/hooks/use-data-table';
+import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
 
 export function OffersDataTable({ initialData }: { initialData: OfferData[] }) {
    const { offers, addMany } = useOffersStore();
 
    const [initialized, setInitialized] = useState<boolean>(false);
 
-   useEffect(() => {
-      const promise = fetchAllOffersWithItems();
-      promise.then((offers) => {
-         addMany(
-            offers.map((offer) => ({
-               ...offer,
-               items: normilizeItems(offer.items),
-            })),
-         );
-         setInitialized(true);
-      });
-   }, []);
+   useGetAndStoreOffers(() => setInitialized(true));
 
    const dataInput = useMemo(() => Object.values(offers), [offers]);
    console.log('Data input: ', dataInput);
