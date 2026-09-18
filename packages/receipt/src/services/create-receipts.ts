@@ -7,7 +7,11 @@ import { dbWapro, recordReceipt, RecordReceiptOutput } from '@wae/wapro';
 import * as v from 'valibot';
 import { db, positionsTable, productsTable, receiptsTable } from '@wae/db';
 import { createInsertSchema } from 'drizzle-orm/valibot';
-import { orderDoesntExist, positionHasNoMatchedOffer } from '../errors';
+import {
+   orderDoesntExist,
+   orderDoesntRequireReceipt,
+   positionHasNoMatchedOffer,
+} from '../errors';
 import { GenerateReceiptInput } from '../schema';
 import { generateReceipts } from './generate-receipts';
 import {
@@ -69,6 +73,11 @@ export async function createReceipts(
 
       if (!order) {
          throw orderDoesntExist(receipt.orderId);
+      }
+
+      // check whether order requires receipt
+      if (order.requiredDocumentType !== 'RECEIPT') {
+         throw orderDoesntRequireReceipt(order.id, order.externalId);
       }
    }
 

@@ -39,3 +39,11 @@ export const positionWasNotInitialized = (orderId: number, offerId: number) =>
    businessRuleViolation(
       `Position with offerId=${offerId} has not been initialized for order with id=${orderId}.`,
    );
+
+export const orderDoesntRequireReceipt = (
+   orderId: number,
+   externalId?: string,
+) =>
+   businessRuleViolation(
+      `Order with id=${orderId}${externalId ? ` and externalId=${externalId}` : ''} does not require receipt. Probably it needs invoice.`,
+   );
