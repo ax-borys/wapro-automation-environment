@@ -36,6 +36,7 @@ export const columns = columnHelper.columns([
       {
          id: 'buyerFullName',
          header: () => <div className="w-30">Buyer name</div>,
+         size: 300,
       },
    ),
    columnHelper.accessor('order.packages', {
@@ -45,6 +46,7 @@ export const columns = columnHelper.columns([
 
          return <div className="text-center">{value}</div>;
       },
+      size: 100,
    }),
    columnHelper.accessor('number', {
       header: () => <div className="text-center">Number</div>,
@@ -57,6 +59,7 @@ export const columns = columnHelper.columns([
             </div>
          );
       },
+      size: 150,
    }),
    columnHelper.accessor('fiscalNumber', {
       header: () => <div className="text-center">Fiscal number</div>,
@@ -69,6 +72,7 @@ export const columns = columnHelper.columns([
             </div>
          );
       },
+      size: 150,
    }),
    columnHelper.accessor('order.paymentMethod', {
       header: () => <div className="text-center">Payment method</div>,
@@ -83,6 +87,7 @@ export const columns = columnHelper.columns([
             </div>
          );
       },
+      size: 150,
    }),
    columnHelper.accessor('order.totalToPay', {
       header: () => <div className="text-right">Total</div>,
@@ -98,5 +103,6 @@ export const columns = columnHelper.columns([
 
          return <div className="text-right font-medium">{formatted}</div>;
       },
+      size: 200,
    }),
 ]);

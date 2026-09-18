@@ -72,7 +72,7 @@ export function BadgeReceiptNumber({
    value: string;
 }) {
    return (
-      <Badge className="ml-auto p-4 underline font-medium bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
+      <Badge className="ml-auto w-34 justify-between p-4 underline font-medium bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-300">
          <CopyIcon className="size-4!" />
          {value}
       </Badge>
@@ -86,7 +86,7 @@ export function BadgeFiskalNumber({
    value: number | string;
 }) {
    return (
-      <Badge className="ml-auto p-4 font-medium bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+      <Badge className="ml-auto w-28 justify-between p-4 font-medium bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
          <CashRegisterIcon className="size-4!" />
          {value}
       </Badge>
