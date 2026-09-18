@@ -1,6 +1,7 @@
 import { Order } from '@wae/types';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
+import { formatFiscalNumber } from './utils/format-fiscal-number';
 
 export type ReceiptModel = {
    orderId: Order['id'];
@@ -30,7 +31,7 @@ type ReceiptsStore = {
    ) => void;
    setFiscalNumber: (
       id: ReceiptModel['orderId'],
-      value: ReceiptModel['fiscalNumber'],
+      value: number | null | undefined,
    ) => void;
    ensureReceipt: (id: ReceiptModel['orderId']) => boolean;
    ensureReceipts: () => boolean;
@@ -69,10 +70,13 @@ export const useReceiptsStore = create<ReceiptsStore>()(
          set((s) => {
             s.receipts[id].number = value;
          }),
-      setFiscalNumber: (id, value) =>
+      setFiscalNumber: (id, value) => {
+         if (!value) return;
+
          set((s) => {
-            s.receipts[id].fiscalNumber = value;
-         }),
+            s.receipts[id].fiscalNumber = formatFiscalNumber(value);
+         });
+      },
       ensureReceipt: (id) => {
          return get().receipts[id] ? true : false;
       },

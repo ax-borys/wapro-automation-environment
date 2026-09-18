@@ -62,7 +62,7 @@ export function Order({
    onChangeFiscalNumber,
 }: {
    id: OrderModel['id'];
-   onChangeFiscalNumber?: (value: string | null) => void;
+   onChangeFiscalNumber?: (value: number | null) => void;
 }) {
    const { order, selectToggle } = useOrder(id);
    const { receipt, setFiscalNumber, recordReceipt } = useReceipt(order.id);
@@ -84,7 +84,7 @@ export function Order({
       const parsedFiscalNumber = Number.parseInt(fiscalNumber);
 
       if (parsedFiscalNumber) {
-         const value = `W${String(parsedFiscalNumber).padStart(6, '0')}`;
+         const value = parsedFiscalNumber;
          setFiscalNumber(value);
          onChangeFiscalNumber?.(value);
       } else if (fiscalNumber === '') {

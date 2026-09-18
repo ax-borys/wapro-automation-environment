@@ -90,7 +90,7 @@ export function OrdersList() {
 
    const generateBulkFiscalNumber = (
       orderId: OrderModel['id'],
-      value: string,
+      value: number,
    ) => {
       const filtredOrders = ordersList.filter(
          (order) => order.requiredDocumentType === 'RECEIPT',
@@ -107,8 +107,7 @@ export function OrdersList() {
 
       restReceipts.forEach((receipt, i) => {
          if (receipt.status === 'RECORDED') return;
-         const prefix = value[0];
-         const newValue = `${prefix}${String(Number.parseInt(value.slice(1)) + i + 1).padStart(6, '0')}`;
+         const newValue = value + i + 1;
 
          setFiscalNumber(receipt.orderId, newValue);
       });
