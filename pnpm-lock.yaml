@@ -615,6 +615,9 @@ importers:
 
   packages/order:
     dependencies:
+      '@wae/core':
+        specifier: workspace:*
+        version: link:../core
       '@wae/db':
         specifier: workspace:*
         version: link:../db
