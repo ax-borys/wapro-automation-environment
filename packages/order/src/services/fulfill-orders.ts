@@ -2,7 +2,7 @@ import * as v from 'valibot';
 import { db, ordersTable } from '@wae/db';
 import { inArray } from 'drizzle-orm';
 import { businessRuleViolation } from '@wae/core';
-import { Order, orderSchema } from '@wae/types';
+import { Order, orderSchema, Tx } from '@wae/types';
 
 export const fulfillOrderInputSchema = v.object({
    id: orderSchema.entries.id,
@@ -14,9 +14,10 @@ type FulfillOrderOutput = v.InferOutput<typeof fulfillOrderInputSchema>;
 type FulfillOrderReturnOutput = v.InferOutput<typeof fulfillOrderReturnSchema>;
 
 export async function fulfillOrders(
+   tx: Tx,
    ordersInput: FulfillOrderOutput[],
 ): Promise<FulfillOrderReturnOutput[]> {
-   const orders = await db
+   const orders = await tx
       .select()
       .from(ordersTable)
       .where(
@@ -46,20 +47,16 @@ export async function fulfillOrders(
       return order.status !== 'FULFILLED' && order.status !== 'CANCELLED';
    });
 
-   const updatedOrders = await db.transaction(async (tx) => {
-      const orders = await tx
-         .update(ordersTable)
-         .set({ status: 'FULFILLED', fulfilledAt: new Date() })
-         .where(
-            inArray(
-               ordersTable.id,
-               updateOrdersInput.map((i) => i.id),
-            ),
-         )
-         .returning();
-
-      return orders;
-   });
+   const updatedOrders = await tx
+      .update(ordersTable)
+      .set({ status: 'FULFILLED', fulfilledAt: new Date() })
+      .where(
+         inArray(
+            ordersTable.id,
+            updateOrdersInput.map((i) => i.id),
+         ),
+      )
+      .returning();
 
    const notUpdatedOrders = orders.filter(
       (order) => !updatedOrders.find((order2) => order.id === order2.id),

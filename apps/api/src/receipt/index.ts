@@ -9,6 +9,8 @@ import { ApiResponse, WaproConfig } from '@wae/types';
 import { Hono } from 'hono';
 import { valibotJsonMiddleware } from '../helpers/valibot-middleware';
 import * as v from 'valibot';
+import { db } from '@wae/db';
+import { fulfillOrders } from '@wae/order';
 
 const config: WaproConfig = {
    companyId: 1,
@@ -35,7 +37,16 @@ export const receipt = new Hono()
       async (c) => {
          const input = c.req.valid('json');
 
-         const receipts = await createReceipts(input, config);
+         const receipts = await db.transaction(async (tx) => {
+            const receipts = await createReceipts(tx, input, config);
+
+            await fulfillOrders(
+               tx,
+               receipts.map((receipt) => ({ id: receipt.orderId })),
+            );
+
+            return receipts;
+         });
 
          return c.json<ApiResponse<typeof receipts>>(
             {

@@ -2,6 +2,7 @@ import {
    WaproConfig,
    Mapping,
    orderWithPositionsWithOfferSchema,
+   Tx,
 } from '@wae/types';
 import { dbWapro, recordReceipt, RecordReceiptOutput } from '@wae/wapro';
 import * as v from 'valibot';
@@ -39,10 +40,11 @@ export type CreateReceiptInput = v.InferOutput<typeof createReceiptInputSchema>;
 export type CreateReceiptReturnOutput = SaveReceiptReturnOutput;
 
 export async function createReceipts(
+   tx: Tx,
    receiptsInput: CreateReceiptInput[],
    config: WaproConfig,
 ): Promise<CreateReceiptReturnOutput[]> {
-   const orders = await db.query.ordersTable.findMany({
+   const orders = await tx.query.ordersTable.findMany({
       with: {
          positions: {
             with: {
@@ -137,34 +139,32 @@ export async function createReceipts(
       config,
    );
 
-   const savedReceipts = await db.transaction(async (tx) => {
-      return await dbWapro.transaction(async (tx2) => {
-         const receiptsInfo: Record<number, RecordReceiptOutput> = {};
+   const savedReceipts = await dbWapro.transaction(async (tx2) => {
+      const receiptsInfo: Record<number, RecordReceiptOutput> = {};
 
-         for (const generatedReceipt of generatedReceipts) {
-            const result = await recordReceipt(tx2, generatedReceipt);
-            receiptsInfo[result.id] = result;
-         }
+      for (const generatedReceipt of generatedReceipts) {
+         const result = await recordReceipt(tx2, generatedReceipt);
+         receiptsInfo[result.id] = result;
+      }
 
-         const saveReceiptsInput: SaveReceiptInput[] = taggedReceiptsInput.map(
-            (receipt) => {
-               return {
-                  ...receipt,
-                  number: receiptsInfo[Number(receipt.clientTag)].receiptNumber,
-                  positions: v
-                     .parse(
-                        orderWithPositionsWithOfferSchema,
-                        mappedOrders.get(receipt.orderId),
-                     )
-                     .positions.map((position) => ({
-                        offerId: position.offerId,
-                     })),
-               };
-            },
-         );
+      const saveReceiptsInput: SaveReceiptInput[] = taggedReceiptsInput.map(
+         (receipt) => {
+            return {
+               ...receipt,
+               number: receiptsInfo[Number(receipt.clientTag)].receiptNumber,
+               positions: v
+                  .parse(
+                     orderWithPositionsWithOfferSchema,
+                     mappedOrders.get(receipt.orderId),
+                  )
+                  .positions.map((position) => ({
+                     offerId: position.offerId,
+                  })),
+            };
+         },
+      );
 
-         return await saveReceipts(tx, saveReceiptsInput);
-      });
+      return await saveReceipts(tx, saveReceiptsInput);
    });
 
    return savedReceipts;
