@@ -33,7 +33,9 @@ export const receipt = new Hono()
    })
    .post(
       '/record',
-      valibotJsonMiddleware(v.array(createReceiptInputSchema)),
+      valibotJsonMiddleware(
+         v.pipe(v.array(createReceiptInputSchema), v.nonEmpty()),
+      ),
       async (c) => {
          const input = c.req.valid('json');
 

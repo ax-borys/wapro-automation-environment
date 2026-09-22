@@ -1,6 +1,6 @@
 import { recipientsTable } from '@wae/db';
 import { createObtainEntities } from '@wae/kernel';
-import { recipientInputSchema, recipientSchema } from '@wae/types';
+import { recipientInputSchema, recipientSchema, Tx } from '@wae/types';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
 
@@ -13,6 +13,7 @@ type ObtainRecipientReturnOutput = v.InferOutput<
 >;
 
 export const obtainRecipients: (
+   tx: Tx,
    recipientsInput: ObtainRecipientOutput[],
 ) => Promise<ObtainRecipientReturnOutput[]> = createObtainEntities({
    table: recipientsTable,

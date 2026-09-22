@@ -1,4 +1,4 @@
-import { db } from '@wae/db';
+import { Tx } from '@wae/types';
 import { and, InferInsertModel, InferSelectModel, or, SQL } from 'drizzle-orm';
 import { SQLiteTable, TableConfig } from 'drizzle-orm/sqlite-core';
 import {
@@ -36,8 +36,11 @@ export function createObtainEntities<
       entity: Entity<TReturnSchema>,
       entityInput: Input<TSchema>,
    ) => Entity<TReturnSchema>;
-}): (input: Input<TSchema>[]) => Promise<v.InferOutput<TReturnSchema>[]> {
-   return async (input) => {
+}): (
+   tx: Tx,
+   input: Input<TSchema>[],
+) => Promise<v.InferOutput<TReturnSchema>[]> {
+   return async (tx, input) => {
       const condition = or(
          ...input.map((row) => {
             const equation = equal(table, row);
@@ -50,7 +53,7 @@ export function createObtainEntities<
          }),
       );
 
-      const existingEntities: Entity<TReturnSchema>[] = await db
+      const existingEntities: Entity<TReturnSchema>[] = await tx
          .select()
          .from(table)
          .where(condition);
@@ -75,7 +78,7 @@ export function createObtainEntities<
 
       const createdEntities: Entity<TReturnSchema>[] =
          uniqueNonExistingEntitiesInput.length
-            ? ((await db
+            ? ((await tx
                  .insert(table)
                  .values(uniqueNonExistingEntitiesInput as InferInsertModel<T>)
                  .returning()) as Entity<TReturnSchema>[])

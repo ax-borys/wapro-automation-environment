@@ -5,6 +5,7 @@ import {
    customerWithCompanyNameInputSchema,
    customerWithFullNameInputSchema,
    customerSchema,
+   Tx,
 } from '@wae/types';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -24,6 +25,7 @@ type ObtainCustomerReturnOutput = v.InferOutput<
 >;
 
 export async function obtainCustomers(
+   tx: Tx,
    customersInput: ObtainCustomerInput[],
 ): Promise<ObtainCustomerReturnOutput[]> {
    const obtainEntities = createObtainEntities({
@@ -40,7 +42,7 @@ export async function obtainCustomers(
          customer1.externalId === customer2.externalId,
    });
 
-   const customers = await obtainEntities(customersInput);
+   const customers = await obtainEntities(tx, customersInput);
 
    return customers;
 }

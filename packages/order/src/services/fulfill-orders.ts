@@ -1,8 +1,8 @@
 import * as v from 'valibot';
 import { db, ordersTable } from '@wae/db';
 import { inArray } from 'drizzle-orm';
-import { businessRuleViolation } from '@wae/core';
 import { Order, orderSchema, Tx } from '@wae/types';
+import { resourceMissing } from '@wae/core';
 
 export const fulfillOrderInputSchema = v.object({
    id: orderSchema.entries.id,
@@ -32,9 +32,7 @@ export async function fulfillOrders(
       const order = orders.find((order) => orderInput.id === order.id);
 
       if (!order) {
-         throw businessRuleViolation(
-            `Order with id=${orderInput.id} doesn't exist.`,
-         );
+         throw resourceMissing(`Order with id=${orderInput.id} doesn't exist.`);
       }
    });
 

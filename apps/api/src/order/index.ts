@@ -1,21 +1,26 @@
 import { Hono } from 'hono';
 import * as allegro from '@wae/allegro';
+import * as v from 'valibot';
 import {
+   addressSchema,
    ApiResponse,
+   customerSchema,
+   deliverySchema,
    Offer,
    orderWithPositionsWithOfferSchema,
    Product,
    ReceiptPosition,
+   recipientSchema,
 } from '@wae/types';
 import { customAlphabet } from 'nanoid';
 import {
    addOrderInputSchema,
    addOrders,
    obtainDeliveries,
+   obtainOrderInputSchema,
    obtainOrders,
    obtainRecipients,
 } from '@wae/order';
-import * as v from 'valibot';
 import {
    addressesTable,
    customersTable,
@@ -51,163 +56,171 @@ export const order = new Hono()
             error: null,
          });
       }
+      const result = await db.transaction(async (tx) => {
+         console.log("Obtaining customers' addresses...");
+         const customerAddresses = await obtainAddresses(
+            tx,
+            allegroOrders
+               .filter(
+                  (
+                     order,
+                  ): order is typeof order & {
+                     customer: typeof order.customer & {
+                        address: NonNullable<typeof order.customer.address>;
+                     };
+                  } => order.customer.address !== null,
+               )
+               .map((order) => order.customer.address),
+         );
+         console.log('Obtaining succeeded.');
 
-      console.log("Obtaining customers' addresses...");
-      const customerAddresses = await obtainAddresses(
-         allegroOrders
-            .filter(
-               (
-                  order,
-               ): order is typeof order & {
-                  customer: typeof order.customer & {
-                     address: NonNullable<typeof order.customer.address>;
-                  };
-               } => order.customer.address !== null,
-            )
-            .map((order) => order.customer.address),
-      );
-      console.log('Obtaining succeeded.');
+         console.log('Obtaining customers...');
+         const customers = await obtainCustomers(
+            tx,
+            allegroOrders.map((order) => {
+               const customerAddress = order.customer.address
+                  ? customerAddresses.find(
+                       (address) => address.clientTag === order.clientTag,
+                    )
+                  : null;
 
-      console.log('Obtaining customers...');
-      const customers = await obtainCustomers(
-         allegroOrders.map((order) => {
-            const customerAddress = order.customer.address
-               ? customerAddresses.find(
-                    (address) => address.clientTag === order.clientTag,
-                 )
-               : null;
+               return {
+                  ...order.customer,
+                  addressId: customerAddress ? customerAddress.id : null,
+               };
+            }),
+         );
+         console.log('Obtaining succeeded.');
 
-            return {
-               ...order.customer,
-               addressId: customerAddress ? customerAddress.id : null,
-            };
-         }),
-      );
-      console.log('Obtaining succeeded.');
+         console.log("Obtaining recipients' addresses...");
+         const recipientAddresses = await obtainAddresses(
+            tx,
+            allegroOrders.map((order) => order.recipient.address),
+         );
+         console.log('Obtaining succeeded.');
 
-      console.log("Obtaining recipients' addresses...");
-      const recipientAddresses = await obtainAddresses(
-         allegroOrders.map((order) => order.recipient.address),
-      );
-      console.log('Obtaining succeeded.');
+         console.log('Obtaining recipients...');
+         const recipients = await obtainRecipients(
+            tx,
+            allegroOrders.map((order) => {
+               const recipientAddress = v.parse(
+                  addressSchema,
+                  recipientAddresses.find(
+                     (address) => address.clientTag === order.clientTag,
+                  ),
+               );
 
-      console.log('Obtaining recipients...');
-      const recipients = await obtainRecipients(
-         allegroOrders.map((order) => {
-            const recipientAddress = recipientAddresses.find(
-               (address) => address.clientTag === order.clientTag,
+               return { ...order.recipient, addressId: recipientAddress.id };
+            }),
+         );
+         console.log('Obtaining succeeded.');
+
+         console.log("Obtaining deliveries' addresses...");
+         const deliveryAddresses = await obtainAddresses(
+            tx,
+            allegroOrders.map((order) => order.delivery.address),
+         );
+         console.log('Obtaining succeeded.');
+
+         console.log('Obtaining deliveries...');
+         const deliveries = await obtainDeliveries(
+            tx,
+            allegroOrders.map((order) => {
+               const deliveryAddress = v.parse(
+                  addressSchema,
+                  deliveryAddresses.find(
+                     (address) => address.clientTag === order.clientTag,
+                  ),
+               );
+
+               return { ...order.delivery, addressId: deliveryAddress.id };
+            }),
+         );
+         console.log('Obtaining succeeded.');
+
+         console.log('Obtaining orders...');
+         const validatedObtainOrdersInput = v.parse(
+            v.pipe(v.array(obtainOrderInputSchema), v.nonEmpty()),
+            allegroOrders.map((order) => {
+               const customer = v.parse(
+                  customerSchema,
+                  customers.find(
+                     (customer) => customer.clientTag === order.clientTag,
+                  ),
+               );
+
+               const recipient = v.parse(
+                  recipientSchema,
+                  recipients.find(
+                     (recipient) => recipient.clientTag === order.clientTag,
+                  ),
+               );
+
+               const delivery = v.parse(
+                  deliverySchema,
+                  deliveries.find(
+                     (delivery) => delivery.clientTag === order.clientTag,
+                  ),
+               );
+
+               return {
+                  ...order,
+                  customerId: customer.id,
+                  recepientId: recipient.id,
+                  deliveryId: delivery.id,
+               };
+            }),
+         );
+
+         const orders = await obtainOrders(tx, validatedObtainOrdersInput);
+
+         const completeOrders = orders.map((order) => {
+            const customer = v.parse(
+               customerSchema,
+               customers.find((customer) => customer.id === order.customerId),
             );
 
-            if (!recipientAddress) {
-               throw new Error('Failed to obtain recipient address.');
-            }
-
-            return { ...order.recipient, addressId: recipientAddress.id };
-         }),
-      );
-      console.log('Obtaining succeeded.');
-
-      console.log("Obtaining deliveries' addresses...");
-      const deliveryAddresses = await obtainAddresses(
-         allegroOrders.map((order) => order.delivery.address),
-      );
-      console.log('Obtaining succeeded.');
-
-      console.log('Obtaining deliveries...');
-      const deliveries = await obtainDeliveries(
-         allegroOrders.map((order) => {
-            const deliveryAddress = deliveryAddresses.find(
-               (address) => address.clientTag === order.clientTag,
+            const customerAddress = customerAddresses.find(
+               (address) => address.id === customer.addressId,
             );
 
-            if (!deliveryAddress) {
-               throw new Error('Failed to obtain delivery address.');
-            }
+            const recipient = v.parse(
+               recipientSchema,
+               recipients.find(
+                  (recipient) => recipient.id === order.recepientId,
+               ),
+            );
 
-            return { ...order.delivery, addressId: deliveryAddress.id };
-         }),
-      );
-      console.log('Obtaining succeeded.');
+            const delivery = v.parse(
+               deliverySchema,
+               deliveries.find((delivery) => delivery.id === order.deliveryId),
+            );
 
-      console.log('Obtaining orders...');
-      const orders = await obtainOrders(
-         allegroOrders.map((order) => {
-            const customer = customers.find(
-               (customer) => customer.clientTag === order.clientTag,
+            const deliveryAddress = v.parse(
+               addressSchema,
+               deliveryAddresses.find(
+                  (address) => address.id === delivery.addressId,
+               ),
             );
-            if (!customer) throw new Error('Failed to obtain customer.');
-            const recipient = recipients.find(
-               (recipient) => recipient.clientTag === order.clientTag,
-            );
-            if (!recipient) {
-               throw new Error('Failed to obtain recipient.');
-            }
-            const delivery = deliveries.find(
-               (delivery) => delivery.clientTag === order.clientTag,
-            );
-            if (!delivery) throw new Error('Failed to obtain delivery.');
 
             return {
                ...order,
-               customerId: customer.id,
-               recepientId: recipient.id,
-               deliveryId: delivery.id,
+               customer: { ...customer, address: customerAddress },
+               recipient,
+               delivery: {
+                  ...delivery,
+                  address: deliveryAddress,
+               },
             };
-         }),
-      );
+         });
 
-      const completeOrders = orders.map((order) => {
-         const customer = customers.find(
-            (customer) => customer.id === order.customerId,
-         );
+         console.log('Obtaining succeeded.');
 
-         if (!customer) {
-            throw new Error('Failed to obtain customer.');
-         }
-
-         const customerAddress = customerAddresses.find(
-            (address) => address.id === customer.addressId,
-         );
-
-         const recipient = recipients.find(
-            (recipient) => recipient.id === order.recepientId,
-         );
-
-         if (!recipient) {
-            throw new Error('Failed to obtain recipient.');
-         }
-
-         const delivery = deliveries.find(
-            (delivery) => delivery.id === order.deliveryId,
-         );
-
-         if (!delivery) {
-            throw new Error('Failed to obtain delivery.');
-         }
-
-         const deliveryAddress = deliveryAddresses.find(
-            (address) => address.id === delivery.addressId,
-         );
-
-         if (!deliveryAddress) {
-            throw new Error('Failed to obtain delivery address');
-         }
-
-         return {
-            ...order,
-            customer: { ...customer, address: customerAddress },
-            recipient,
-            delivery: {
-               ...delivery,
-               address: deliveryAddress,
-            },
-         };
+         return completeOrders;
       });
 
-      console.log('Obtaining succeeded.');
-
-      return c.json<ApiResponse<typeof completeOrders>>({
-         data: completeOrders,
+      return c.json<ApiResponse<typeof result>>({
+         data: result,
          error: null,
       });
    })

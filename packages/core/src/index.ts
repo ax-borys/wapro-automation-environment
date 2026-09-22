@@ -22,6 +22,7 @@ export {
    conflict,
    businessRuleViolation,
    externalApiError,
+   resourceMissing,
    AppError,
 } from './app-error';
 

@@ -9,7 +9,7 @@ import {
    filterNewOrdersBySrcExternalId,
 } from '../utils/filter-orders';
 import { db } from '@wae/db';
-import { Order, receiptSchema } from '@wae/types';
+import { Order, receiptSchema, Tx } from '@wae/types';
 
 export const obtainOrderInputSchema = addOrderInputSchema;
 export const obtainOrderReturnSchema = v.object({
@@ -21,6 +21,7 @@ type ObtainOrderOutput = v.InferOutput<typeof obtainOrderInputSchema>;
 type ObtainOrderReturnOutput = v.InferOutput<typeof obtainOrderReturnSchema>;
 
 export async function obtainOrders(
+   tx: Tx,
    input: ObtainOrderOutput[],
 ): Promise<ObtainOrderReturnOutput[]> {
    const condition = buildSrcExternalIdQueryCondition(input);
@@ -50,7 +51,7 @@ export async function obtainOrders(
    const newOrders: typeof existingOrders = [];
 
    if (newOrdersInput.length) {
-      const orders = await addOrders(newOrdersInput);
+      const orders = await addOrders(tx, newOrdersInput);
 
       orders.forEach((order) => newOrders.push({ ...order, receipt: null }));
    }

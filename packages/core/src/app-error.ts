@@ -1,6 +1,7 @@
 type ErrorCode =
    | 'NOT_FOUND'
    | 'VALIDATION'
+   | 'RESOURCE_MISSING'
    | 'UNPROCESSABLE'
    | 'CONFLICT'
    | 'FORBIDDEN'
@@ -10,6 +11,7 @@ type ErrorCode =
 const STATUS_MAP = {
    NOT_FOUND: 404,
    VALIDATION: 400,
+   RESOURCE_MISSING: 400,
    UNPROCESSABLE: 422,
    CONFLICT: 409,
    FORBIDDEN: 403,
@@ -36,5 +38,7 @@ export const forbidden = (msg = 'Forbidden') => new AppError('FORBIDDEN', msg);
 export const validationError = (msg: string) => new AppError('VALIDATION', msg);
 export const businessRuleViolation = (msg: string) =>
    new AppError('UNPROCESSABLE', msg);
+export const resourceMissing = (msg: string) =>
+   new AppError('RESOURCE_MISSING', msg);
 export const externalApiError = (msg: string) =>
    new AppError('EXTERNAL_API_ERROR', msg);

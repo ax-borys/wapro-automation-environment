@@ -3,6 +3,7 @@ import { invoiceInputSchema, invoiceSchema } from '@wae/types';
 import { inArray } from 'drizzle-orm';
 import * as v from 'valibot';
 import { emptyInput, orderDoesntExist } from '../errors';
+import { resourceMissing } from '@wae/core';
 
 export const createInvoiceInputSchema = v.pick(invoiceInputSchema, ['orderId']);
 
@@ -16,10 +17,6 @@ type CreateInvoiceReturnOutput = v.InferOutput<
 export async function createInvoices(
    input: CreateInvoiceOutput[],
 ): Promise<CreateInvoiceReturnOutput[]> {
-   if (!input.length) {
-      throw emptyInput('CreateInvoice input cannot be empty.');
-   }
-
    const orders = await db
       .select()
       .from(ordersTable)
@@ -34,7 +31,7 @@ export async function createInvoices(
 
    for (const { orderId } of input) {
       if (!ordersIds.includes(orderId)) {
-         throw orderDoesntExist(orderId);
+         throw resourceMissing(`Order with id=${orderId} does not exist.`);
       }
    }
 

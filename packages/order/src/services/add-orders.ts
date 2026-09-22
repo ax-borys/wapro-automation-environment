@@ -17,9 +17,10 @@ import {
    positionSchema,
    productSchema,
    recipientFullInputSchema,
+   Tx,
 } from '@wae/types';
-import { db, offersTable, ordersTable, positionsTable } from '@wae/db';
-import { inArray } from 'drizzle-orm';
+import { db, ordersTable, positionsTable } from '@wae/db';
+import { businessRuleViolation } from '@wae/core';
 
 export const addOrderInputSchema = v.object({
    ...v.omit(orderInputSchema, ['createdAt', 'id', 'clientTag']).entries,
@@ -117,6 +118,7 @@ type AddOrderReturnInput = v.InferInput<typeof addOrderReturnSchema>;
 type AddOrderReturnOutput = v.InferOutput<typeof addOrderReturnSchema>;
 
 export async function addOrders(
+   tx: Tx,
    input: AddOrderInputSchema[],
 ): Promise<AddOrderReturnOutput[]> {
    const inputMap = new Map<
@@ -140,114 +142,110 @@ export async function addOrders(
       }),
    );
 
-   const result = await db.transaction(async (tx) => {
-      const ordersInput = [...inputMap.values()].map((i) => ({
-         ...i,
-         preparedAt: i.preparedAt ?? new Date(),
-      }));
+   const ordersInput = [...inputMap.values()].map((i) => ({
+      ...i,
+      preparedAt: i.preparedAt ?? new Date(),
+   }));
 
-      const existingOrders = await tx.select().from(ordersTable);
-      const existingOrdersExternalIds = new Map(
-         existingOrders.map((i) => [i.externalId, i.src]),
-      );
+   const existingOrders = await tx.select().from(ordersTable);
+   const existingOrdersExternalIds = new Map(
+      existingOrders.map((i) => [i.externalId, i.src]),
+   );
 
-      const nonExistingOrdersInput = ordersInput.filter(
-         (order) =>
-            !existingOrdersExternalIds.has(order.externalId) &&
-            existingOrdersExternalIds.get(order.externalId) !== order.src,
-      );
+   const nonExistingOrdersInput = ordersInput.filter(
+      (order) =>
+         !existingOrdersExternalIds.has(order.externalId) &&
+         existingOrdersExternalIds.get(order.externalId) !== order.src,
+   );
 
-      const orders = await tx
-         .insert(ordersTable)
-         .values(nonExistingOrdersInput)
-         .returning();
+   const orders = await tx
+      .insert(ordersTable)
+      .values(nonExistingOrdersInput)
+      .returning();
 
-      console.log('Validation orders...');
-      const validatedOrders = v.parse(v.array(orderSchema), orders);
-      console.log('Validation completed.');
+   console.log('Validation orders...');
+   const validatedOrders = v.parse(v.array(orderSchema), orders);
+   console.log('Validation completed.');
 
-      const externalOffersIds = new Set(
-         input.flatMap((i) => i.positions.map((i) => i.offer.externalId)),
-      );
+   const externalOffersIds = new Set(
+      input.flatMap((i) => i.positions.map((i) => i.offer.externalId)),
+   );
 
-      const offers = await tx.query.offersTable.findMany({
-         with: {
-            items: {
-               with: {
-                  product: true,
-               },
+   const offers = await tx.query.offersTable.findMany({
+      with: {
+         items: {
+            with: {
+               product: true,
             },
          },
-         where: {
-            externalId: {
-               in: [...externalOffersIds],
-            },
+      },
+      where: {
+         externalId: {
+            in: [...externalOffersIds],
          },
-      });
-      if (externalOffersIds.size > offers.length) {
-         throw new Error('Offers are not synchronized');
-      }
-
-      console.log('Building positions...');
-      const positionsInput: PositionInput[] = [...inputMap.values()].flatMap(
-         (order) =>
-            order.positions.map(
-               (position): PositionInput => ({
-                  orderId: v.parse(
-                     orderSchema,
-                     orders.find((o) => o.clientTag === order.clientTag),
-                  ).id,
-                  offerId: v.parse(
-                     offerSchema,
-                     offers.find(
-                        (o) =>
-                           o.externalId === position.offer.externalId &&
-                           o.src === position.offer.src,
-                     ),
-                  ).id,
-                  price: position.price,
-                  quantity: position.quantity,
-                  clientTag: position.clientTag,
-               }),
-            ),
-      );
-
-      console.log('Validatig positions input...');
-      const validatedPositionsInput = v.parse(
-         v.array(orderPositionInputSchema),
-         positionsInput,
-      );
-      console.log('Validation completed');
-
-      const positions = await tx
-         .insert(positionsTable)
-         .values(validatedPositionsInput)
-         .returning();
-
-      console.log('Positions: ', positions);
-
-      const completeOrders: AddOrderReturnInput[] = validatedOrders.map(
-         (order): AddOrderReturnInput => ({
-            ...order,
-            positions: positions
-               .filter((p) => p.orderId === order.id)
-               .map((p) => ({
-                  ...p,
-                  offer: v.parse(
-                     offerWithItemsAndProductSchema,
-                     offers.find((offer) => offer.id === p.offerId),
-                  ),
-               })),
-         }),
-      );
-
-      const validatedCompleteOrders = v.parse(
-         v.array(addOrderReturnSchema),
-         completeOrders,
-      );
-
-      return validatedCompleteOrders;
+      },
    });
 
-   return result;
+   // FIX: need to handle it by synchronizing offers automatically
+   if (externalOffersIds.size > offers.length) {
+      throw businessRuleViolation('Offers are not synchronized');
+   }
+
+   console.log('Building positions...');
+   const positionsInput: PositionInput[] = [...inputMap.values()].flatMap(
+      (order) =>
+         order.positions.map(
+            (position): PositionInput => ({
+               orderId: v.parse(
+                  orderSchema,
+                  orders.find((o) => o.clientTag === order.clientTag),
+               ).id,
+               offerId: v.parse(
+                  offerSchema,
+                  offers.find(
+                     (o) =>
+                        o.externalId === position.offer.externalId &&
+                        o.src === position.offer.src,
+                  ),
+               ).id,
+               price: position.price,
+               quantity: position.quantity,
+               clientTag: position.clientTag,
+            }),
+         ),
+   );
+
+   console.log('Validatig positions input...');
+   const validatedPositionsInput = v.parse(
+      v.array(orderPositionInputSchema),
+      positionsInput,
+   );
+   console.log('Validation completed');
+
+   const positions = await tx
+      .insert(positionsTable)
+      .values(validatedPositionsInput)
+      .returning();
+
+   const completeOrders: AddOrderReturnInput[] = validatedOrders.map(
+      (order): AddOrderReturnInput => ({
+         ...order,
+         positions: positions
+            .filter((p) => p.orderId === order.id)
+            .map((p) => ({
+               ...p,
+               offer: v.parse(
+                  offerWithItemsAndProductSchema,
+                  offers.find((offer) => offer.id === p.offerId),
+               ),
+            })),
+      }),
+   );
+
+   const validatedCompleteOrders = v.parse(
+      v.array(addOrderReturnSchema),
+      completeOrders,
+   );
+
+   return validatedCompleteOrders;
 }

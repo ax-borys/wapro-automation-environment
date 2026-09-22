@@ -10,6 +10,7 @@ import {
    Tx,
 } from '@wae/types';
 import { and, eq, or } from 'drizzle-orm';
+import { businessRuleViolation } from '@wae/core';
 
 export const saveReceiptInputSchema = v.object({
    ...v.omit(receiptInputSchema, ['id', 'createdAt', 'clientTag']).entries,
@@ -110,9 +111,8 @@ export async function saveReceipts(
          );
 
          if (!position) {
-            throw positionWasNotInitialized(
-               receipt.orderId,
-               taggedPosition.offerId,
+            throw businessRuleViolation(
+               `Position with offerId=${taggedPosition.offerId} has not been created for order with id=${receipt.orderId}.`,
             );
          }
 

@@ -1,6 +1,6 @@
 import { deliveriesTable } from '@wae/db';
 import { createObtainEntities } from '@wae/kernel';
-import { deliveryInputSchema, deliverySchema } from '@wae/types';
+import { deliveryInputSchema, deliverySchema, Tx } from '@wae/types';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
 import { compareDeliveries } from '../utils/compare-deliveries';
@@ -14,6 +14,7 @@ type ObtainDeliveryReturnOutput = v.InferOutput<
 >;
 
 export const obtainDeliveries: (
+   tx: Tx,
    deliveriesInput: ObtainDeliveryOutput[],
 ) => Promise<ObtainDeliveryReturnOutput[]> = createObtainEntities({
    table: deliveriesTable,

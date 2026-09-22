@@ -8,11 +8,6 @@ import { dbWapro, recordReceipt, RecordReceiptOutput } from '@wae/wapro';
 import * as v from 'valibot';
 import { db, positionsTable, productsTable, receiptsTable } from '@wae/db';
 import { createInsertSchema } from 'drizzle-orm/valibot';
-import {
-   orderDoesntExist,
-   orderDoesntRequireReceipt,
-   positionHasNoMatchedOffer,
-} from '../errors';
 import { GenerateReceiptInput } from '../schema';
 import { generateReceipts } from './generate-receipts';
 import {
@@ -23,6 +18,7 @@ import {
    saveReceipts,
 } from './save-receipts';
 import currency from 'currency.js';
+import { businessRuleViolation, resourceMissing } from '@wae/core';
 
 const receiptInputSchema = createInsertSchema(receiptsTable);
 
@@ -32,7 +28,10 @@ export const createReceiptInputSchema = v.object({
    fiscalNumber: v.nonNullish(receiptInputSchema.entries.fiscalNumber),
 });
 
-export const createReceiptsInputSchema = v.array(createReceiptInputSchema);
+export const createReceiptsInputSchema = v.pipe(
+   v.array(createReceiptInputSchema),
+   v.nonEmpty(),
+);
 
 export const createReceiptOutputSchema = saveReceiptOutputSchema;
 
@@ -74,12 +73,16 @@ export async function createReceipts(
       const order = mappedOrders.get(receipt.orderId);
 
       if (!order) {
-         throw orderDoesntExist(receipt.orderId);
+         throw resourceMissing(
+            `Order with id=${receipt.orderId} does not exist.`,
+         );
       }
 
       // check whether order requires receipt
       if (order.requiredDocumentType !== 'RECEIPT') {
-         throw orderDoesntRequireReceipt(order.id, order.externalId);
+         throw businessRuleViolation(
+            `Order with id=${order.id} and externalId=${order.externalId} does not require receipt.`,
+         );
       }
    }
 

@@ -1,5 +1,5 @@
 import { addressesTable, db } from '@wae/db';
-import { addressInputSchema, addressSchema } from '@wae/types';
+import { addressInputSchema, addressSchema, Tx } from '@wae/types';
 import { and, eq, or, SQL, Table } from 'drizzle-orm';
 import * as v from 'valibot';
 import { compareAddresses } from '../utils/compare-addresses';
@@ -14,6 +14,7 @@ type AddressInput = v.InferOutput<typeof addAddressesInputSchema>;
 type AddressReturn = v.InferOutput<typeof addAddressReturnSchema>;
 
 export async function obtainAddresses(
+   tx: Tx,
    inputAddresses: AddressInput[],
 ): Promise<AddressReturn[]> {
    const obtainEntities = createObtainEntities({
@@ -34,7 +35,7 @@ export async function obtainAddresses(
       }),
    });
 
-   const addresses = await obtainEntities(inputAddresses);
+   const addresses = await obtainEntities(tx, inputAddresses);
 
    return addresses;
 }
