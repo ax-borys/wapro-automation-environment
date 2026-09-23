@@ -1,20 +1,29 @@
+import { validationError } from '@wae/core';
+import { allegroError } from '../errors/api-errors';
 import { store } from '../store/store';
+import * as v from 'valibot';
 
-type ApiResponseRawInvoices = {
-   order_mode: 'UKRAINE_EXPORT' | 'REGULAR';
-   invoices: RawInvoice;
-   hasExternalInvoices: boolean;
-};
+const rawInvoiceSchema = v.object({
+   id: v.string(),
+   invoiceNumber: v.nullable(v.string()),
+   createdAt: v.string(),
+   file: v.nullable(
+      v.object({
+         name: v.string(),
+         uploadedAt: v.string(),
+      }),
+   ),
+});
 
-type RawInvoice = {
-   id: string;
-   invoiceNumber: string;
-   createdAt: string;
-   file: {
-      name: string;
-      uploadedAt: string;
-   };
-};
+const apiResponseRawInvoicesSchema = v.object({
+   orderMode: v.picklist(['UKRAINE_EXPORT', 'REGULAR']),
+   invoices: v.array(rawInvoiceSchema),
+   hasExternalInvoices: v.boolean(),
+});
+
+type ApiResponseRawInvoices = v.InferOutput<
+   typeof apiResponseRawInvoicesSchema
+>;
 
 export async function fetchInvoices(
    accessToken: string,
@@ -35,9 +44,20 @@ export async function fetchInvoices(
    );
 
    if (!response.ok) {
-      console.error(await response.text());
-      throw response;
+      throw allegroError(
+         `Failed to obtain invoices. Got status ${response.status}.`,
+      );
    }
 
-   return (await response.json()) as ApiResponseRawInvoices;
+   const result = await response.json();
+
+   const validatedResult = v.safeParse(apiResponseRawInvoicesSchema, result);
+
+   if (!validatedResult.success) {
+      throw validationError(
+         'Invoices have been fetched successfully, but response schema is different. Probably, Allegro has been changed it recently.',
+      );
+   }
+
+   return validatedResult.output;
 }

@@ -1,4 +1,15 @@
-import { ApiResponseRawOrder } from './types';
+import { externalApiError } from '@wae/core';
+import { rawOrderSchema } from './schema';
+import * as v from 'valibot';
+import { allegroError, validationError } from '../errors/api-errors';
+
+const apiResponseRawOrderSchema = v.object({
+   checkoutForms: v.array(rawOrderSchema),
+   count: v.number(),
+   totalCount: v.number(),
+});
+
+type ApiResponseRawOrder = v.InferOutput<typeof apiResponseRawOrderSchema>;
 
 type QueryParams = {
    'fulfillment.status': 'NEW' | 'PROCESSING' | 'SENT';
@@ -23,11 +34,21 @@ export async function fetchOrders(
       },
    );
 
-   console.log(response);
-
    if (!response.ok) {
-      throw response;
+      throw allegroError(
+         `Failed to obtain orders. Got status ${response.status}.`,
+      );
    }
 
-   return await response.json();
+   const result = await response.json();
+
+   const validatedResult = v.safeParse(apiResponseRawOrderSchema, result);
+
+   if (!validatedResult.success) {
+      throw validationError(
+         'Orders have been fetched successfully, but response schema is different. Probably, Allegro has been changed it recently.',
+      );
+   }
+
+   return validatedResult.output;
 }

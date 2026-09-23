@@ -1,7 +1,9 @@
 import dotenv from 'dotenv';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ApiResponseRawOffer, RawOffer } from './offer';
+import { apiResponseRawOffersSchema } from './offer';
+import { allegroError, validationError } from '../errors/api-errors';
+import * as v from 'valibot';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,6 +20,8 @@ export type QueryParams = {
    limit?: string;
    offset?: string;
 };
+
+type ApiResponseRawOffer = v.InferOutput<typeof apiResponseRawOffersSchema>;
 
 export async function fetchOffers(
    accessToken: string,
@@ -37,9 +41,20 @@ export async function fetchOffers(
    );
 
    if (!response.ok) {
-      const errors = await response.json();
-      throw errors;
+      throw allegroError(
+         `Failed to obtain offers. Got status ${response.status}.`,
+      );
    }
 
-   return (await response.json()) as ApiResponseRawOffer;
+   const result = await response.json();
+
+   const validatedResult = v.safeParse(apiResponseRawOffersSchema, result);
+
+   if (!validatedResult.success) {
+      throw validationError(
+         'Offers have been fetched successfully, but response schema is different. Probably, Allegro has been changed it recently.',
+      );
+   }
+
+   return validatedResult.output;
 }
