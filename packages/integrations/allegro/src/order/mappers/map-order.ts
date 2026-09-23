@@ -11,7 +11,7 @@ import {
    recipientWithCompanyNameSchema,
    recipientWithFullNameSchema,
 } from '@wae/types';
-import { RawOrder } from './types';
+import { RawOrder } from '../types';
 import * as v from 'valibot';
 import currency from 'currency.js';
 

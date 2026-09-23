@@ -1,5 +1,5 @@
 import * as v from 'valibot';
-import { orderValidationSchema } from './map-order';
+import { orderValidationSchema } from '../mappers/map-order';
 type Order = v.InferOutput<typeof orderValidationSchema>;
 
 export async function getPendingOrdersMock(): Promise<any[]> {

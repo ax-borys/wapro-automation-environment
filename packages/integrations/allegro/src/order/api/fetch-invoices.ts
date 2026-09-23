@@ -1,6 +1,6 @@
 import { validationError } from '@wae/core';
-import { allegroError } from '../errors/api-errors';
-import { store } from '../store/store';
+import { allegroError } from '../../errors/api-errors';
+import { store } from '../../store/store';
 import * as v from 'valibot';
 
 const rawInvoiceSchema = v.object({

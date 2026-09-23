@@ -1,1 +1,1 @@
-export { getAllOffers } from './get-all-offers';
+export { getAllOffers } from './services/get-all-offers';

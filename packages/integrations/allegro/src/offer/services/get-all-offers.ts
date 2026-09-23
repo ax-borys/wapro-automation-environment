@@ -1,7 +1,7 @@
 import { CreateOfferInput } from '@wae/offer';
-import { fetchOffers, QueryParams } from './fetch-offers';
-import { obtainAuthTokens } from '../auth/obtain-auth-tokens';
-import { mapOffer } from './map-offer';
+import { fetchOffers, QueryParams } from '../api/fetch-offers';
+import { obtainAuthTokens } from '../../auth/obtain-auth-tokens';
+import { mapOffer } from '../mappers/map-offer';
 
 function customDeliveryOffer(): CreateOfferInput {
    return {

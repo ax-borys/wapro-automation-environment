@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { apiResponseRawOffersSchema } from './offer';
-import { allegroError, validationError } from '../errors/api-errors';
+import { apiResponseRawOffersSchema } from '../offer';
+import { allegroError, validationError } from '../../errors/api-errors';
 import * as v from 'valibot';
 
 const __filename = fileURLToPath(import.meta.url);

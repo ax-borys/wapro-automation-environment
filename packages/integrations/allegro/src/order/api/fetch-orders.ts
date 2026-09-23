@@ -1,7 +1,7 @@
 import { externalApiError } from '@wae/core';
-import { rawOrderSchema } from './schema';
+import { rawOrderSchema } from '../schema';
 import * as v from 'valibot';
-import { allegroError, validationError } from '../errors/api-errors';
+import { allegroError, validationError } from '../../errors/api-errors';
 
 const apiResponseRawOrderSchema = v.object({
    checkoutForms: v.array(rawOrderSchema),

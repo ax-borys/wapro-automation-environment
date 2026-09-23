@@ -1,6 +1,6 @@
 import { CreateOfferInput } from '@wae/offer';
 import * as v from 'valibot';
-import { rawOfferSchema } from './offer';
+import { rawOfferSchema } from '../offer';
 
 type RawOffer = v.InferOutput<typeof rawOfferSchema>;
 
