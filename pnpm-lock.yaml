@@ -545,6 +545,9 @@ importers:
 
   packages/integrations/wapro:
     dependencies:
+      '@wae/core':
+        specifier: workspace:*
+        version: link:../../core
       '@wae/types':
         specifier: workspace:*
         version: link:../../types

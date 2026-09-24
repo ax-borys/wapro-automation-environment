@@ -60,12 +60,18 @@ export async function fetchAuthTokens(): Promise<AllegroApiRefreshTokenResponse>
       );
 
       if (!validatedErrorResult.success) {
-         throw validationError('Cannot obtain error body. Schema mistmatch.');
+         throw validationError(
+            'Cannot obtain error body. Schema mistmatch.',
+            validatedErrorResult.issues,
+         );
       }
 
       const { error, error_description } = validatedErrorResult.output;
 
-      throw authError(error + ':' + error_description);
+      throw authError(
+         error_description ??
+            'Failed to obtain auth tokens. Reason was not provided.',
+      );
    }
 
    const result = await response.json();

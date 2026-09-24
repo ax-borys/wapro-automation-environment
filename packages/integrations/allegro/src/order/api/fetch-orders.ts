@@ -37,6 +37,7 @@ export async function fetchOrders(
    if (!response.ok) {
       throw allegroError(
          `Failed to obtain orders. Got status ${response.status}.`,
+         'EXTERNAL_API_ERROR',
       );
    }
 

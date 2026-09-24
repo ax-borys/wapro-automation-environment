@@ -43,6 +43,7 @@ export async function fetchOffers(
    if (!response.ok) {
       throw allegroError(
          `Failed to obtain offers. Got status ${response.status}.`,
+         'EXTERNAL_API_ERROR',
       );
    }
 
@@ -53,6 +54,7 @@ export async function fetchOffers(
    if (!validatedResult.success) {
       throw validationError(
          'Offers have been fetched successfully, but response schema is different. Probably, Allegro has been changed it recently.',
+         validatedResult.issues,
       );
    }
 

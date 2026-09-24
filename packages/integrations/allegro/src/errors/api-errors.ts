@@ -1,16 +1,23 @@
-import { externalApiError } from '@wae/core';
+import { AppError, ErrorCode, externalApiError } from '@wae/core';
 import { runtimeError } from '@wae/core';
 
-export const allegroError = (msg: string) =>
-   externalApiError('ALLEGRO: ' + msg);
+export const allegroError = (
+   msg: string,
+   code: ErrorCode,
+   cause?: unknown,
+   details?: unknown,
+) => externalApiError(msg, code, 'ALLEGRO', cause, details);
 
-export const validationError = (msg: string) =>
-   allegroError('VALIDATION: ' + msg);
+export const validationError = (msg: string, details?: unknown) =>
+   allegroError(msg, 'VALIDATION', null, details);
 
-export const authError = (msg: string) => allegroError('AUTH: ' + msg);
+export const authError = (
+   msg: string,
+   code?: ErrorCode & ('FORBIDDEN' | 'UNAUTHORIZED'),
+) => allegroError(msg, code ?? 'AUTHENTICATION');
 
 export const invalidDeviceCode = () =>
-   allegroError(
+   authError(
       'Failed to fetch refresh token. Invalid device code. Provide refresh token or valid device code.',
    );
 

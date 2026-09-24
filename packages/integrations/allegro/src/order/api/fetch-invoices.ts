@@ -46,6 +46,7 @@ export async function fetchInvoices(
    if (!response.ok) {
       throw allegroError(
          `Failed to obtain invoices. Got status ${response.status}.`,
+         'EXTERNAL_API_ERROR',
       );
    }
 

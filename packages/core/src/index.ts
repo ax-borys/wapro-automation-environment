@@ -24,6 +24,7 @@ export {
    externalApiError,
    resourceMissing,
    AppError,
+   type ErrorCode,
 } from './app-error';
 
 export { runtimeError } from './runtime-errors';

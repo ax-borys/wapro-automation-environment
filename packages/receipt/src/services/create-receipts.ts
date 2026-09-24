@@ -18,7 +18,12 @@ import {
    saveReceipts,
 } from './save-receipts';
 import currency from 'currency.js';
-import { businessRuleViolation, resourceMissing } from '@wae/core';
+import {
+   AppError,
+   businessRuleViolation,
+   externalApiError,
+   resourceMissing,
+} from '@wae/core';
 
 const receiptInputSchema = createInsertSchema(receiptsTable);
 
@@ -142,33 +147,62 @@ export async function createReceipts(
       config,
    );
 
-   const savedReceipts = await dbWapro.transaction(async (tx2) => {
-      const receiptsInfo: Record<number, RecordReceiptOutput> = {};
+   try {
+      const savedReceipts = await dbWapro.transaction(async (tx2) => {
+         const receiptsInfo: Record<number, RecordReceiptOutput> = {};
 
-      for (const generatedReceipt of generatedReceipts) {
-         const result = await recordReceipt(tx2, generatedReceipt);
-         receiptsInfo[result.id] = result;
-      }
+         for (const generatedReceipt of generatedReceipts) {
+            const result = await recordReceipt(tx2, generatedReceipt);
+            receiptsInfo[result.id] = result;
+         }
 
-      const saveReceiptsInput: SaveReceiptInput[] = taggedReceiptsInput.map(
-         (receipt) => {
-            return {
-               ...receipt,
-               number: receiptsInfo[Number(receipt.clientTag)].receiptNumber,
-               positions: v
-                  .parse(
-                     orderWithPositionsWithOfferSchema,
-                     mappedOrders.get(receipt.orderId),
-                  )
-                  .positions.map((position) => ({
-                     offerId: position.offerId,
-                  })),
-            };
-         },
+         const saveReceiptsInput: SaveReceiptInput[] = taggedReceiptsInput.map(
+            (receipt) => {
+               return {
+                  ...receipt,
+                  number: receiptsInfo[Number(receipt.clientTag)].receiptNumber,
+                  positions: v
+                     .parse(
+                        orderWithPositionsWithOfferSchema,
+                        mappedOrders.get(receipt.orderId),
+                     )
+                     .positions.map((position) => ({
+                        offerId: position.offerId,
+                     })),
+               };
+            },
+         );
+
+         return await saveReceipts(tx, saveReceiptsInput);
+      });
+      return savedReceipts;
+   } catch (error) {
+      const validatedError = v.safeParse(
+         v.object({
+            originalError: v.object({
+               precedingErrors: v.array(
+                  v.object({
+                     originalError: v.object({
+                        info: v.object({
+                           message: v.nullable(v.string()),
+                        }),
+                     }),
+                  }),
+               ),
+            }),
+         }),
+         error,
       );
 
-      return await saveReceipts(tx, saveReceiptsInput);
-   });
+      if (validatedError.success) {
+         const msg = validatedError.output.originalError.precedingErrors
+            .map((err) => err.originalError.info.message)
+            .join(' <--- ');
 
-   return savedReceipts;
+         throw externalApiError(msg, 'EXTERNAL_API_ERROR', 'WAPRO');
+      } else {
+         console.log(JSON.stringify(error, null, 2));
+         throw error;
+      }
+   }
 }

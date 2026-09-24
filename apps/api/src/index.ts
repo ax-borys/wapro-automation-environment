@@ -45,21 +45,23 @@ const app = new Hono()
       let message = null;
       let code = null;
       let status: ContentfulStatusCode = 500;
+      let scope: string = 'APPLICATION';
 
       if (error instanceof ValiError) {
          status = 400;
          code = 'VALIDATION';
          message = error.message;
+      } else if (error instanceof AppError) {
+         message = error.message;
+         code = error.code;
+         status = error.status as ContentfulStatusCode;
+         scope = error.scope;
       } else if (error instanceof mssql.RequestError) {
          message = error.message;
          code = error.name;
       } else if (error instanceof mssql.TransactionError) {
          message = error.message;
          code = error.name;
-      } else if (error instanceof AppError) {
-         message = error.message;
-         code = error.code;
-         status = error.status as ContentfulStatusCode;
       } else {
          console.error(error);
       }
@@ -69,6 +71,7 @@ const app = new Hono()
             error: {
                code: code || 'INTERNAL_ERROR',
                message: message || 'Something went wrong',
+               scope: scope,
             },
             data: null,
          },

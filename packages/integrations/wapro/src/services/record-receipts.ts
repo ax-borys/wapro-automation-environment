@@ -1,6 +1,8 @@
 import { IResult } from 'mssql';
 import { db } from '../db';
 import { toWaproDate } from '../utils/to-wapro-date';
+import { waproError } from '../errors';
+import * as v from 'valibot';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type CreateReceiptOutput = {
@@ -84,8 +86,30 @@ export async function createReceipt(
          receiptNumber: receiptInfo.recordset[0].receiptNumber,
       };
    } catch (error) {
-      console.log('exec error: ', error);
-      throw error;
+      const validatedError = v.safeParse(
+         v.object({
+            precedingErrors: v.array(
+               v.object({
+                  originalError: v.object({
+                     info: v.object({
+                        message: v.nullable(v.string()),
+                     }),
+                  }),
+               }),
+            ),
+         }),
+         error,
+      );
+
+      if (validatedError.success) {
+         const msg = validatedError.output.precedingErrors
+            .map((err) => err.originalError.info.message)
+            .join(' <--- ');
+
+         throw waproError(msg);
+      } else {
+         throw error;
+      }
    }
 
    return result;
