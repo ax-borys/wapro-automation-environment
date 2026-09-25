@@ -402,6 +402,9 @@ importers:
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@5.9.3)
       zustand:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.2.18)(immer@11.1.18)(react@19.2.8)(use-sync-external-store@1.6.0(react@19.2.8))
@@ -10660,6 +10663,10 @@ snapshots:
       react: 19.2.8
 
   util-deprecate@1.0.2: {}
+
+  valibot@1.4.2(typescript@5.9.3):
+    optionalDependencies:
+      typescript: 5.9.3
 
   valibot@1.4.2(typescript@7.0.2):
     optionalDependencies:

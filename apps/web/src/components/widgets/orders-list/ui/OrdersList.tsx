@@ -17,12 +17,15 @@ import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
 import { Order } from '@/components/features/order';
 import { sortOrders } from '@/entities/order';
 import { normilizeItems } from '@/entities/offer';
+import { errorModelSchema, useError } from '@/entities/error';
+import * as v from 'valibot';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
 }
 
 export function OrdersList() {
+   const { raiseError } = useError();
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
    const {
       receipts,
@@ -168,7 +171,12 @@ export function OrdersList() {
             })),
          );
       } catch (error) {
-         console.error(error);
+         const parsedError = v.safeParse(errorModelSchema, error);
+
+         if (parsedError.success) {
+            raiseError(parsedError.output);
+         }
+
          changeStatusForMany(selectedReceiptsIds, 'RECORD');
       }
    };
