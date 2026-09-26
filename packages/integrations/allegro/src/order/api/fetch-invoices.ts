@@ -1,7 +1,6 @@
-import { validationError } from '@wae/core';
-import { allegroError } from '../../errors/api-errors';
 import { store } from '../../store/store';
 import * as v from 'valibot';
+import { fetchWithValidation } from '../../core';
 
 const rawInvoiceSchema = v.object({
    id: v.string(),
@@ -30,7 +29,10 @@ export async function fetchInvoices(
    orderId: string,
 ): Promise<ApiResponseRawInvoices> {
    const { userAgent } = store.getState();
-   const response = await fetch(
+
+   const result = await fetchWithValidation(
+      apiResponseRawInvoicesSchema,
+      v.any(),
       `https://api.allegro.pl/order/checkout-forms/${orderId}/invoices`,
       {
          headers: {
@@ -41,24 +43,8 @@ export async function fetchInvoices(
             'User-Agent': `${userAgent}`,
          },
       },
+      'Failed to obtain invoices.',
    );
 
-   if (!response.ok) {
-      throw allegroError(
-         `Failed to obtain invoices. Got status ${response.status}.`,
-         'EXTERNAL_API_ERROR',
-      );
-   }
-
-   const result = await response.json();
-
-   const validatedResult = v.safeParse(apiResponseRawInvoicesSchema, result);
-
-   if (!validatedResult.success) {
-      throw validationError(
-         'Invoices have been fetched successfully, but response schema is different. Probably, Allegro has been changed it recently.',
-      );
-   }
-
-   return validatedResult.output;
+   return result;
 }

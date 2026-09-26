@@ -22,3 +22,10 @@ export const contractMismatch = <TSchema extends GenericSchema>(
       undefined,
       issues ? { issues } : undefined,
    );
+
+export const errorOccured = <TDetails>(
+   code: ErrorCode,
+   message: string,
+   cause?: BaseError,
+   details?: TDetails,
+) => new AllegroError<TDetails>(code, message, cause, details);

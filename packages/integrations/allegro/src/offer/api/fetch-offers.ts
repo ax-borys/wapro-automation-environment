@@ -2,8 +2,8 @@ import dotenv from 'dotenv';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { apiResponseRawOffersSchema } from '../offer';
-import { allegroError, validationError } from '../../errors/api-errors';
 import * as v from 'valibot';
+import { fetchWithValidation } from '../../core';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,7 +28,10 @@ export async function fetchOffers(
    queryParams?: QueryParams,
 ): Promise<ApiResponseRawOffer> {
    const params = new URLSearchParams(queryParams);
-   const response = await fetch(
+
+   const result = await fetchWithValidation(
+      apiResponseRawOffersSchema,
+      v.any(),
       `https://api.allegro.pl/sale/offers?${params.toString()}`,
       {
          headers: {
@@ -38,25 +41,8 @@ export async function fetchOffers(
             'User-Agent': `${process.env.ALLEGRO_USER_AGENT!}`,
          },
       },
+      'Failed to obtain offers.',
    );
 
-   if (!response.ok) {
-      throw allegroError(
-         `Failed to obtain offers. Got status ${response.status}.`,
-         'EXTERNAL_API_ERROR',
-      );
-   }
-
-   const result = await response.json();
-
-   const validatedResult = v.safeParse(apiResponseRawOffersSchema, result);
-
-   if (!validatedResult.success) {
-      throw validationError(
-         'Offers have been fetched successfully, but response schema is different. Probably, Allegro has been changed it recently.',
-         validatedResult.issues,
-      );
-   }
-
-   return validatedResult.output;
+   return result;
 }

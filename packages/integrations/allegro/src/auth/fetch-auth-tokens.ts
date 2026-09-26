@@ -1,15 +1,12 @@
-import {
-   authError,
-   invalidDeviceCode,
-   validationError,
-} from '../errors/api-errors';
-import { externalApiError } from '@wae/core';
+import { BaseError, statusToCode } from '@wae/error';
+import { contractMismatch, errorOccured } from '../error';
 import { store } from '../store/store';
 import * as v from 'valibot';
+import { fetchWithValidation } from '../core';
 
 const allegroApiErrorSchema = v.object({
    error: v.string(),
-   error_description: v.optional(v.string()),
+   error_description: v.nullish(v.string()),
 });
 
 const allegroApiRefreshTokenResponseSchema = v.object({
@@ -45,48 +42,12 @@ export async function fetchAuthTokens(): Promise<AllegroApiRefreshTokenResponse>
       ),
    });
 
-   const response = await fetch(request);
-
-   if (!response.ok) {
-      if (response.status !== 400) {
-         console.error(response);
-         throw authError(`Failed to refresh tokens.`);
-      }
-
-      const errorResult = await response.json();
-      const validatedErrorResult = v.safeParse(
-         allegroApiErrorSchema,
-         errorResult,
-      );
-
-      if (!validatedErrorResult.success) {
-         throw validationError(
-            'Cannot obtain error body. Schema mistmatch.',
-            validatedErrorResult.issues,
-         );
-      }
-
-      const { error, error_description } = validatedErrorResult.output;
-
-      throw authError(
-         error_description ??
-            'Failed to obtain auth tokens. Reason was not provided.',
-      );
-   }
-
-   const result = await response.json();
-
-   const validatedResult = v.safeParse(
+   const result = await fetchWithValidation(
       allegroApiRefreshTokenResponseSchema,
-      result,
+      allegroApiErrorSchema,
+      request,
+      'Failed to obtain auth tokens.',
    );
 
-   if (!validatedResult.success) {
-      console.error(result);
-      throw validationError(
-         'Tokens have been fetched successfully, but response schema is different. Probably Allegro has changed it recently.',
-      );
-   }
-
-   return validatedResult.output;
+   return result;
 }

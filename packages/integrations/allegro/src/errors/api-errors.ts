@@ -1,4 +1,4 @@
-import { AppError, ErrorCode, externalApiError } from '@wae/core';
+import { ErrorCode, externalApiError } from '@wae/core';
 import { runtimeError } from '@wae/core';
 
 export const allegroError = (

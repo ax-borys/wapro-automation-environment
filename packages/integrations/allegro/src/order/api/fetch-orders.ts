@@ -1,7 +1,6 @@
-import { externalApiError } from '@wae/core';
 import { rawOrderSchema } from '../schema';
 import * as v from 'valibot';
-import { allegroError, validationError } from '../../errors/api-errors';
+import { fetchWithValidation } from '../../core';
 
 const apiResponseRawOrderSchema = v.object({
    checkoutForms: v.array(rawOrderSchema),
@@ -22,7 +21,9 @@ export async function fetchOrders(
    const queryParams = new URLSearchParams({
       'fulfillment.status': 'SENT',
    } as QueryParams);
-   const response = await fetch(
+   const result = await fetchWithValidation(
+      apiResponseRawOrderSchema,
+      v.any(),
       `https://api.allegro.pl/order/checkout-forms?${queryParams.toString()}`,
       {
          headers: {
@@ -32,24 +33,8 @@ export async function fetchOrders(
             'User-Agent': `${userAgent}`,
          },
       },
+      'Failed to obtain orders.',
    );
 
-   if (!response.ok) {
-      throw allegroError(
-         `Failed to obtain orders. Got status ${response.status}.`,
-         'EXTERNAL_API_ERROR',
-      );
-   }
-
-   const result = await response.json();
-
-   const validatedResult = v.safeParse(apiResponseRawOrderSchema, result);
-
-   if (!validatedResult.success) {
-      throw validationError(
-         'Orders have been fetched successfully, but response schema is different. Probably, Allegro has been changed it recently.',
-      );
-   }
-
-   return validatedResult.output;
+   return result;
 }
