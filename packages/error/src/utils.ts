@@ -1,7 +1,7 @@
-import { StatusCode } from 'hono/utils/http-status';
+import { ContentfulStatusCode, StatusCode } from 'hono/utils/http-status';
 import { ErrorCode } from './error-code';
 
-export function codeToStatus(code: ErrorCode): StatusCode {
+export function codeToStatus(code: ErrorCode): ContentfulStatusCode {
    switch (code) {
       case 'VALIDATION':
          return 400;

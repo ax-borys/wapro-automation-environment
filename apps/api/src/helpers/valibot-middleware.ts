@@ -1,4 +1,5 @@
 import { Hook, vValidator } from '@hono/valibot-validator';
+import { ValidationError } from '@wae/error';
 import { Env } from 'hono';
 import { GenericSchema, GenericSchemaAsync, ValiError } from 'valibot';
 
@@ -11,7 +12,13 @@ function valibotHook<T extends GenericSchema | GenericSchemaAsync>(): Hook<
 > {
    return async (result) => {
       if (!result.success) {
-         throw new ValiError(result.issues);
+         throw new ValidationError(
+            'Validation failed.',
+            new ValiError(result.issues),
+            {
+               issues: result.issues,
+            },
+         );
       }
    };
 }

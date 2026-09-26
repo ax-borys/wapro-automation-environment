@@ -46,8 +46,14 @@ export async function fetchWithValidation<
       generalErrorMessage = possibleGeneralErrorMessage;
    }
 
-   assert(request instanceof Request);
-   assert(typeof generalErrorMessage === 'string');
+   assert(
+      typeof request === 'object',
+      'Assertion failed: request is not instanceof Request.',
+   );
+   assert(
+      typeof generalErrorMessage === 'string',
+      'Assertion failed: generalErrorMessage is not string',
+   );
 
    try {
       const response = await fetch(request);

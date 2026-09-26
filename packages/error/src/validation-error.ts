@@ -1,7 +1,14 @@
-import { GenericSchema, InferIssue, ValiError } from 'valibot';
+import {
+   GenericSchema,
+   GenericSchemaAsync,
+   InferIssue,
+   ValiError,
+} from 'valibot';
 import { BaseError } from './base-error';
 
-export class ValidationError<TSchema extends GenericSchema> extends BaseError {
+export class ValidationError<
+   TSchema extends GenericSchema | GenericSchemaAsync,
+> extends BaseError {
    readonly source = 'app';
    readonly name = 'ValidationError';
    readonly details?: { issues: InferIssue<TSchema>[] };

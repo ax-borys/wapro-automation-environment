@@ -9,20 +9,29 @@ import { Hono, type Env } from 'hono';
 
 import { serveStatic } from '@hono/node-server/serve-static';
 import { cors } from 'hono/cors';
-import { ValiError } from 'valibot';
 import mssql from 'mssql';
-import type { ApiError, ApiResponse } from '@wae/types';
-import { AppError } from '@wae/core';
-import type {
-   ContentfulStatusCode,
-   ServerErrorStatusCode,
-} from 'hono/utils/http-status';
 import { ApplyGlobalResponse } from 'hono/client';
 import { offer } from './offer';
 import { receipt } from './receipt';
 import { product } from './product';
 import { type HandledStatusCodes } from '@wae/core';
 import { order } from './order';
+import {
+   UpstreamError,
+   ValidationError,
+   AppError,
+   codeToStatus,
+} from '@wae/error';
+import { formatError, FormattedError } from './helpers/format-error';
+
+export type ApiError = FormattedError;
+
+export type ApiResponse<T> = T extends ApiError
+   ? { data: null; error: ApiError }
+   : {
+        data: T;
+        error: null;
+     };
 
 const app = new Hono()
    .use(
@@ -42,40 +51,46 @@ const app = new Hono()
    .route('/product', product)
    .route('/order', order)
    .onError((error, c) => {
-      let message = null;
-      let code = null;
-      let status: ContentfulStatusCode = 500;
-      let scope: string = 'APPLICATION';
+      let errorObj: Partial<ApiError> = {};
 
-      if (error instanceof ValiError) {
-         status = 400;
-         code = 'VALIDATION';
-         message = error.message;
+      if (error instanceof ValidationError) {
+         errorObj = formatError(error);
       } else if (error instanceof AppError) {
-         message = error.message;
-         code = error.code;
-         status = error.status as ContentfulStatusCode;
-         scope = error.scope;
+         errorObj = formatError(error);
+      } else if (error instanceof UpstreamError) {
+         errorObj = formatError(error);
       } else if (error instanceof mssql.RequestError) {
-         message = error.message;
-         code = error.name;
+         errorObj = {
+            code: 'INTERNAL',
+            message: error.message,
+            source: 'app',
+            cause: formatError(error),
+         };
       } else if (error instanceof mssql.TransactionError) {
-         message = error.message;
-         code = error.name;
+         errorObj = {
+            code: 'INTERNAL',
+            message: error.message,
+            source: 'app',
+            cause: formatError(error),
+         };
       } else {
+         errorObj = {
+            code: 'INTERNAL',
+            message: 'Something went wrong.',
+            source: 'app',
+            cause: formatError(error),
+         };
          console.error(error);
       }
 
+      console.error(errorObj);
+
       return c.json<ApiResponse<ApiError>>(
          {
-            error: {
-               code: code || 'INTERNAL_ERROR',
-               message: message || 'Something went wrong',
-               scope: scope,
-            },
+            error: errorObj as ApiError,
             data: null,
          },
-         status,
+         codeToStatus((errorObj as ApiError).code),
       );
    });
 

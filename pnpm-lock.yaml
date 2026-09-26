@@ -253,6 +253,9 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@wae/error':
+        specifier: workspace:*
+        version: link:../../packages/error
       '@wae/offer':
         specifier: workspace:*
         version: link:../../packages/offer
