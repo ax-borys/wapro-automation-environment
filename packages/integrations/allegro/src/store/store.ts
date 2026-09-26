@@ -1,3 +1,4 @@
+import { runtimeError } from '@wae/core';
 import dotenv, { configDotenv } from 'dotenv';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -5,13 +6,6 @@ import { fileURLToPath } from 'node:url';
 import { createStore } from 'zustand';
 import { createJSONStorage, persist, StateStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
-import {
-   clientIdIsNotSet,
-   clientSecretIsNotSet,
-   deviceIdIsNotSet,
-   sellerIdIsNotSet,
-   userAgentIsNotSet,
-} from '../errors/api-errors';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,23 +28,23 @@ const output = dotenv.config({
 const config = output.parsed as Config;
 
 if (!config.ALLEGRO_DEVICE_ID) {
-   throw deviceIdIsNotSet();
+   throw runtimeError('DEVICE_ID is not set.');
 }
 
 if (!config.ALLEGRO_CLIENT_ID) {
-   throw clientIdIsNotSet();
+   throw runtimeError('CLIENT_ID is not set.');
 }
 
 if (!config.ALLEGRO_CLIENT_SECRET) {
-   throw clientSecretIsNotSet();
+   throw runtimeError('CLIENT_SECRET is not set.');
 }
 
 if (!config.ALLEGRO_USER_AGENT) {
-   throw userAgentIsNotSet();
+   throw runtimeError('USER_AGENT is not set.');
 }
 
 if (!config.ALLEGRO_SELLER_ID) {
-   throw sellerIdIsNotSet();
+   throw runtimeError('SELLER_ID is not set.');
 }
 
 const fileStorage: StateStorage = {
