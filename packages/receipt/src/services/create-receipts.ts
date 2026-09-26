@@ -195,9 +195,9 @@ export async function createReceipts(
       );
 
       if (validatedError.success) {
-         const msg = validatedError.output.originalError.precedingErrors
-            .map((err) => err.originalError.info.message)
-            .join(' <--- ');
+         const msg =
+            validatedError.output.originalError.precedingErrors[0].originalError
+               .info.message || 'Message is not provided.';
 
          throw externalApiError(msg, 'EXTERNAL_API_ERROR', 'WAPRO');
       } else {

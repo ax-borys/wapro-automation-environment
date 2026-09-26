@@ -2,6 +2,8 @@
 import { useEffect } from 'react';
 import { ReceiptModel, useReceiptsStore } from './receipt.store';
 import { RecordReceiptInput, recordReceipts } from './record-receipts';
+import { errorModelSchema, useError } from '../error';
+import * as v from 'valibot';
 
 export const useReceipts = (initialReceipts: ReceiptModel[]) => {
    const receiptsExist = useReceiptsStore((s) => s.ensureReceipts)();
@@ -18,6 +20,7 @@ export const useReceipts = (initialReceipts: ReceiptModel[]) => {
 };
 
 export const useReceipt = (id: ReceiptModel['orderId']) => {
+   const { raiseError } = useError();
    const changeStatus = useReceiptsStore((s) => s.changeStatus).bind(null, id);
    const setNumber = useReceiptsStore((s) => s.setNumber).bind(null, id);
    const receipt: ReceiptModel = useReceiptsStore((s) => s.receipts[id]);
@@ -44,7 +47,12 @@ export const useReceipt = (id: ReceiptModel['orderId']) => {
          changeStatus('RECORDED');
          setNumber(receipt.number);
       } catch (error) {
-         console.error(error);
+         const parsedError = v.safeParse(errorModelSchema, error);
+
+         if (parsedError.success) {
+            raiseError(parsedError.output);
+         }
+
          changeStatus('RECORD');
       }
    };

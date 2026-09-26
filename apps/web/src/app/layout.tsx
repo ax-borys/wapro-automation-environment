@@ -1,4 +1,4 @@
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from '@/components/providers/theme-provider';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Inter } from 'next/font/google';
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/features/app-sidebar';
 import { Header } from '@/components/widgets/header';
+import { ErrorProvider } from '@/components/providers/error-provider';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -51,13 +52,15 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
                   enableSystem
                   disableTransitionOnChange
                >
-                  <SidebarProvider>
-                     <AppSidebar />
-                     <SidebarInset>
-                        <Header />
-                        {children}
-                     </SidebarInset>
-                  </SidebarProvider>
+                  <ErrorProvider>
+                     <SidebarProvider>
+                        <AppSidebar />
+                        <SidebarInset>
+                           <Header />
+                           {children}
+                        </SidebarInset>
+                     </SidebarProvider>
+                  </ErrorProvider>
                </ThemeProvider>
             </TooltipProvider>
          </body>

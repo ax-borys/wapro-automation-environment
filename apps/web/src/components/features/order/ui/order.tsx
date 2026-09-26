@@ -52,6 +52,8 @@ import { Badge } from '@/components/ui/badge';
 import { EditOffer } from '../../edit-offer';
 import { useOffersStore } from '@/entities/offer';
 import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
+import { useError } from '@/entities/error';
+import * as v from 'valibot';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -67,11 +69,14 @@ export function Order({
    const { order, selectToggle } = useOrder(id);
    const { receipt, setFiscalNumber, recordReceipt } = useReceipt(order.id);
    const { offers } = useOffersStore();
+   const { raiseError } = useError();
    useGetAndStoreOffers();
 
    const { number, status, fiscalNumber } = receipt;
 
-   const recordReceiptsHandler = recordReceipt;
+   const recordReceiptsHandler = async () => {
+      await recordReceipt();
+   };
 
    const receiptNumberSubmitHandler: React.SubmitEventHandler<
       HTMLFormElement
