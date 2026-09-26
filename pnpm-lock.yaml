@@ -498,6 +498,15 @@ importers:
         specifier: rc
         version: 1.0.0-rc.4
 
+  packages/error:
+    dependencies:
+      hono:
+        specifier: ^4.13.2
+        version: 4.13.2
+      valibot:
+        specifier: ^1.4.2
+        version: 1.4.2(typescript@7.0.2)
+
   packages/integrations/allegro:
     dependencies:
       '@types/jsonwebtoken':
@@ -509,6 +518,9 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../../db
+      '@wae/error':
+        specifier: workspace:*
+        version: link:../../error
       '@wae/offer':
         specifier: workspace:*
         version: link:../../offer
@@ -521,6 +533,9 @@ importers:
       drizzle-orm:
         specifier: 1.0.0-rc.4
         version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+      error:
+        specifier: ^10.4.0
+        version: 10.4.0
       immer:
         specifier: ^11.1.18
         version: 11.1.18
@@ -3703,6 +3718,9 @@ packages:
 
   error-ex@1.3.4:
     resolution: {integrity: sha512-sqQamAnR14VgCr1A618A3sGrygcpK+HEbenA/HiEAkkUwcZIIB/tgWqHFxWgOyDh4nB4JCRimh79dR5Ywc9MDQ==}
+
+  error@10.4.0:
+    resolution: {integrity: sha512-YxIFEJuhgcICugOUvRx5th0UM+ActZ9sjY0QJmeVwsQdvosZ7kYzc9QqS0Da3R5iUmgU5meGIxh0xBeZpMVeLw==}
 
   es-abstract-get@1.0.0:
     resolution: {integrity: sha512-6PMWXpdhshVvFp+FoWYs1EvG1Nj0tvk0dZM+XcK0xMEM1czRVcP6ohqPWHy6qPagSpC8j4+p89WXlT+xXJs/fg==}
@@ -8345,6 +8363,8 @@ snapshots:
   error-ex@1.3.4:
     dependencies:
       is-arrayish: 0.2.1
+
+  error@10.4.0: {}
 
   es-abstract-get@1.0.0:
     dependencies:
