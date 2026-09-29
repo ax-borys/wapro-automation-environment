@@ -51,46 +51,16 @@ const app = new Hono()
    .route('/product', product)
    .route('/order', order)
    .onError((error, c) => {
-      let errorObj: Partial<ApiError> = {};
+      const formattedError = formatError(error);
 
-      if (error instanceof ValidationError) {
-         errorObj = formatError(error);
-      } else if (error instanceof AppError) {
-         errorObj = formatError(error);
-      } else if (error instanceof UpstreamError) {
-         errorObj = formatError(error);
-      } else if (error instanceof mssql.RequestError) {
-         errorObj = {
-            code: 'INTERNAL',
-            message: error.message,
-            source: 'app',
-            cause: formatError(error),
-         };
-      } else if (error instanceof mssql.TransactionError) {
-         errorObj = {
-            code: 'INTERNAL',
-            message: error.message,
-            source: 'app',
-            cause: formatError(error),
-         };
-      } else {
-         errorObj = {
-            code: 'INTERNAL',
-            message: 'Something went wrong.',
-            source: 'app',
-            cause: formatError(error),
-         };
-         console.error(error);
-      }
-
-      console.error(errorObj);
+      console.error(formattedError);
 
       return c.json<ApiResponse<ApiError>>(
          {
-            error: errorObj as ApiError,
+            error: formattedError,
             data: null,
          },
-         codeToStatus((errorObj as ApiError).code),
+         codeToStatus(formattedError.code),
       );
    });
 

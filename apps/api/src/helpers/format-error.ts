@@ -1,15 +1,60 @@
-import { BaseError, UpstreamError, AppError, ErrorCode } from '@wae/error';
+import {
+   BaseError,
+   UpstreamError,
+   AppError,
+   ErrorCode,
+   ValidationError,
+} from '@wae/error';
 
-export type FormattedError = {
+export type FormattedError<TDetails = unknown> = {
    code: ErrorCode;
    message: string;
    source: BaseError['source'];
    provider?: UpstreamError['provider'];
    cause?: any;
-   details?: unknown;
+   details?: TDetails;
 };
 
-export function formatError(
+export function formatError<
+   T extends { details?: unknown; cause?: any; message?: string },
+>(error: T): FormattedError<T['details']> {
+   if (error instanceof AppError) {
+      return {
+         code: error.code,
+         message: error.message,
+         source: error.source,
+         cause: error.cause ? formatError(error.cause) : null,
+         details: error.details,
+      };
+   } else if (error instanceof UpstreamError) {
+      return {
+         code: error.code,
+         message: error.message,
+         source: error.source,
+         provider: error.provider,
+         cause: error.cause ? formatError(error.cause) : null,
+         details: error.details,
+      };
+   } else if (error instanceof ValidationError) {
+      return {
+         code: error.code,
+         message: error.message,
+         source: error.source,
+         cause: error.cause ? formatError(error.cause) : null,
+         details: error.details,
+      };
+   } else {
+      return {
+         code: 'INTERNAL',
+         message: error.message ?? 'Something went wrong.',
+         source: 'app',
+         cause: null,
+         details: null,
+      };
+   }
+}
+
+export function formatErrorOld(
    error:
       | BaseError
       | AppError
