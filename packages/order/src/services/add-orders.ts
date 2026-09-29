@@ -20,7 +20,7 @@ import {
    Tx,
 } from '@wae/types';
 import { db, ordersTable, positionsTable } from '@wae/db';
-import { businessRuleViolation } from '@wae/core';
+import { businessRuleViolation } from '@wae/error';
 
 export const addOrderInputSchema = v.object({
    ...v.omit(orderInputSchema, ['createdAt', 'id', 'clientTag']).entries,

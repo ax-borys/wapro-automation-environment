@@ -1,6 +1,5 @@
 import { positionsTable, receiptsTable } from '@wae/db';
 import * as v from 'valibot';
-import { positionWasNotInitialized } from '../errors';
 import {
    Position,
    positionInputSchema,
@@ -10,7 +9,7 @@ import {
    Tx,
 } from '@wae/types';
 import { and, eq, or } from 'drizzle-orm';
-import { businessRuleViolation } from '@wae/core';
+import { businessRuleViolation } from '@wae/error';
 
 export const saveReceiptInputSchema = v.object({
    ...v.omit(receiptInputSchema, ['id', 'createdAt', 'clientTag']).entries,

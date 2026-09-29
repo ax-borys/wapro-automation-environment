@@ -1,5 +1,10 @@
-import { businessRuleViolation } from '@wae/core';
-import { BaseError, ErrorCode, UpstreamError, AppError } from '@wae/error';
+import {
+   BaseError,
+   ErrorCode,
+   UpstreamError,
+   AppError,
+   businessRuleViolation,
+} from '@wae/error';
 import { WaproError } from '@wae/wapro';
 
 export const errorOccured = (

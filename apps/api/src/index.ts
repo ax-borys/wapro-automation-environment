@@ -5,23 +5,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 import { serve } from '@hono/node-server';
-import { Hono, type Env } from 'hono';
+import { Hono } from 'hono';
 
 import { serveStatic } from '@hono/node-server/serve-static';
 import { cors } from 'hono/cors';
-import mssql from 'mssql';
 import { ApplyGlobalResponse } from 'hono/client';
 import { offer } from './offer';
 import { receipt } from './receipt';
 import { product } from './product';
 import { type HandledStatusCodes } from '@wae/core';
 import { order } from './order';
-import {
-   UpstreamError,
-   ValidationError,
-   AppError,
-   codeToStatus,
-} from '@wae/error';
+import { codeToStatus } from '@wae/error';
 import { formatError, FormattedError } from './helpers/format-error';
 
 export type ApiError = FormattedError;

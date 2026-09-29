@@ -1,11 +1,6 @@
 import { Tx } from '@wae/types';
-import { and, InferInsertModel, InferSelectModel, or, SQL } from 'drizzle-orm';
+import { and, InferInsertModel, or, SQL } from 'drizzle-orm';
 import { SQLiteTable, TableConfig } from 'drizzle-orm/sqlite-core';
-import {
-   createInsertSchema,
-   CreateSelectSchema,
-   createSelectSchema,
-} from 'drizzle-orm/valibot';
 import * as v from 'valibot';
 
 type Table = SQLiteTable<TableConfig>;

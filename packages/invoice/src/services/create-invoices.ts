@@ -1,9 +1,8 @@
 import { db, invoicesTable, ordersTable } from '@wae/db';
+import { invalidReference } from '@wae/error';
 import { invoiceInputSchema, invoiceSchema } from '@wae/types';
 import { inArray } from 'drizzle-orm';
 import * as v from 'valibot';
-import { emptyInput, orderDoesntExist } from '../errors';
-import { resourceMissing } from '@wae/core';
 
 export const createInvoiceInputSchema = v.pick(invoiceInputSchema, ['orderId']);
 
@@ -31,7 +30,7 @@ export async function createInvoices(
 
    for (const { orderId } of input) {
       if (!ordersIds.includes(orderId)) {
-         throw resourceMissing(`Order with id=${orderId} does not exist.`);
+         throw invalidReference(`Order with id=${orderId} does not exist.`);
       }
    }
 

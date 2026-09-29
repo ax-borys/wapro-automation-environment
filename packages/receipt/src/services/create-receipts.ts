@@ -18,13 +18,8 @@ import {
    saveReceipts,
 } from './save-receipts';
 import currency from 'currency.js';
-import {
-   AppError,
-   businessRuleViolation,
-   externalApiError,
-   resourceMissing,
-} from '@wae/core';
 import { waproErrorOccured } from '../errors';
+import { businessRuleViolation, invalidReference } from '@wae/error';
 
 const receiptInputSchema = createInsertSchema(receiptsTable);
 
@@ -79,7 +74,7 @@ export async function createReceipts(
       const order = mappedOrders.get(receipt.orderId);
 
       if (!order) {
-         throw resourceMissing(
+         throw invalidReference(
             `Order with id=${receipt.orderId} does not exist.`,
          );
       }
