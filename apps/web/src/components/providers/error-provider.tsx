@@ -33,7 +33,6 @@ function ErrorDialog({
                </DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-2 text-destructive">
-               Message:{' '}
                <p className="text-primary/80 bg-muted p-2 rounded-md">
                   {error?.message}
                </p>
