@@ -24,6 +24,7 @@ import {
    externalApiError,
    resourceMissing,
 } from '@wae/core';
+import { waproErrorOccured } from '../errors';
 
 const receiptInputSchema = createInsertSchema(receiptsTable);
 
@@ -199,9 +200,9 @@ export async function createReceipts(
             validatedError.output.originalError.precedingErrors[0].originalError
                .info.message || 'Message is not provided.';
 
-         throw externalApiError(msg, 'EXTERNAL_API_ERROR', 'WAPRO');
+         throw waproErrorOccured('CONFLICT', msg);
       } else {
-         console.log(JSON.stringify(error, null, 2));
+         console.error(JSON.stringify(error, null, 2));
          throw error;
       }
    }

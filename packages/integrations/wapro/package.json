@@ -14,6 +14,7 @@
    },
    "dependencies": {
       "@wae/core": "workspace:*",
+      "@wae/error": "workspace:*",
       "@wae/types": "workspace:*",
       "dotenv": "^17.4.2",
       "drizzle-orm": "1.0.0-rc.4",

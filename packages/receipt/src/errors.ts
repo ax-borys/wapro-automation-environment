@@ -1,4 +1,20 @@
-import { AppError, businessRuleViolation } from '@wae/core';
+import { businessRuleViolation } from '@wae/core';
+import { BaseError, ErrorCode, UpstreamError, AppError } from '@wae/error';
+import { WaproError } from '@wae/wapro';
+
+export const errorOccured = (
+   code: ErrorCode,
+   message: string,
+   cause?: BaseError,
+   details?: unknown,
+) => new AppError(code, message, cause, details);
+
+export const waproErrorOccured = <TDetails = unknown>(
+   code: ErrorCode,
+   message: string,
+   cause?: BaseError,
+   details?: TDetails,
+) => new WaproError<TDetails>(code, message, cause, details);
 
 export const unsupportedPaymentMethod = (method: string) => {
    return businessRuleViolation(`Unsuported payment method: ${method}`);

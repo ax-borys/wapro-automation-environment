@@ -1,9 +1,12 @@
+import { ErrorCodeEnum } from '@wae/error';
 import { createContext } from 'react';
 import * as v from 'valibot';
 
 export const errorModelSchema = v.object({
    message: v.string(),
-   scope: v.string(),
+   code: ErrorCodeEnum,
+   source: v.picklist(['app', 'upstream']),
+   provider: v.nullish(v.picklist(['wapro', 'allegro'])),
 });
 
 export type ErrorModel = v.InferOutput<typeof errorModelSchema>;

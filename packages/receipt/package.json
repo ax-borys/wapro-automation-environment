@@ -13,6 +13,7 @@
       "@libsql/client": "^0.17.4",
       "@wae/core": "workspace:*",
       "@wae/db": "workspace:*",
+      "@wae/error": "workspace:*",
       "@wae/types": "workspace:*",
       "@wae/wapro": "workspace:*",
       "currency.js": "^2.0.4",

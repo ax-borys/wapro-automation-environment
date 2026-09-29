@@ -14,6 +14,7 @@
       "@tanstack/match-sorter-utils": "^9.1.2",
       "@tanstack/react-table": "^9.1.2",
       "@wae/api-types": "workspace:*",
+      "@wae/error": "workspace:*",
       "@wae/offer": "workspace:*",
       "@wae/receipt": "workspace:*",
       "class-variance-authority": "^0.7.1",

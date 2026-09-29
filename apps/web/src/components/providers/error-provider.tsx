@@ -29,7 +29,7 @@ function ErrorDialog({
          <DialogContent>
             <DialogHeader>
                <DialogTitle className="text-destructive">
-                  Error occured: {error?.scope}
+                  Error occured: {error?.provider ?? 'application'}
                </DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-2 text-destructive">

@@ -1,8 +1,8 @@
 import { IResult } from 'mssql';
 import { db } from '../db';
 import { toWaproDate } from '../utils/to-wapro-date';
-import { waproError } from '../errors';
 import * as v from 'valibot';
+import { errorOccured } from '../errors';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 export type CreateReceiptOutput = {
@@ -106,7 +106,7 @@ export async function createReceipt(
             .map((err) => err.originalError.info.message)
             .join(' <--- ');
 
-         throw waproError(msg);
+         throw errorOccured('CONFLICT', msg);
       } else {
          throw error;
       }

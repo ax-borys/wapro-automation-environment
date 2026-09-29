@@ -10,3 +10,4 @@ export { closeConnection } from './db';
 export { db as dbWapro } from './db';
 
 export { getProducts } from './services/get-products';
+export { WaproError } from './errors';
