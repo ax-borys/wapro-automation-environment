@@ -11,15 +11,15 @@ export const errorOccured = (
    code: ErrorCode,
    message: string,
    cause?: BaseError,
-   details?: unknown,
+   details?: AppError['details'],
 ) => new AppError(code, message, cause, details);
 
-export const waproErrorOccured = <TDetails = unknown>(
+export const waproErrorOccured = (
    code: ErrorCode,
    message: string,
-   cause?: BaseError,
-   details?: TDetails,
-) => new WaproError<TDetails>(code, message, cause, details);
+   cause?: WaproError['cause'],
+   details?: WaproError['details'],
+) => new WaproError(code, message, cause, details);
 
 export const unsupportedPaymentMethod = (method: string) => {
    return businessRuleViolation(`Unsuported payment method: ${method}`);

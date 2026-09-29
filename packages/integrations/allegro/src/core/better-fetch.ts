@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { GenericSchema, InferOutput } from 'valibot';
-import { contractMismatch, errorOccured } from '../error/';
+import { AllegroError, contractMismatch, errorOccured } from '../error/';
 import * as v from 'valibot';
 import { BaseError, statusToCode } from '@wae/error';
 
@@ -68,17 +68,25 @@ export async function fetchWithValidation<
                   statusToCode(response.status),
                   'Fetching failed.',
                   undefined,
-                  parsedErrorResult.output,
+                  {
+                     originalStatus: response.status,
+                     raw: JSON.stringify(parsedErrorResult.output),
+                  },
                );
             }
 
             throw contractMismatch(
                'Fetching failed. Obtaining error body failed due to schema mismatch. Probably allegro has changed its api recently.',
-               parsedErrorResult.issues,
+               {
+                  originalStatus: response.status,
+                  issues: parsedErrorResult.issues,
+               },
             );
          } catch (error) {
             if (error instanceof SyntaxError) {
-               throw contractMismatch('Fetching failed. Body is not json.');
+               throw contractMismatch('Fetching failed. Body is not json.', {
+                  originalStatus: response.status,
+               });
             }
 
             throw error;
@@ -92,6 +100,7 @@ export async function fetchWithValidation<
          if (!parsedResult.success) {
             throw contractMismatch(
                'Fetching succeeded, but obtaining body failed due to schema mismatch. Probably allegro has changed its api recently.',
+               { originalStatus: response.status, issues: parsedResult.issues },
             );
          }
 
@@ -100,12 +109,13 @@ export async function fetchWithValidation<
          if (error instanceof SyntaxError) {
             throw contractMismatch(
                'Fetching succeed, but obtaining body failed, because its format is not JSON.',
+               { originalStatus: response.status },
             );
          }
          throw error;
       }
    } catch (error) {
-      if (error instanceof BaseError) {
+      if (error instanceof AllegroError) {
          throw errorOccured(
             'UNAVAILABLE',
             generalErrorMessage || 'Error occured during fetching.',
@@ -113,10 +123,10 @@ export async function fetchWithValidation<
             error.details,
          );
       } else {
-         throw errorOccured(
-            'UNAVAILABLE',
-            `Unexpected error. Raw error body: ${JSON.stringify(error, null, 2)}`,
-         );
+         throw errorOccured('UNAVAILABLE', `Unexpected error.`, undefined, {
+            originalStatus: 0,
+            raw: JSON.stringify(error),
+         });
       }
    }
 }

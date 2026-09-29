@@ -47,8 +47,6 @@ const app = new Hono()
    .onError((error, c) => {
       const formattedError = formatError(error);
 
-      console.error(formattedError);
-
       return c.json<ApiResponse<ApiError>>(
          {
             error: formattedError,

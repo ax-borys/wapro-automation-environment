@@ -3,7 +3,7 @@ import { store } from '../store/store';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import * as v from 'valibot';
 
-interface AllegroJwtPayload extends JwtPayload {
+type AllegroJwtPayload = JwtPayload & {
    iss: string;
    user_name: string;
    scope: string[];
@@ -11,9 +11,9 @@ interface AllegroJwtPayload extends JwtPayload {
    exp: number;
    client_id: string;
    jti: string;
-}
+};
 
-const allegroJwtPayloadSchema = v.object({
+export const allegroJwtPayloadSchema = v.object({
    iss: v.string(),
    user_name: v.string(),
    scope: v.array(v.string()),
