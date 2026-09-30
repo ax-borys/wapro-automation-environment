@@ -1,13 +1,8 @@
 import { AllegroError } from '@wae/allegro';
 import {
-   BaseError,
    UpstreamError,
    AppError,
-   ErrorCode,
    ValidationError,
-   AppErrorFormatted,
-   UpstreamErrorFormatted,
-   ValidationErrorFormatted,
    type InferErrorFormat,
 } from '@wae/error';
 import { WaproError } from '@wae/wapro';
