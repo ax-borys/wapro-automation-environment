@@ -5,60 +5,40 @@ import {
    AppError,
    ErrorCode,
    ValidationError,
+   AppErrorFormatted,
+   UpstreamErrorFormatted,
+   ValidationErrorFormatted,
 } from '@wae/error';
 import { WaproError } from '@wae/wapro';
 import { GenericSchema } from 'valibot';
 
-type Details =
-   | AllegroError['details']
-   | AppError['details']
-   | UpstreamError['details']
-   | WaproError['details']
-   | ValidationError<GenericSchema>['details'];
-
-export type FormattedError = {
-   code: ErrorCode;
-   message: string;
-   source: BaseError['source'];
-   provider?: UpstreamError['provider'];
-   cause?: any;
-   details?: Details;
-};
+export type FormattedError =
+   | AppErrorFormatted
+   | AppErrorFormatted<{ originalMessage?: string; raw?: string }>
+   | UpstreamErrorFormatted
+   | UpstreamErrorFormatted<AllegroError['details']>
+   | UpstreamErrorFormatted<WaproError['details']>
+   | ValidationErrorFormatted<GenericSchema>;
 
 export function formatError<
-   T extends { details?: Details; cause?: any; message?: string },
+   T extends {
+      details?: FormattedError['details'];
+      cause?: any;
+      message?: string;
+   },
 >(error: T): FormattedError {
    if (error instanceof AppError) {
-      return {
-         code: error.code,
-         message: error.message,
-         source: error.source,
-         cause: error.cause ? formatError(error.cause) : null,
-         details: error.details,
-      };
+      return error.format();
    } else if (error instanceof UpstreamError) {
-      return {
-         code: error.code,
-         message: error.message,
-         source: error.source,
-         provider: error.provider,
-         cause: error.cause ? formatError(error.cause) : null,
-         details: error.details,
-      };
+      return error.format();
    } else if (error instanceof ValidationError) {
-      return {
-         code: error.code,
-         message: error.message,
-         source: error.source,
-         cause: error.cause ? formatError(error.cause) : null,
-         details: error.details,
-      };
+      return error.format();
    } else {
-      return {
-         code: 'INTERNAL',
-         message: error.message ?? 'Something went wrong.',
-         source: 'app',
-         cause: null,
-      };
+      return new AppError(
+         'INTERNAL',
+         error.message ?? 'Something went wrong',
+         undefined,
+         { originalMessage: error.message, raw: JSON.stringify(error) },
+      ).format();
    }
 }

@@ -21,4 +21,19 @@ export class UpstreamError<
       this.provider = provider;
       this.details = details;
    }
+
+   format() {
+      return {
+         code: this.code,
+         message: this.message,
+         source: this.source,
+         provider: this.provider,
+         cause: this.cause,
+         details: this.details,
+      };
+   }
 }
+
+export type UpstreamErrorFormatted<
+   TDetails extends Record<string, any> | undefined = undefined,
+> = ReturnType<UpstreamError<TDetails>['format']>;

@@ -18,4 +18,18 @@ export class AppError<
       super(code, message, cause, details, options);
       this.details = details;
    }
+
+   format() {
+      return {
+         code: this.code,
+         message: this.message,
+         source: this.source,
+         cause: this.cause,
+         details: this.details,
+      };
+   }
 }
+
+export type AppErrorFormatted<
+   TDetails extends Record<string, any> | undefined = undefined,
+> = ReturnType<AppError<TDetails>['format']>;

@@ -37,4 +37,6 @@ export abstract class BaseError extends Error {
          this.message
       } - caused by ${this.cause?.toString()}`;
    }
+
+   abstract format(): Record<string, any>;
 }

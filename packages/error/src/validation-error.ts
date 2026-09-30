@@ -21,4 +21,18 @@ export class ValidationError<
       super('VALIDATION', message, cause, details);
       this.details = details;
    }
+
+   format() {
+      return {
+         code: this.code,
+         message: this.message,
+         source: this.source,
+         cause: this.cause,
+         details: this.details,
+      };
+   }
 }
+
+export type ValidationErrorFormatted<
+   TSchema extends GenericSchema | GenericSchemaAsync,
+> = ReturnType<ValidationError<TSchema>['format']>;
