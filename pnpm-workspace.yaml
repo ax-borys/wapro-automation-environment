@@ -1,8 +1,11 @@
 allowBuilds:
-  esbuild: false
-  node-base64: false
-  unrs-resolver: set this to true or false
+   esbuild: false
+   node-base64: false
+   unrs-resolver: set this to true or false
+
+injectWorkspacePackages: true
+
 packages:
-  - "apps/*"
-  - "packages/integrations/*"
-  - "packages/*"
+   - 'apps/*'
+   - 'packages/integrations/*'
+   - 'packages/*'
