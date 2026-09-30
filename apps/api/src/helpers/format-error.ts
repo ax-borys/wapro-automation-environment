@@ -8,17 +8,18 @@ import {
    AppErrorFormatted,
    UpstreamErrorFormatted,
    ValidationErrorFormatted,
+   type InferErrorFormat,
 } from '@wae/error';
 import { WaproError } from '@wae/wapro';
 import { GenericSchema } from 'valibot';
 
 export type FormattedError =
-   | AppErrorFormatted
-   | AppErrorFormatted<{ originalMessage?: string; raw?: string }>
-   | UpstreamErrorFormatted
-   | UpstreamErrorFormatted<AllegroError['details']>
-   | UpstreamErrorFormatted<WaproError['details']>
-   | ValidationErrorFormatted<GenericSchema>;
+   | InferErrorFormat<AppError>
+   | InferErrorFormat<AppError<{ originalMessage?: string; raw?: string }>>
+   | InferErrorFormat<UpstreamError>
+   | InferErrorFormat<AllegroError>
+   | InferErrorFormat<WaproError>
+   | InferErrorFormat<ValidationError<GenericSchema>>;
 
 export function formatError<
    T extends {

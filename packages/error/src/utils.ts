@@ -1,5 +1,6 @@
 import { ContentfulStatusCode, StatusCode } from 'hono/utils/http-status';
 import { ErrorCode } from './error-code';
+import { BaseError } from './base-error';
 
 export function codeToStatus(code: ErrorCode): ContentfulStatusCode {
    switch (code) {
@@ -52,3 +53,5 @@ export function statusToCode(status: number): ErrorCode {
          return 'INTERNAL';
    }
 }
+
+export type InferErrorFormat<T extends BaseError> = ReturnType<T['format']>;
