@@ -202,6 +202,7 @@ lockfileVersion: '9.0'
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
+  injectWorkspacePackages: true
 
 importers:
 
@@ -322,7 +323,7 @@ importers:
         version: 2.0.4
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       valibot:
         specifier: ^1.4.2
         version: 1.4.2(typescript@7.0.2)
@@ -456,7 +457,7 @@ importers:
         version: link:../types
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       valibot:
         specifier: ^1.4.2
         version: 1.4.2(typescript@7.0.2)
@@ -486,7 +487,7 @@ importers:
         version: link:../types
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       valibot:
         specifier: ^1.4.2
         version: 1.4.2(typescript@7.0.2)
@@ -544,7 +545,7 @@ importers:
         version: 2.0.4
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       error:
         specifier: ^10.4.0
         version: 10.4.0
@@ -614,7 +615,7 @@ importers:
         version: link:../types
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       valibot:
         specifier: ^1.4.2
         version: 1.4.2(typescript@7.0.2)
@@ -629,7 +630,7 @@ importers:
         version: link:../types
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       valibot:
         specifier: ^1.4.2
         version: 1.4.2(typescript@7.0.2)
@@ -644,7 +645,7 @@ importers:
         version: link:../db
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       valibot:
         specifier: ^1.4.2
         version: 1.4.2(typescript@7.0.2)
@@ -668,7 +669,7 @@ importers:
         version: link:../types
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       nanoid:
         specifier: ^6.0.1
         version: 6.0.1
@@ -725,7 +726,7 @@ importers:
         version: link:../db
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
+        version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       valibot:
         specifier: ^1.4.2
         version: 1.4.2(typescript@7.0.2)
@@ -8394,6 +8395,14 @@ snapshots:
       jiti: 2.7.0
 
   drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3):
+    optionalDependencies:
+      '@libsql/client': 0.17.4
+      '@types/mssql': 12.3.0(supports-color@7.2.0)
+      mssql: 12.7.0(supports-color@7.2.0)
+      valibot: 1.4.2(typescript@7.0.2)
+      zod: 4.4.3
+
+  drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0)(mssql@12.7.0)(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3):
     optionalDependencies:
       '@libsql/client': 0.17.4
       '@types/mssql': 12.3.0(supports-color@7.2.0)
