@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import './config/init-db';
 
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +21,7 @@ import { order } from './order';
 import { codeToStatus } from '@wae/error';
 import { formatError, FormattedError } from './helpers/format-error';
 import { providePersistentStore } from '@wae/allegro';
-import { store } from './config/storage';
+import { store } from './config/allegro-storage';
 
 providePersistentStore(store);
 

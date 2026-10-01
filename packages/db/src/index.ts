@@ -1,24 +1,38 @@
-import dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/libsql';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { relations } from './schemas';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+export const createDb = (pathToDbFile: string) =>
+   drizzle('file:' + path.resolve(__dirname, pathToDbFile), { relations });
 
-const envPath = path.resolve(__dirname, '../../../.env');
+export type Db = ReturnType<typeof createDb>;
 
-dotenv.config({
-   path: envPath,
-   quiet: true,
+let instance: Db | null = null;
+
+export const initDb = (pathToDbFile: string) => {
+   if (instance) return instance;
+
+   instance = createDb(pathToDbFile);
+
+   return instance;
+};
+
+// Hack to prevent exported db to be possible null
+export const db = new Proxy({} as Db, {
+   get(_, property, receiver) {
+      if (!instance) {
+         throw new Error('Database is not initialized.');
+      }
+
+      const value = Reflect.get(instance, property, receiver);
+
+      if (typeof value === 'function') {
+         return value.bind(instance);
+      }
+
+      return value;
+   },
 });
-
-const dbPath =
-   'file:' + path.resolve(__dirname, `../../../${process.env.DB_FILENAME}`);
-console.log('Path: ', dbPath);
-
-export const db = drizzle(dbPath, { relations });
 
 export {
    receiptsTable,
