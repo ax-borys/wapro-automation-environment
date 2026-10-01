@@ -4,6 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { apiResponseRawOffersSchema } from '../offer';
 import * as v from 'valibot';
 import { fetchWithValidation } from '../../core';
+import { store } from '../../store/store';
+import { assertStore } from '../../assertions';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +29,9 @@ export async function fetchOffers(
    accessToken: string,
    queryParams?: QueryParams,
 ): Promise<ApiResponseRawOffer> {
+   assertStore(store);
+
+   const { userAgent } = store.getState();
    const params = new URLSearchParams(queryParams);
 
    const result = await fetchWithValidation(
@@ -38,7 +43,7 @@ export async function fetchOffers(
             Authorization: `Bearer ${accessToken}`,
             Accept: 'application/vnd.allegro.public.v1+json',
             'Content-Type': 'application/vnd.allegro.public.v1+json',
-            'User-Agent': `${process.env.ALLEGRO_USER_AGENT!}`,
+            'User-Agent': userAgent,
          },
       },
       'Failed to obtain offers.',

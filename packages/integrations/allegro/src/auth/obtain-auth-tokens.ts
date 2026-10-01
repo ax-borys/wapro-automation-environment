@@ -2,6 +2,7 @@ import { fetchAuthTokens } from './fetch-auth-tokens';
 import { store } from '../store/store';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import * as v from 'valibot';
+import { assertStore } from '../assertions';
 
 type AllegroJwtPayload = JwtPayload & {
    iss: string;
@@ -42,6 +43,8 @@ export async function obtainAuthTokens(): Promise<{
    refreshToken: string;
    accessToken: string;
 }> {
+   assertStore(store);
+
    const { refreshToken, accessToken, setRefreshToken, setAccessToken } =
       store.getState();
 

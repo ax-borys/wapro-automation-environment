@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -17,6 +19,10 @@ import { type HandledStatusCodes } from '@wae/core';
 import { order } from './order';
 import { codeToStatus } from '@wae/error';
 import { formatError, FormattedError } from './helpers/format-error';
+import { providePersistentStore } from '@wae/allegro';
+import { store } from './config/storage';
+
+providePersistentStore(store);
 
 export type ApiError = FormattedError;
 

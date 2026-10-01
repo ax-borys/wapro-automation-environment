@@ -4,7 +4,7 @@ import { GenericSchema, InferIssue } from 'valibot';
 export class AllegroError<
    TSchema extends GenericSchema = GenericSchema,
    TDetails extends {
-      originalStatus: number;
+      originalStatus?: number;
       originalMessage?: string;
       issues?: InferIssue<TSchema>[];
       raw?: string;

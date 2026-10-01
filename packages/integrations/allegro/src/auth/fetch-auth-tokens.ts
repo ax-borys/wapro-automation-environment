@@ -3,6 +3,7 @@ import { contractMismatch, errorOccured } from '../error';
 import { store } from '../store/store';
 import * as v from 'valibot';
 import { fetchWithValidation } from '../core';
+import { assertStore } from '../assertions';
 
 const allegroApiErrorSchema = v.object({
    error: v.string(),
@@ -22,6 +23,8 @@ export type AllegroApiRefreshTokenResponse = v.InferOutput<
 >;
 
 export async function fetchAuthTokens(): Promise<AllegroApiRefreshTokenResponse> {
+   assertStore(store);
+
    const { refreshToken, clientId, clientSecret, deviceId } = store.getState();
    const request = new Request(`https://allegro.pl/auth/oauth/token`, {
       method: 'POST',

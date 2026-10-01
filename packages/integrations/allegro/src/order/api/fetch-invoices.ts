@@ -1,6 +1,7 @@
 import { store } from '../../store/store';
 import * as v from 'valibot';
 import { fetchWithValidation } from '../../core';
+import { assertStore } from '../../assertions';
 
 const rawInvoiceSchema = v.object({
    id: v.string(),
@@ -28,6 +29,8 @@ export async function fetchInvoices(
    accessToken: string,
    orderId: string,
 ): Promise<ApiResponseRawInvoices> {
+   assertStore(store);
+
    const { userAgent } = store.getState();
 
    const result = await fetchWithValidation(

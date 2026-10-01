@@ -1,106 +1,77 @@
-import { runtimeError } from '@wae/core';
-import dotenv, { configDotenv } from 'dotenv';
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { createStore } from 'zustand';
-import { createJSONStorage, persist, StateStorage } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
+import type { StateStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const envPath = path.resolve(__dirname, '../../../../.env');
-const storagePath = path.resolve(__dirname, './storage.json');
+type Token = string;
 
 type Config = {
-   ALLEGRO_CLIENT_ID: string;
-   ALLEGRO_DEVICE_ID: string;
-   ALLEGRO_CLIENT_SECRET: string;
-   ALLEGRO_USER_AGENT: string;
-   ALLEGRO_SELLER_ID: string;
+   clientId: string;
+   clientSecret: string;
+   deviceCode: string;
+   userAgent: string;
+   sellerId: string;
 };
-
-const output = dotenv.config({
-   path: envPath,
-});
-
-const config = output.parsed as Config;
-
-if (!config.ALLEGRO_DEVICE_ID) {
-   throw runtimeError('DEVICE_ID is not set.');
-}
-
-if (!config.ALLEGRO_CLIENT_ID) {
-   throw runtimeError('CLIENT_ID is not set.');
-}
-
-if (!config.ALLEGRO_CLIENT_SECRET) {
-   throw runtimeError('CLIENT_SECRET is not set.');
-}
-
-if (!config.ALLEGRO_USER_AGENT) {
-   throw runtimeError('USER_AGENT is not set.');
-}
-
-if (!config.ALLEGRO_SELLER_ID) {
-   throw runtimeError('SELLER_ID is not set.');
-}
-
-const fileStorage: StateStorage = {
-   getItem: (name: string): string | null => {
-      if (!existsSync(name)) return null;
-      return readFileSync(name, 'utf-8');
-   },
-   setItem: (name: string, value: string): void => {
-      writeFileSync(name, value, 'utf-8');
-   },
-   removeItem: (name: string): void => {
-      if (existsSync(name)) unlinkSync(name);
-   },
-};
-
-type Token = string;
 
 type AppState = {
    refreshToken: Token | null;
    accessToken: Token | null;
-   deviceId: Config['ALLEGRO_DEVICE_ID'];
-   clientId: Config['ALLEGRO_CLIENT_ID'];
-   clientSecret: Config['ALLEGRO_CLIENT_SECRET'];
-   allegroSellerId: Config['ALLEGRO_SELLER_ID'];
-   userAgent: Config['ALLEGRO_USER_AGENT'];
+   deviceId: Config['deviceCode'];
+   clientId: Config['clientId'];
+   clientSecret: Config['clientSecret'];
+   allegroSellerId: Config['sellerId'];
+   userAgent: Config['userAgent'];
    setAccessToken: (token: Token) => void;
    setRefreshToken: (token: Token) => void;
    setDeviceId: (id: string) => void;
 };
 
-export const store = createStore<AppState>()(
-   persist(
-      immer((set) => ({
-         refreshToken: null,
-         accessToken: null,
-         clientId: config.ALLEGRO_CLIENT_ID,
-         clientSecret: config.ALLEGRO_CLIENT_SECRET,
-         deviceId: config.ALLEGRO_DEVICE_ID,
-         userAgent: config.ALLEGRO_USER_AGENT,
-         allegroSellerId: config.ALLEGRO_SELLER_ID,
-         setAccessToken: (token) =>
-            set((draft) => {
-               draft.accessToken = token;
-            }),
-         setRefreshToken: (token) =>
-            set((draft) => {
-               draft.refreshToken = token;
-            }),
-         setDeviceId: (id) =>
-            set((draft) => {
-               draft.deviceId = id;
-            }),
-      })),
-      {
-         name: storagePath,
-         storage: createJSONStorage(() => fileStorage),
-      },
-   ),
-);
+export const createPersistentStore = ({
+   name,
+   storage,
+   config,
+}: {
+   name: string;
+   storage: StateStorage;
+   config: Config;
+}) =>
+   createStore<AppState>()(
+      persist(
+         immer((set) => ({
+            refreshToken: null,
+            accessToken: null,
+            clientId: config.clientId,
+            clientSecret: config.clientSecret,
+            deviceId: config.deviceCode,
+            userAgent: config.userAgent,
+            allegroSellerId: config.sellerId,
+            setAccessToken: (token) =>
+               set((draft) => {
+                  draft.accessToken = token;
+               }),
+            setRefreshToken: (token) =>
+               set((draft) => {
+                  draft.refreshToken = token;
+               }),
+            setDeviceId: (id) =>
+               set((draft) => {
+                  draft.deviceId = id;
+               }),
+         })),
+         {
+            name,
+            storage: createJSONStorage(() => storage),
+         },
+      ),
+   );
+
+export type AppStore = ReturnType<typeof createPersistentStore>;
+export type { StateStorage };
+
+export let store: AppStore | null;
+
+export const providePersistentStore = (appStore: AppStore) => {
+   if (!store) {
+      store = appStore;
+   }
+};

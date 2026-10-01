@@ -5,8 +5,11 @@ import { fetchInvoices } from '../api/fetch-invoices';
 import { fetchOrders } from '../api/fetch-orders';
 import { RawOrder } from '../types';
 import { mapOrder, Order } from '../mappers/map-order';
+import { assertStore } from '../../assertions';
 
 export async function getPendingOrders(): Promise<Order[]> {
+   assertStore(store);
+
    const { userAgent } = store.getState();
    const { accessToken } = await obtainAuthTokens();
 
