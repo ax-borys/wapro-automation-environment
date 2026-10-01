@@ -1,9 +1,7 @@
 allowBuilds:
    esbuild: false
    node-base64: false
-   unrs-resolver: set this to true or false
-
-injectWorkspacePackages: true
+   unrs-resolver: false
 
 packages:
    - 'apps/*'

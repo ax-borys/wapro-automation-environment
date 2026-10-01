@@ -15,17 +15,17 @@
    "devEngines": {
       "packageManager": {
          "name": "pnpm",
-         "version": "^11.3.0",
+         "version": "^12.8.1",
          "onFail": "download"
       }
    },
    "type": "module",
    "devDependencies": {
       "@types/node": "^26.2.0",
+      "@wae/cli": "workspace:*",
       "tsdown": "^0.22.14",
       "tsx": "^4.23.11",
-      "typescript": "^7.0.2",
-      "@wae/cli": "workspace:*"
+      "typescript": "^7.0.2"
    },
    "dependencies": {
       "dotenv": "^17.4.2"
