@@ -1,4 +1,8 @@
-import { createPersistentStore, type StateStorage } from '@wae/allegro';
+import {
+   createPersistentStore,
+   providePersistentStore,
+   type StateStorage,
+} from '@wae/allegro';
 import { runtimeError } from '@wae/core';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 
@@ -39,7 +43,7 @@ const fileStorage: StateStorage = {
    },
 };
 
-export const store = createPersistentStore({
+const store = createPersistentStore({
    name: process.env.ALLEGRO_STORE_PATH,
    storage: fileStorage,
    config: {
@@ -50,3 +54,5 @@ export const store = createPersistentStore({
       userAgent: process.env.ALLEGRO_USER_AGENT,
    },
 });
+
+providePersistentStore(store);
