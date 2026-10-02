@@ -26,6 +26,10 @@ import { order } from './order';
 import { codeToStatus } from '@wae/error';
 import { formatError, FormattedError } from './helpers/format-error';
 
+if (!process.env.API_HOST) {
+   throw new Error('API_HOST environment variable is required.');
+}
+
 export type ApiError = FormattedError;
 
 export type ApiResponse<T> = T extends ApiError
@@ -39,7 +43,7 @@ const app = new Hono()
    .use(
       '*',
       cors({
-         origin: 'http://localhost:8081',
+         origin: ['http://localhost:8081', 'http://192.168.1.66:3000'],
       }),
    )
    .use(
@@ -76,9 +80,12 @@ export type AppType = ApplyGlobalResponse<
 serve(
    {
       fetch: app.fetch,
+      hostname: process.env.API_HOST,
       port: 8082,
    },
    (info) => {
-      console.log(`Server is running on http://localhost:${info.port}`);
+      console.log(
+         `Server is running on http://${process.env.API_HOST}:${info.port}`,
+      );
    },
 );

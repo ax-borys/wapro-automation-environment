@@ -20,6 +20,8 @@ WORKDIR /app
 
 COPY --from=build /app/out .
 
+RUN mkdir ./data
+
 CMD ["node", "dist/index.mjs"]
 
 EXPOSE 8082

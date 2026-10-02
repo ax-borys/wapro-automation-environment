@@ -13,8 +13,7 @@ dotenv.config({
 });
 import { defineConfig } from 'drizzle-kit';
 
-const dbPath =
-   'file:' + path.resolve(__dirname, `../../${process.env.DB_FILENAME!}`);
+const dbPath = 'file:' + path.resolve(__dirname, `${process.env.DB_FILENAME!}`);
 
 console.log('Path', dbPath);
 
