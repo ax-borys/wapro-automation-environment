@@ -7,7 +7,6 @@
    "scripts": {
       "build": "tsc -b && tsdown"
    },
-   "packageManager": "pnpm@10.33.0",
    "dependencies": {
       "hono": "^4.13.2",
       "valibot": "^1.4.2"
