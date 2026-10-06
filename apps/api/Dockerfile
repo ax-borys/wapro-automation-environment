@@ -1,27 +1,58 @@
-FROM node:26-slim AS build
-RUN npm install -g pnpm
+ARG NODE_VERSION=24.19.0-slim
+
+FROM node:${NODE_VERSION} AS deps
 
 WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+COPY apps/web/package.json apps/web/package.json
+COPY apps/api/package.json apps/api/package.json
+COPY apps/wae-cli/package.json apps/wae-cli/package.json
+
+COPY packages/types/package.json packages/types/package.json
+COPY packages/error/package.json packages/error/package.json
+COPY packages/address/package.json packages/address/package.json
+COPY packages/customer/package.json packages/customer/package.json
+COPY packages/order/package.json packages/order/package.json
+COPY packages/offer/package.json packages/offer/package.json
+COPY packages/receipt/package.json packages/receipt/package.json
+COPY packages/api-types/package.json packages/api-types/package.json
+
+COPY packages/core/package.json packages/core/package.json
+COPY packages/kernel/package.json packages/kernel/package.json
+COPY packages/db/package.json packages/db/package.json
+
+COPY packages/integrations/wapro/package.json packages/integrations/wapro/package.json
+COPY packages/integrations/allegro/package.json packages/integrations/allegro/package.json
+
+RUN  --mount=type=cache,target=/root/.local/share/pnpm/store \
+    corepack enable pnpm && corepack use pnpm@12.9.1 && pnpm install --frozen-lockfile --filter @wae/api...
+
+FROM node:${NODE_VERSION} AS builder
+
+WORKDIR /app
+
+COPY --from=deps /app ./
 
 COPY . .
 
-ENV CI=true
-
-RUN pnpm install --frozen-lockfile --filter=@wae/api...
-RUN pnpm --filter @wae/api... build
-RUN pnpm --filter @wae/api --frozen-lockfile --prod deploy ./out
-
-FROM node:26-slim AS runtime
-RUN npm install -g pnpm
-
 ENV NODE_ENV=production
+
+RUN corepack enable pnpm && corepack use pnpm@12.9.1 && pnpm --filter @wae/web... build && pnpm --filter @wae/api --frozen-lockfile --prod deploy ./out
+
+FROM node:${NODE_VERSION} AS runtime
 
 WORKDIR /app
 
-COPY --from=build /app/out .
+ENV NODE_ENV=production
 
-RUN mkdir ./data
+COPY --from=builder --chown=node:node /app/out .
 
-CMD ["node", "dist/index.mjs"]
+RUN mkdir ./data && chown node:node -R ./data
+
+USER node
 
 EXPOSE 8082
+
+CMD ["node", "dist/index.mjs"]
