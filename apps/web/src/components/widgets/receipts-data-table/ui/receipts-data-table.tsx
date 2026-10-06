@@ -26,7 +26,10 @@ export function ReceiptsDataTable({
 }: {
    initialData: ReceiptRecorded[];
 }) {
-   const [date, setDate] = useState<DateRange | undefined>();
+   const [date, setDate] = useState<DateRange | undefined>({
+      from: new Date(),
+      to: new Date(),
+   });
 
    const [columnVisibility, setColumnVisibility] =
       useState<ColumnVisibilityState>({});
@@ -45,10 +48,12 @@ export function ReceiptsDataTable({
 
       result.then((r) =>
          setData(
-            r.map((i) => ({
-               ...i,
-               createdAt: new Date(i.createdAt),
-            })),
+            r
+               .map((i) => ({
+                  ...i,
+                  createdAt: new Date(i.createdAt),
+               }))
+               .reverse(),
          ),
       );
    }, [date]);
@@ -70,7 +75,7 @@ export function ReceiptsDataTable({
       initialState: {
          pagination: {
             pageIndex: 0,
-            pageSize: 10,
+            pageSize: 50,
          },
       },
       state: {

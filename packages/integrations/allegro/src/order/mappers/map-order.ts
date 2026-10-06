@@ -95,13 +95,16 @@ export function mapOrder(order: RawOrder): Order {
       throw new Error("CompanyName and Customer's names cannot be null");
    }
 
+   console.log('Login: ', order.buyer.login);
+   console.log('Id: ', order.buyer.id);
+
    const customer: Order['customer'] = {
       firstName: order.buyer.firstName,
       lastName: order.buyer.lastName,
       companyName: order.buyer.companyName,
       email: order.buyer.email,
       phoneNumber: order.buyer.phoneNumber,
-      externalId: order.buyer.id,
+      externalId: order.buyer.login,
       address: validatedCustomerAddress.success
          ? validatedCustomerAddress.output
          : null,

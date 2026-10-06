@@ -1,4 +1,5 @@
 'use client';
+import { Button } from '@/components/ui/button';
 import { DataTableFeatures } from '@/components/ui/data-table/data-table-features';
 import {
    BadgeFiskalNumber,
@@ -8,11 +9,15 @@ import {
 } from '@/components/ui/receipt-card';
 import { createColumnHelper } from '@tanstack/react-table';
 import { GetReceiptOutput, GetReceiptsInput } from '@wae/receipt';
+import { Customer, Order } from '@wae/types';
 import currency from 'currency.js';
+import Link from 'next/link';
 
 export type ReceiptRecorded = {
    order: {
+      externalId: Order['externalId'];
       customer: {
+         externalId: Customer['externalId'];
          firstName: string | null | undefined;
          lastName: string | null | undefined;
          companyName: string | null | undefined;
@@ -36,9 +41,37 @@ export const columns = columnHelper.columns([
       {
          id: 'buyerFullName',
          header: () => <div className="w-30">Buyer name</div>,
-         size: 300,
+         size: 200,
       },
    ),
+   columnHelper.accessor('order.customer.externalId', {
+      header: () => <div className="text-center">Customer external id</div>,
+      cell: ({ row: r }) => {
+         const value = r.getValue('order_customer_externalId') as string;
+
+         return <div className="text-center">{value}</div>;
+      },
+      size: 100,
+   }),
+   columnHelper.accessor('order.externalId', {
+      header: () => <div className="text-center">External id</div>,
+      cell: ({ row: r }) => {
+         const value = r.getValue('order_externalId') as string;
+
+         return (
+            <div className="text-center">
+               <Link
+                  className="underline"
+                  href={'https://salescenter.allegro.com/orders?query=' + value}
+                  target="_blank"
+               >
+                  {value}
+               </Link>
+            </div>
+         );
+      },
+      size: 100,
+   }),
    columnHelper.accessor('order.packages', {
       header: () => <div className="text-center">Packages</div>,
       cell: ({ row: r }) => {
@@ -51,11 +84,16 @@ export const columns = columnHelper.columns([
    columnHelper.accessor('number', {
       header: () => <div className="text-center">Number</div>,
       cell: ({ row: r }) => {
-         const value = r.getValue('number') as number;
+         const value = r.getValue('number') as string;
 
          return (
             <div className="text-center">
-               <BadgeReceiptNumber value={value.toString()} />
+               <Button
+                  onClick={() => navigator.clipboard.writeText(value)}
+                  className="bg-transparent hover:bg-transparent cursor-pointer px-0"
+               >
+                  <BadgeReceiptNumber value={value} />
+               </Button>
             </div>
          );
       },

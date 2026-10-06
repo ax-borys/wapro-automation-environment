@@ -54,6 +54,7 @@ import { useOffersStore } from '@/entities/offer';
 import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
 import { useError } from '@/entities/error';
 import * as v from 'valibot';
+import Link from 'next/link';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -111,7 +112,15 @@ export function Order({
                onCheckedChange={() => selectToggle()}
             />
             <span className="font-medium underline">
-               Order #{order.externalId}
+               <Link
+                  href={
+                     'https://salescenter.allegro.com/orders?query=' +
+                     order.externalId
+                  }
+                  target="_blank"
+               >
+                  Order #{order.externalId}
+               </Link>
             </span>
             {order.requiredDocumentType === 'INVOICE' ? (
                <Badge>Invoice</Badge>

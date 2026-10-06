@@ -30,7 +30,6 @@ export function OffersDataTable({ initialData }: { initialData: OfferData[] }) {
    useGetAndStoreOffers(() => setInitialized(true));
 
    const dataInput = useMemo(() => Object.values(offers), [offers]);
-   console.log('Data input: ', dataInput);
 
    const { globalFilter, table, isMounted, setGlobalFilter } = useDataTable(
       initialized ? dataInput : initialData,

@@ -14,7 +14,11 @@ export function useDataTable<TData extends RowData>(
    data: TData[],
    columns: ColumnDef<DataTableFeatures, TData>[],
    options?: {
-      initialSortingState: SortingState;
+      initialSortingState?: SortingState;
+      pagination?: {
+         pageIndex?: number;
+         pageSize?: number;
+      };
    },
 ) {
    const [date, setDate] = useState<DateRange | undefined>();
@@ -47,8 +51,8 @@ export function useDataTable<TData extends RowData>(
       onSortingChange: setSorting,
       initialState: {
          pagination: {
-            pageIndex: 0,
-            pageSize: 10,
+            pageIndex: options?.pagination?.pageIndex ?? 0,
+            pageSize: options?.pagination?.pageSize ?? 10,
          },
       },
       state: {
