@@ -48,6 +48,7 @@ FROM node:${NODE_VERSION} AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV API_URL=http://wae-api-prod:8082
 
 COPY --from=builder --chown=node:node /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=node:node /app/apps/web/public ./apps/web/public
