@@ -12,11 +12,7 @@ import {
 import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { addDays, endOfDay, formatISO, startOfDay } from 'date-fns';
-import {
-   ColumnVisibilityState,
-   PaginationState,
-   useTable,
-} from '@tanstack/react-table';
+import { ColumnVisibilityState, useTable } from '@tanstack/react-table';
 import { fetchReceipts } from '@/entities/receipt';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react';
@@ -46,7 +42,9 @@ export function ReceiptsDataTable({
          },
       });
 
-      result.then((r) =>
+      result.then((r) => {
+         if (!r.length) return;
+
          setData(
             r
                .map((i) => ({
@@ -54,8 +52,8 @@ export function ReceiptsDataTable({
                   createdAt: new Date(i.createdAt),
                }))
                .reverse(),
-         ),
-      );
+         );
+      });
    }, [date]);
 
    // fix hydrantion error bug with pageIndex=0

@@ -1,6 +1,5 @@
 import { client } from '@/lib/client';
 import { InferRequestType } from 'hono/client';
-import { useError } from '../error';
 
 export type RecordReceiptInput = InferRequestType<
    typeof client.receipt.record.$post

@@ -3,17 +3,32 @@ import { EditFiscalNumber } from '@/components/features/edit-fiscal-number/ui/ed
 import { Button } from '@/components/ui/button';
 import { DataTableFeatures } from '@/components/ui/data-table/data-table-features';
 import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuGroup,
+   DropdownMenuItem,
+   DropdownMenuLabel,
+   DropdownMenuPortal,
+   DropdownMenuSeparator,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
    BadgeFiskalNumber,
    BadgePaid,
    BadgePickup,
    BadgeReceiptNumber,
 } from '@/components/ui/receipt-card';
+import {
+   DotsThreeOutlineVerticalIcon,
+   DotsThreeVerticalIcon,
+} from '@phosphor-icons/react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { GetReceiptOutput, GetReceiptsInput } from '@wae/receipt';
 import { Customer, Order, Receipt } from '@wae/types';
 import currency from 'currency.js';
-import { EditIcon } from 'lucide-react';
+import { EditIcon, EllipsisVerticalIcon } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 export type ReceiptRecorded = {
    id: Receipt['id'];
@@ -147,18 +162,36 @@ export const columns = columnHelper.columns([
       size: 200,
    }),
    columnHelper.display({
-      id: 'edit',
+      id: 'actions',
       cell: ({ row: r }) => {
+         const [selected, setSelected] = useState<'FISCAL_NUMBER' | null>(null);
+
          return (
             <div className="flex flex-col w-full">
-               <EditFiscalNumber
-                  receiptId={1}
-                  trigger={
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
                      <Button variant={'ghost'}>
-                        <EditIcon />
+                        <EllipsisVerticalIcon />
                      </Button>
-                  }
-               />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent onChange={() => {}}>
+                     <DropdownMenuGroup>
+                        <DropdownMenuLabel>Edit</DropdownMenuLabel>
+                        <DropdownMenuItem
+                           onSelect={() => setSelected('FISCAL_NUMBER')}
+                        >
+                           Fiscal number
+                        </DropdownMenuItem>
+                     </DropdownMenuGroup>
+                  </DropdownMenuContent>
+               </DropdownMenu>
+               {selected === 'FISCAL_NUMBER' ? (
+                  <EditFiscalNumber
+                     receiptId={1}
+                     defaultOpen={true}
+                     onClose={() => setTimeout(() => setSelected(null), 100)}
+                  />
+               ) : null}
             </div>
          );
       },

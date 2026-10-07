@@ -7,6 +7,7 @@ import {
    DialogHeader,
    DialogTitle,
    DialogTrigger,
+   DialogDescription,
 } from '../dialog';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -74,6 +75,13 @@ export function EditFiscalNumberDialogTitle({
          {children}
       </DialogTitle>
    );
+}
+
+export function EditFiscalNumberDialogDescription({
+   className,
+   ...props
+}: React.ComponentProps<typeof DialogDescription>) {
+   return <DialogDescription className={cn(className)} {...props} />;
 }
 
 export function EditFiscalNumberDialogContent({

@@ -14,4 +14,6 @@ if (!process.env.DB_FILE_PATH) {
    throw runtimeError('DB_FILE_PATH is not provided.');
 }
 
+console.log('Path: ', path.resolve(__baseDirname, process.env.DB_FILE_PATH));
+
 initDb(path.resolve(__baseDirname, process.env.DB_FILE_PATH));
