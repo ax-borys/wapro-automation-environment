@@ -1,4 +1,5 @@
 'use client';
+import { EditFiscalNumber } from '@/components/features/edit-fiscal-number/ui/edit-fiscal-number';
 import { Button } from '@/components/ui/button';
 import { DataTableFeatures } from '@/components/ui/data-table/data-table-features';
 import {
@@ -9,11 +10,13 @@ import {
 } from '@/components/ui/receipt-card';
 import { createColumnHelper } from '@tanstack/react-table';
 import { GetReceiptOutput, GetReceiptsInput } from '@wae/receipt';
-import { Customer, Order } from '@wae/types';
+import { Customer, Order, Receipt } from '@wae/types';
 import currency from 'currency.js';
+import { EditIcon } from 'lucide-react';
 import Link from 'next/link';
 
 export type ReceiptRecorded = {
+   id: Receipt['id'];
    order: {
       externalId: Order['externalId'];
       customer: {
@@ -142,5 +145,24 @@ export const columns = columnHelper.columns([
          return <div className="text-right font-medium">{formatted}</div>;
       },
       size: 200,
+   }),
+   columnHelper.display({
+      id: 'edit',
+      cell: ({ row: r }) => {
+         return (
+            <div className="flex flex-col w-full">
+               <EditFiscalNumber
+                  receiptId={1}
+                  trigger={
+                     <Button variant={'ghost'}>
+                        <EditIcon />
+                     </Button>
+                  }
+               />
+            </div>
+         );
+      },
+      size: 40,
+      minSize: 40,
    }),
 ]);

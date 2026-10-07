@@ -4,6 +4,8 @@ import {
    GetReceiptOutput,
    getReceipts,
    getReceiptsInputSchema,
+   updateFiscalNumber,
+   updateFiscalNumberInputSchema,
 } from '@wae/receipt';
 import { ApiResponse, WaproConfig } from '@wae/types';
 import { Hono } from 'hono';
@@ -31,6 +33,24 @@ export const receipt = new Hono()
          error: null,
       });
    })
+   .put(
+      '/fiscal-number',
+      valibotJsonMiddleware(updateFiscalNumberInputSchema),
+      async (c) => {
+         const input = c.req.valid('json');
+
+         const receipt = await db.transaction(async (tx) => {
+            const receipt = await updateFiscalNumber(tx, input);
+
+            return receipt;
+         });
+
+         return c.json<ApiResponse<typeof receipt>>({
+            data: receipt,
+            error: null,
+         });
+      },
+   )
    .post(
       '/record',
       valibotJsonMiddleware(

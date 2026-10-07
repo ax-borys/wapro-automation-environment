@@ -12,3 +12,5 @@ export {
    getReceiptsInputSchema,
    getReceipts,
 } from './services/get-receipts';
+
+export * from './services/update-fiscal-number';
