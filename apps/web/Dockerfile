@@ -40,7 +40,7 @@ COPY --from=deps /app ./
 COPY . .
 
 ENV NODE_ENV=production
-ENV API_URL=http://wae-api-prod:8082
+ENV API_URL=http://api:8082
 
 RUN corepack enable pnpm && corepack use pnpm@12.9.1 && pnpm --filter @wae/web... build
 

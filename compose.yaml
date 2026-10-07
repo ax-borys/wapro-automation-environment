@@ -1,0 +1,25 @@
+services:
+   web:
+      build:
+         context: .
+         dockerfile: apps/web/Dockerfile
+      image: wae-web
+      ports:
+         - '3000:3000'
+      networks:
+         - main
+
+   api:
+      build:
+         context: .
+         dockerfile: apps/api/Dockerfile
+      image: wae-api
+      env_file:
+         - apps/api/.env.docker
+      volumes:
+         - D:\wae-api-data\:/app/data
+      networks:
+         - main
+
+networks:
+   main: {}
