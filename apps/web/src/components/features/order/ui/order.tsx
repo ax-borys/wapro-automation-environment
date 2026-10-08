@@ -55,6 +55,16 @@ import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-o
 import { useError } from '@/entities/error';
 import * as v from 'valibot';
 import Link from 'next/link';
+import {
+   EditDialog,
+   EditDialogCancel,
+   EditDialogContent,
+   EditDialogDescription,
+   EditDialogFooter,
+   EditDialogHeader,
+   EditDialogSave,
+   EditDialogTrigger,
+} from '@/components/ui/edit-dalog';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -231,29 +241,29 @@ export function Order({
                   </Button>
                ) : (
                   <>
-                     <Dialog>
+                     <EditDialog>
                         <form
                            onSubmit={receiptNumberSubmitHandler}
                            id={`set-fiscal-number-form-#${receipt.orderId}`}
                         >
-                           <DialogTrigger asChild>
+                           <EditDialogTrigger asChild>
                               <Button
                                  variant={'outline'}
                                  disabled={receipt.status !== 'RECORD'}
                               >
                                  <CashRegisterIcon />
                               </Button>
-                           </DialogTrigger>
-                           <DialogContent>
-                              <DialogHeader>
+                           </EditDialogTrigger>
+                           <EditDialogContent>
+                              <EditDialogHeader>
                                  <DialogTitle>
                                     Enter receipt's fiscal number
                                  </DialogTitle>
-                              </DialogHeader>
-                              <DialogDescription>
+                              </EditDialogHeader>
+                              <EditDialogDescription>
                                  Make sure you are writing correct fiscal
                                  number.
-                              </DialogDescription>
+                              </EditDialogDescription>
                               <FieldGroup>
                                  <Field>
                                     <Label>Fiscal number</Label>
@@ -264,22 +274,13 @@ export function Order({
                                     />
                                  </Field>
                               </FieldGroup>
-                              <DialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
-                                 <DialogClose asChild>
-                                    <Button variant={'outline'}>Cancel</Button>
-                                 </DialogClose>
-                                 <DialogClose asChild>
-                                    <Button
-                                       type="submit"
-                                       form={`set-fiscal-number-form-#${receipt.orderId}`}
-                                    >
-                                       Save changes
-                                    </Button>
-                                 </DialogClose>
-                              </DialogFooter>
-                           </DialogContent>
+                              <EditDialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
+                                 <EditDialogCancel />
+                                 <EditDialogSave />
+                              </EditDialogFooter>
+                           </EditDialogContent>
                         </form>
-                     </Dialog>
+                     </EditDialog>
                      {status === 'RECORD' ? (
                         <Button
                            onClick={recordReceiptsHandler}
