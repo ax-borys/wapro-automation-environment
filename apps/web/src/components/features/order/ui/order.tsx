@@ -172,7 +172,7 @@ export function Order({
                                  className="rounded-sm"
                               />
                            )}
-                           <div className="overflow-scroll">
+                           <div className="overflow-auto">
                               {item.offer.title}
                            </div>
                            {!Object.values(
