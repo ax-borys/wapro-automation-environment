@@ -26,7 +26,7 @@ export async function updateFiscalNumber(
    tx: Tx,
    receiptInput: UpdateFiscalNumberOutput,
 ): Promise<UpdateFiscalNumberReturnOutput> {
-   const receipt = await tx
+   const [receipt] = await tx
       .select()
       .from(receiptsTable)
       .where(eq(receiptsTable.id, receiptInput.id));
