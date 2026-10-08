@@ -38,12 +38,12 @@ export function AppSidebar() {
                      <Logo className="size-5" />
                   </Link>
                </Button>
-               <div className="ml-3 h-full flex flex-col gap-3.5 justify-center space-x-3 tracking-wide">
+               <div className="ml-3 h-full flex flex-col gap-3.5 justify-center space-x-3 tracking-wide mr-auto">
                   <span className="font-bold text-base leading-0">
-                     Automation
+                     Automata
                   </span>
-                  <span className="text-xs leading-0 text-muted-foreground self-end translate-x-2">
-                     platform v0.0.1
+                  <span className="text-xs leading-0 text-muted-foreground self-center translate-x-2">
+                     v0.1.0
                   </span>
                </div>
                <Button
