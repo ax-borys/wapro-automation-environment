@@ -13,14 +13,7 @@ import { valibotJsonMiddleware } from '../helpers/valibot-middleware';
 import * as v from 'valibot';
 import { db } from '@wae/db';
 import { fulfillOrders } from '@wae/order';
-
-const config: WaproConfig = {
-   companyId: 1,
-   cashRegisterId: 1,
-   userId: 3000001,
-   counterPartyId: 1,
-   stockId: 1,
-};
+import { waproConfig } from './wapro-config';
 
 export const receipt = new Hono()
    .post('/', valibotJsonMiddleware(getReceiptsInputSchema), async (c) => {
@@ -60,7 +53,7 @@ export const receipt = new Hono()
          const input = c.req.valid('json');
 
          const receipts = await db.transaction(async (tx) => {
-            const receipts = await createReceipts(tx, input, config);
+            const receipts = await createReceipts(tx, input, waproConfig);
 
             await fulfillOrders(
                tx,
