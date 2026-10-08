@@ -65,6 +65,7 @@ import {
    EditDialogSave,
    EditDialogTrigger,
 } from '@/components/ui/edit-dalog';
+import { useCallback, useState } from 'react';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -80,7 +81,9 @@ export function Order({
    const { order, selectToggle } = useOrder(id);
    const { receipt, setFiscalNumber, recordReceipt } = useReceipt(order.id);
    const { offers } = useOffersStore();
-   const { raiseError } = useError();
+
+   const [draftFiscalNumber, setDraftFiscalNumber] = useState<string>('');
+
    useGetAndStoreOffers();
 
    const { number, status, fiscalNumber } = receipt;
@@ -89,25 +92,11 @@ export function Order({
       await recordReceipt();
    };
 
-   const receiptNumberSubmitHandler: React.SubmitEventHandler<
-      HTMLFormElement
-   > = (e) => {
-      e.preventDefault();
-      const fiscalNumber = (
-         e.target.elements.namedItem('fiscalNumber') as HTMLInputElement
-      )?.value;
-
-      const parsedFiscalNumber = Number.parseInt(fiscalNumber);
-
-      if (parsedFiscalNumber) {
-         const value = parsedFiscalNumber;
-         setFiscalNumber(value);
-         onChangeFiscalNumber?.(value);
-      } else if (fiscalNumber === '') {
-         setFiscalNumber(null);
-         onChangeFiscalNumber?.(null);
-      }
-   };
+   const submitFiscalNumber = useCallback(() => {
+      console.log('Submit: ', draftFiscalNumber);
+      setFiscalNumber(Number(draftFiscalNumber));
+      onChangeFiscalNumber?.(Number(draftFiscalNumber));
+   }, [draftFiscalNumber]);
 
    const copyToClipboard = (value: string) => {
       return navigator.clipboard.writeText(value);
@@ -241,45 +230,50 @@ export function Order({
                   </Button>
                ) : (
                   <>
-                     <EditDialog>
-                        <form
-                           onSubmit={receiptNumberSubmitHandler}
-                           id={`set-fiscal-number-form-#${receipt.orderId}`}
-                        >
-                           <EditDialogTrigger asChild>
-                              <Button
-                                 variant={'outline'}
-                                 disabled={receipt.status !== 'RECORD'}
-                              >
-                                 <CashRegisterIcon />
-                              </Button>
-                           </EditDialogTrigger>
-                           <EditDialogContent>
-                              <EditDialogHeader>
-                                 <DialogTitle>
-                                    Enter receipt's fiscal number
-                                 </DialogTitle>
-                              </EditDialogHeader>
-                              <EditDialogDescription>
-                                 Make sure you are writing correct fiscal
-                                 number.
-                              </EditDialogDescription>
-                              <FieldGroup>
-                                 <Field>
-                                    <Label>Fiscal number</Label>
-                                    <Input
-                                       autoFocus={true}
-                                       name="fiscalNumber"
-                                       form={`set-fiscal-number-form-#${receipt.orderId}`}
-                                    />
-                                 </Field>
-                              </FieldGroup>
-                              <EditDialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
-                                 <EditDialogCancel />
-                                 <EditDialogSave />
-                              </EditDialogFooter>
-                           </EditDialogContent>
-                        </form>
+                     <EditDialog
+                        onSave={submitFiscalNumber}
+                        onCancel={() => setDraftFiscalNumber('')}
+                     >
+                        <EditDialogTrigger asChild>
+                           <Button
+                              variant={'outline'}
+                              disabled={receipt.status !== 'RECORD'}
+                           >
+                              <CashRegisterIcon />
+                           </Button>
+                        </EditDialogTrigger>
+                        <EditDialogContent>
+                           <EditDialogHeader>
+                              <DialogTitle>
+                                 Enter receipt's fiscal number
+                              </DialogTitle>
+                           </EditDialogHeader>
+                           <EditDialogDescription>
+                              Make sure you are writing correct fiscal number.
+                           </EditDialogDescription>
+                           <FieldGroup>
+                              <Field>
+                                 <Label>Fiscal number</Label>
+                                 <Input
+                                    autoFocus={true}
+                                    value={draftFiscalNumber}
+                                    onChange={(e) => {
+                                       if (
+                                          Number.isInteger(
+                                             Number(e.target.value),
+                                          )
+                                       ) {
+                                          setDraftFiscalNumber(e.target.value);
+                                       }
+                                    }}
+                                 />
+                              </Field>
+                           </FieldGroup>
+                           <EditDialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
+                              <EditDialogCancel />
+                              <EditDialogSave />
+                           </EditDialogFooter>
+                        </EditDialogContent>
                      </EditDialog>
                      {status === 'RECORD' ? (
                         <Button

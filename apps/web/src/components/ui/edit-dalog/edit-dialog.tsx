@@ -11,12 +11,13 @@ import {
 } from '../dialog';
 import { cn } from '@/lib/utils';
 import { Kbd } from '../kbd';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Button } from '../button';
 import {
    EditDialogHandlersProvider,
    useEditDialogHandlers,
 } from './model/edit-dialog-context';
+import { openAsBlob } from 'fs';
 
 export function EditDialog({
    children,
@@ -29,30 +30,33 @@ export function EditDialog({
 }) {
    const [open, setOpen] = useState<boolean>(false);
 
-   const handlers = {
-      onSave: new Proxy(onSave ?? (() => {}), {
-         apply: (target, thisArg, args) => {
-            const result = Reflect.apply(target, thisArg, args);
+   const handlers = useMemo(
+      () => ({
+         onSave: new Proxy(onSave ?? (() => {}), {
+            apply: (target, thisArg, args) => {
+               const result = Reflect.apply(target, thisArg, args);
 
-            setOpen(false);
+               setOpen(false);
+               console.log('Save');
 
-            return result;
-         },
+               return result;
+            },
+         }),
+
+         onCancel: new Proxy(onCancel ?? (() => {}), {
+            apply: (target, thisArg, args) => {
+               const result = Reflect.apply(target, thisArg, args);
+
+               setOpen(false);
+
+               return result;
+            },
+         }),
+
+         onOpen: () => setOpen(true),
       }),
-
-      onCancel: new Proxy(onCancel ?? (() => {}), {
-         apply: (target, thisArg, args) => {
-            const result = Reflect.apply(target, thisArg, args);
-
-            console.log('Cancel');
-            setOpen(false);
-
-            return result;
-         },
-      }),
-
-      onOpen: () => setOpen(true),
-   };
+      [setOpen, onCancel, onSave, open],
+   );
 
    useEffect(() => {
       if (!open) return;
@@ -119,9 +123,20 @@ export function EditDialogDescription({
 }
 
 export function EditDialogContent({
+   onClose,
    ...props
 }: React.ComponentProps<typeof DialogContent>) {
-   return <DialogContent {...props} />;
+   const [{ onCancel: cancelHandler }] = useEditDialogHandlers();
+
+   return (
+      <DialogContent
+         onClose={() => {
+            cancelHandler?.();
+            onClose?.();
+         }}
+         {...props}
+      />
+   );
 }
 
 export function EditDialogFooter({
