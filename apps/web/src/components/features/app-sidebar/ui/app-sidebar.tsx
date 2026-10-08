@@ -43,7 +43,7 @@ export function AppSidebar() {
                      Automata
                   </span>
                   <span className="text-xs leading-0 text-muted-foreground self-center translate-x-2">
-                     v0.1.0
+                     v0.1.0 (alpha)
                   </span>
                </div>
                <Button
