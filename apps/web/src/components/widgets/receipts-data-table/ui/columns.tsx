@@ -18,10 +18,6 @@ import {
    BadgePickup,
    BadgeReceiptNumber,
 } from '@/components/ui/receipt-card';
-import {
-   DotsThreeOutlineVerticalIcon,
-   DotsThreeVerticalIcon,
-} from '@phosphor-icons/react';
 import { createColumnHelper } from '@tanstack/react-table';
 import { GetReceiptOutput, GetReceiptsInput } from '@wae/receipt';
 import { Customer, Order, Receipt } from '@wae/types';
@@ -187,7 +183,7 @@ export const columns = columnHelper.columns([
                </DropdownMenu>
                {selected === 'FISCAL_NUMBER' ? (
                   <EditFiscalNumber
-                     receiptId={1}
+                     receiptId={r.original.id}
                      defaultOpen={true}
                      onClose={() => setTimeout(() => setSelected(null), 100)}
                   />
