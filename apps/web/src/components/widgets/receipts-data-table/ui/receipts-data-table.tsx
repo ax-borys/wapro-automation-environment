@@ -43,8 +43,6 @@ export function ReceiptsDataTable({
       });
 
       result.then((r) => {
-         if (!r.length) return;
-
          setData(
             r
                .map((i) => ({
