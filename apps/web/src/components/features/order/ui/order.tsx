@@ -93,9 +93,10 @@ export function Order({
    };
 
    const submitFiscalNumber = useCallback(() => {
-      console.log('Submit: ', draftFiscalNumber);
       setFiscalNumber(Number(draftFiscalNumber));
       onChangeFiscalNumber?.(Number(draftFiscalNumber));
+
+      setTimeout(() => setDraftFiscalNumber(''), 100);
    }, [draftFiscalNumber]);
 
    const copyToClipboard = (value: string) => {

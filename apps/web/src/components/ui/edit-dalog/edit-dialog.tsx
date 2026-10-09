@@ -17,7 +17,7 @@ import {
    EditDialogHandlersProvider,
    useEditDialogHandlers,
 } from './model/edit-dialog-context';
-import { openAsBlob } from 'fs';
+import { Slot } from 'radix-ui';
 
 export function EditDialog({
    children,
@@ -55,7 +55,7 @@ export function EditDialog({
 
          onOpen: () => setOpen(true),
       }),
-      [setOpen, onCancel, onSave, open],
+      [setOpen, onCancel, onSave],
    );
 
    useEffect(() => {
@@ -160,21 +160,34 @@ export function EditDialogFooter({
 export function EditDialogCancel({
    className,
    children,
+   asChild,
+   onClick,
    ...props
 }: React.ComponentProps<typeof Button>) {
    const [{ onCancel }] = useEditDialogHandlers();
 
+   const Comp = asChild ? Slot.Root : Button;
+
    return (
       <DialogClose asChild>
-         <Button
+         <Comp
             tabIndex={-1}
             className={cn('', className)}
-            variant={'outline'}
-            onClick={onCancel}
+            {...(!asChild ? { variant: 'outline' as const } : {})}
             {...props}
+            onClick={(e) => {
+               onCancel?.();
+               onClick?.(e);
+            }}
          >
-            Cancel<Kbd>Esc</Kbd>
-         </Button>
+            {asChild ? (
+               children
+            ) : (
+               <>
+                  Cancel<Kbd>Esc</Kbd>
+               </>
+            )}
+         </Comp>
       </DialogClose>
    );
 }
@@ -182,19 +195,33 @@ export function EditDialogCancel({
 export function EditDialogSave({
    className,
    children,
+   asChild,
+   onClick,
    ...props
 }: React.ComponentProps<typeof Button>) {
    const [{ onSave }] = useEditDialogHandlers();
+
+   const Comp = asChild ? Slot.Root : Button;
+
    return (
       <DialogClose asChild>
-         <Button
+         <Comp
             tabIndex={-1}
             className={cn('', className)}
-            onClick={onSave}
             {...props}
+            onClick={(e) => {
+               onSave?.();
+               onClick?.(e);
+            }}
          >
-            Save<Kbd>F10</Kbd>
-         </Button>
+            {asChild ? (
+               children
+            ) : (
+               <>
+                  Save<Kbd>F10</Kbd>
+               </>
+            )}
+         </Comp>
       </DialogClose>
    );
 }

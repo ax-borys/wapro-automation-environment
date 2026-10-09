@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext } from 'react';
 
 type HandlersContext = {
    onSave?: () => void;
@@ -7,38 +7,21 @@ type HandlersContext = {
 };
 
 const editDialogHandlersContext = createContext<HandlersContext>({});
-const editDialogHandlersSetterContext = createContext<React.Dispatch<
-   React.SetStateAction<HandlersContext>
-> | null>(null);
 
 export function EditDialogHandlersProvider({
    children,
    value,
    ...props
 }: React.ProviderProps<HandlersContext>) {
-   const [handlers, setHandlers] = useState<HandlersContext>(value);
-
    return (
-      <editDialogHandlersContext.Provider value={handlers}>
-         <editDialogHandlersSetterContext.Provider value={setHandlers}>
-            {children}
-         </editDialogHandlersSetterContext.Provider>
+      <editDialogHandlersContext.Provider value={value}>
+         {children}
       </editDialogHandlersContext.Provider>
    );
 }
 
-export function useEditDialogHandlers(): [
-   HandlersContext,
-   React.Dispatch<React.SetStateAction<HandlersContext>>,
-] {
+export function useEditDialogHandlers(): [HandlersContext] {
    const handlers = useContext(editDialogHandlersContext);
-   const setHandlers = useContext(editDialogHandlersSetterContext);
 
-   if (!setHandlers) {
-      throw new Error(
-         'useEditDialogHandlers must be called inside EditDialogProvider.',
-      );
-   }
-
-   return [handlers, setHandlers];
+   return [handlers];
 }
