@@ -1,4 +1,15 @@
 import {
+   EditDialog,
+   EditDialogCancel,
+   EditDialogContent,
+   EditDialogDescription,
+   EditDialogFooter,
+   EditDialogHeader,
+   EditDialogSave,
+   EditDialogTitle,
+   EditDialogTrigger,
+} from '@/components/ui/edit-dalog';
+import {
    EditFiscalNumberDialog,
    EditFiscalNumberDialogClose,
    EditFiscalNumberDialogContent,
@@ -10,7 +21,11 @@ import {
    EditFiscalNumberDialogTitle,
    EditFiscalNumberDialogTrigger,
 } from '@/components/ui/edit-fiscal-number-dialog';
+import { Field, FieldGroup } from '@/components/ui/field';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { formatFiscalNumber, updateFiscalNumber } from '@/entities/receipt';
+import { cn } from '@/lib/utils';
 import { Receipt } from '@wae/types';
 import { EditIcon } from 'lucide-react';
 import { ChangeEventHandler, useCallback, useEffect, useState } from 'react';
@@ -26,11 +41,9 @@ export function EditFiscalNumber({
    defaultOpen?: boolean;
    onClose?: () => void;
 }) {
-   const [isOpen, setIsOpen] = useState<boolean>(defaultOpen);
    const [fiscalNumber, setFiscalNumber] = useState<number | null>(null);
 
    const cancel = useCallback(() => {
-      setIsOpen(false);
       setTimeout(() => setFiscalNumber(null), 100);
       onClose?.();
    }, [setFiscalNumber]);
@@ -45,7 +58,6 @@ export function EditFiscalNumber({
          fiscalNumber: formatFiscalNumber(fiscalNumber),
       });
 
-      setIsOpen(false);
       setTimeout(() => setFiscalNumber(null), 100);
       onClose?.();
    }, [fiscalNumber]);
@@ -62,49 +74,32 @@ export function EditFiscalNumber({
       setFiscalNumber(value);
    };
 
-   useEffect(() => {
-      if (!isOpen) return;
-
-      const keyHandler = async (e: KeyboardEvent) => {
-         switch (e.key) {
-            case 'F10':
-               e.preventDefault();
-               await save();
-               break;
-            case 'Escape':
-               cancel();
-         }
-      };
-
-      window.addEventListener('keydown', keyHandler, { capture: true });
-
-      return () =>
-         window.removeEventListener('keydown', keyHandler, { capture: true });
-   }, [isOpen, save, cancel]);
-
    return (
-      <EditFiscalNumberDialog open={isOpen}>
-         <EditFiscalNumberDialogTrigger asChild onClick={() => setIsOpen(true)}>
-            {trigger}
-         </EditFiscalNumberDialogTrigger>
-         <EditFiscalNumberDialogContent onClose={cancel}>
-            <EditFiscalNumberDialogHeader>
-               <EditFiscalNumberDialogTitle>
+      <EditDialog onSave={save} onCancel={cancel} defaultOpen={defaultOpen}>
+         <EditDialogTrigger asChild>{trigger}</EditDialogTrigger>
+         <EditDialogContent>
+            <EditDialogHeader>
+               <EditDialogTitle>
                   <EditIcon /> Edit fiscal number
-               </EditFiscalNumberDialogTitle>
-            </EditFiscalNumberDialogHeader>
-            <EditFiscalNumberDialogDescription>
+               </EditDialogTitle>
+            </EditDialogHeader>
+            <EditDialogDescription>
                Please, make sure you are writing correct fiscal number.
-            </EditFiscalNumberDialogDescription>
-            <EditFiscalNumberDialogInput
-               value={fiscalNumber ?? ''}
-               onChange={onChangeFiscalNumberHander}
-            />
-            <EditFiscalNumberDialogFooter>
-               <EditFiscalNumberDialogClose onClick={cancel} />
-               <EditFiscalNumberDialogSave onClick={save} />
-            </EditFiscalNumberDialogFooter>
-         </EditFiscalNumberDialogContent>
-      </EditFiscalNumberDialog>
+            </EditDialogDescription>
+            <FieldGroup>
+               <Field>
+                  <Label>Fiscal number</Label>
+                  <Input
+                     value={fiscalNumber ?? ''}
+                     onChange={onChangeFiscalNumberHander}
+                  />
+               </Field>
+            </FieldGroup>
+            <EditDialogFooter>
+               <EditDialogCancel />
+               <EditDialogSave />
+            </EditDialogFooter>
+         </EditDialogContent>
+      </EditDialog>
    );
 }

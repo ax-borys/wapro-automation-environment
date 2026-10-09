@@ -23,12 +23,14 @@ export function EditDialog({
    children,
    onCancel,
    onSave,
+   defaultOpen = false,
 }: {
    onCancel?: () => void;
    onSave?: () => void;
    children: React.ReactNode;
+   defaultOpen?: boolean;
 }) {
-   const [open, setOpen] = useState<boolean>(false);
+   const [open, setOpen] = useState<boolean>(defaultOpen);
 
    const handlers = useMemo(
       () => ({

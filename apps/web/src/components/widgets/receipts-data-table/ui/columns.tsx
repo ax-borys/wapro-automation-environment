@@ -18,6 +18,12 @@ import {
    BadgePickup,
    BadgeReceiptNumber,
 } from '@/components/ui/receipt-card';
+import {
+   ArrowSquareOutIcon,
+   CashRegisterIcon,
+   PenIcon,
+} from '@phosphor-icons/react';
+import { ArrowSquareOut } from '@phosphor-icons/react/dist/ssr';
 import { createColumnHelper } from '@tanstack/react-table';
 import { GetReceiptOutput, GetReceiptsInput } from '@wae/receipt';
 import { Customer, Order, Receipt } from '@wae/types';
@@ -59,11 +65,11 @@ export const columns = columnHelper.columns([
       },
    ),
    columnHelper.accessor('order.customer.externalId', {
-      header: () => <div className="text-center">Customer external id</div>,
+      header: () => <div className="text-left">Customer external id</div>,
       cell: ({ row: r }) => {
          const value = r.getValue('order_customer_externalId') as string;
 
-         return <div className="text-center">{value}</div>;
+         return <div className="text-left">{value}</div>;
       },
       size: 100,
    }),
@@ -75,11 +81,11 @@ export const columns = columnHelper.columns([
          return (
             <div className="text-center">
                <Link
-                  className="underline"
+                  className="underline flex items-center gap-1"
                   href={'https://salescenter.allegro.com/orders?query=' + value}
                   target="_blank"
                >
-                  {value}
+                  {value} <ArrowSquareOutIcon />
                </Link>
             </div>
          );
@@ -170,13 +176,16 @@ export const columns = columnHelper.columns([
                         <EllipsisVerticalIcon />
                      </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent onChange={() => {}}>
+                  <DropdownMenuContent onChange={() => {}} className="min-w-40">
                      <DropdownMenuGroup>
-                        <DropdownMenuLabel>Edit</DropdownMenuLabel>
+                        <DropdownMenuLabel className="flex items-center gap-1">
+                           <PenIcon />
+                           Edit
+                        </DropdownMenuLabel>
                         <DropdownMenuItem
                            onSelect={() => setSelected('FISCAL_NUMBER')}
                         >
-                           Fiscal number
+                           <CashRegisterIcon /> Fiscal number
                         </DropdownMenuItem>
                      </DropdownMenuGroup>
                   </DropdownMenuContent>

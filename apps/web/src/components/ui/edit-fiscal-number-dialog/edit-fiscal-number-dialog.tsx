@@ -1,4 +1,3 @@
-import { OfferModel } from '@/entities/offer';
 import {
    Dialog,
    DialogClose,
@@ -10,32 +9,7 @@ import {
    DialogDescription,
 } from '../dialog';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import {
-   Item,
-   ItemActions,
-   ItemContent,
-   ItemHeader,
-   ItemMedia,
-   ItemTitle,
-} from '../item';
-import {
-   ArrowsVerticalIcon,
-   LinkIcon,
-   TrashIcon,
-   TruckIcon,
-   XIcon,
-} from '@phosphor-icons/react';
 import { Button } from '../button';
-import {
-   Combobox,
-   ComboboxContent,
-   ComboboxEmpty,
-   ComboboxInput,
-   ComboboxItem,
-   ComboboxList,
-} from '../combobox';
-import { Tooltip, TooltipContent, TooltipTrigger } from '../tooltip';
 import { Kbd } from '../kbd';
 import { Input } from '../input';
 import React from 'react';
