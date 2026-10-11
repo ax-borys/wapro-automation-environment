@@ -2,7 +2,7 @@ export {
    type CreateReceiptInput,
    createReceiptInputSchema,
    createReceiptsInputSchema,
-   createReceiptOutputSchema,
+   createReceiptReturnSchema as createReceiptOutputSchema,
    createReceipts,
 } from './services/create-receipts';
 

@@ -70,7 +70,6 @@ export const orderValidationSchema = v.object({
    ),
 });
 
-type Address = v.InferInput<typeof addressSchema>;
 export type Order = v.InferOutput<typeof orderValidationSchema>;
 
 export function mapOrder(order: RawOrder): Order {

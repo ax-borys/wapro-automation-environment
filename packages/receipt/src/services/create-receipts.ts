@@ -3,6 +3,7 @@ import {
    Mapping,
    orderWithPositionsWithOfferSchema,
    Tx,
+   receiptSchema,
 } from '@wae/types';
 import { dbWapro, recordReceipt, RecordReceiptOutput } from '@wae/wapro';
 import * as v from 'valibot';
@@ -34,10 +35,12 @@ export const createReceiptsInputSchema = v.pipe(
    v.nonEmpty(),
 );
 
-export const createReceiptOutputSchema = saveReceiptOutputSchema;
+export const createReceiptReturnSchema = receiptSchema;
 
 export type CreateReceiptInput = v.InferOutput<typeof createReceiptInputSchema>;
-export type CreateReceiptReturnOutput = SaveReceiptReturnOutput;
+export type CreateReceiptReturnOutput = v.InferOutput<
+   typeof createReceiptReturnSchema
+>;
 
 export async function createReceipts(
    tx: Tx,
@@ -171,7 +174,8 @@ export async function createReceipts(
 
          return await saveReceipts(tx, saveReceiptsInput);
       });
-      return savedReceipts;
+
+      return v.parse(v.array(createReceiptReturnSchema), savedReceipts);
    } catch (error) {
       const validatedError = v.safeParse(
          v.object({

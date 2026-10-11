@@ -19,6 +19,7 @@
       "@wae/customer": "workspace:*",
       "@wae/db": "workspace:*",
       "@wae/error": "workspace:*",
+      "@wae/invoice": "workspace:*",
       "@wae/offer": "workspace:*",
       "@wae/order": "workspace:*",
       "@wae/receipt": "workspace:*",

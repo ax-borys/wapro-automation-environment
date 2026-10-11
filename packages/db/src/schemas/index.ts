@@ -107,6 +107,7 @@ export const invoicesTable = sqliteTable('invoices', {
    orderId: int('order_id')
       .notNull()
       .references(() => ordersTable.id),
+   number: text().notNull().unique(),
    clientTag: text('client_tag'),
    createdAt: int('created_at', { mode: 'timestamp_ms' })
       .notNull()

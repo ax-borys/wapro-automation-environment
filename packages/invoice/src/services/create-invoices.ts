@@ -1,10 +1,13 @@
 import { db, invoicesTable, ordersTable } from '@wae/db';
 import { invalidReference } from '@wae/error';
-import { invoiceInputSchema, invoiceSchema } from '@wae/types';
+import { invoiceInputSchema, invoiceSchema, Tx } from '@wae/types';
 import { inArray } from 'drizzle-orm';
 import * as v from 'valibot';
 
-export const createInvoiceInputSchema = v.pick(invoiceInputSchema, ['orderId']);
+export const createInvoiceInputSchema = v.pick(invoiceInputSchema, [
+   'orderId',
+   'number',
+]);
 
 export const createInvoiceReturnSchema = invoiceSchema;
 
@@ -14,9 +17,10 @@ type CreateInvoiceReturnOutput = v.InferOutput<
 >;
 
 export async function createInvoices(
+   tx: Tx,
    input: CreateInvoiceOutput[],
 ): Promise<CreateInvoiceReturnOutput[]> {
-   const orders = await db
+   const orders = await tx
       .select()
       .from(ordersTable)
       .where(
@@ -34,7 +38,7 @@ export async function createInvoices(
       }
    }
 
-   const invoices = await db.insert(invoicesTable).values(input).returning();
+   const invoices = await tx.insert(invoicesTable).values(input).returning();
 
    return invoices;
 }

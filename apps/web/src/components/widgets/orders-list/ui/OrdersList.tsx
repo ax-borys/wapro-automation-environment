@@ -51,6 +51,15 @@ export function OrdersList() {
                        createdAt: new Date(order.receipt.createdAt),
                     }
                   : null,
+               invoice: order.invoice
+                  ? {
+                       ...order.invoice,
+                       status: 'RECORDED',
+                    }
+                  : {
+                       number: '',
+                       status: 'RECORD',
+                    },
                selected: false,
                positions: normilizePositions(
                   order.positions.map((position) => ({

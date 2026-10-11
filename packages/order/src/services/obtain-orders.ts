@@ -9,12 +9,13 @@ import {
    filterNewOrdersBySrcExternalId,
 } from '../utils/filter-orders';
 import { db } from '@wae/db';
-import { Order, receiptSchema, Tx } from '@wae/types';
+import { invoiceSchema, Order, receiptSchema, Tx } from '@wae/types';
 
 export const obtainOrderInputSchema = addOrderInputSchema;
 export const obtainOrderReturnSchema = v.object({
    ...addOrderReturnSchema.entries,
    receipt: v.nullable(receiptSchema),
+   invoice: v.nullable(invoiceSchema),
 });
 
 type ObtainOrderOutput = v.InferOutput<typeof obtainOrderInputSchema>;
@@ -42,6 +43,7 @@ export async function obtainOrders(
             },
          },
          receipt: true,
+         invoice: true,
       },
       where: condition,
    });
@@ -53,7 +55,9 @@ export async function obtainOrders(
    if (newOrdersInput.length) {
       const orders = await addOrders(tx, newOrdersInput);
 
-      orders.forEach((order) => newOrders.push({ ...order, receipt: null }));
+      orders.forEach((order) =>
+         newOrders.push({ ...order, receipt: null, invoice: null }),
+      );
    }
 
    const orders = [...existingOrders, ...newOrders];

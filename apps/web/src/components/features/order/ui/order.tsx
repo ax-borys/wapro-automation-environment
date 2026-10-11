@@ -26,13 +26,18 @@ import {
    FloppyDiskIcon,
    InvoiceIcon,
    ReceiptIcon,
+   SealCheckIcon,
    SpinnerIcon,
    TruckIcon,
    WarningIcon,
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
-import { recordReceipts } from '@/entities/receipt/record-receipts';
-import { useOrder, useOrdersStore, type OrderModel } from '@/entities/order';
+import {
+   useOrder,
+   useOrdersStore,
+   useFulfillOrders,
+   type OrderModel,
+} from '@/entities/order';
 import {
    Dialog,
    DialogContent,
@@ -66,6 +71,7 @@ import {
    EditDialogTrigger,
 } from '@/components/ui/edit-dalog';
 import { useCallback, useState } from 'react';
+import { InvoiceNumberBadge } from '@/components/ui/badges';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -78,18 +84,28 @@ export function Order({
    id: OrderModel['id'];
    onChangeFiscalNumber?: (value: number | null) => void;
 }) {
-   const { order, selectToggle } = useOrder(id);
-   const { receipt, setFiscalNumber, recordReceipt } = useReceipt(order.id);
+   const { order, selectToggle, setInvoiceNumber } = useOrder(id);
+   const { receipt, setFiscalNumber } = useReceipt(order.id);
    const { offers } = useOffersStore();
 
+   const fulfillOrder = useFulfillOrders([order.id]);
+
    const [draftFiscalNumber, setDraftFiscalNumber] = useState<string>('');
+   const [draftInvoiceNumber, setDraftInvoiceNumber] = useState<string>('');
 
    useGetAndStoreOffers();
 
    const { number, status, fiscalNumber } = receipt;
 
-   const recordReceiptsHandler = async () => {
-      await recordReceipt();
+   const invoiceStatus = order.invoice.status;
+
+   const fulfillOrdersHandler = async () => {
+      // Guarantee that at least one field has value
+      if (!order.invoice?.number && !receipt.fiscalNumber) {
+         return;
+      }
+
+      await fulfillOrder();
    };
 
    const submitFiscalNumber = useCallback(() => {
@@ -98,6 +114,11 @@ export function Order({
 
       setTimeout(() => setDraftFiscalNumber(''), 100);
    }, [draftFiscalNumber]);
+
+   const submitInvoiceNumber = useCallback(() => {
+      setInvoiceNumber(draftInvoiceNumber);
+      setTimeout(() => setDraftInvoiceNumber(''), 100);
+   }, [draftInvoiceNumber]);
 
    const copyToClipboard = (value: string) => {
       return navigator.clipboard.writeText(value);
@@ -126,7 +147,7 @@ export function Order({
                <Badge>Invoice</Badge>
             ) : null}
             <div className="ml-auto flex gap-2 h-9">
-               {status === 'RECORDED' ? (
+               {receipt.number ? (
                   <Button
                      onClick={() => copyToClipboard(number as string)}
                      className="bg-transparent hover:bg-transparent cursor-pointer px-0"
@@ -136,6 +157,17 @@ export function Order({
                ) : null}
                {fiscalNumber ? (
                   <BadgeFiskalNumber value={fiscalNumber} />
+               ) : null}
+               {order.invoice?.number ? (
+                  <Button
+                     onClick={() =>
+                        order.invoice?.number &&
+                        copyToClipboard(order.invoice?.number)
+                     }
+                     className="bg-transparent hover:bg-transparent cursor-pointer px-0"
+                  >
+                     <InvoiceNumberBadge value={order.invoice.number} />
+                  </Button>
                ) : null}
                {order.paymentMethod === 'PREPAID' ? (
                   <BadgePaid />
@@ -225,15 +257,94 @@ export function Order({
             />
             <OrderCardFooterActions>
                {order.requiredDocumentType === 'INVOICE' ? (
-                  <Button variant={'outline'}>
-                     <InvoiceIcon />
-                     Invoice required
-                  </Button>
+                  <>
+                     {invoiceStatus !== 'RECORDED' ? (
+                        <EditDialog
+                           onSave={submitInvoiceNumber}
+                           onCancel={() =>
+                              setTimeout(() => setDraftInvoiceNumber(''), 100)
+                           }
+                        >
+                           <EditDialogTrigger asChild>
+                              <Button
+                                 variant={
+                                    order.invoice?.number
+                                       ? 'outline'
+                                       : 'default'
+                                 }
+                                 disabled={receipt.status !== 'RECORD'}
+                              >
+                                 <InvoiceIcon />
+                              </Button>
+                           </EditDialogTrigger>
+                           <EditDialogContent>
+                              <EditDialogHeader>
+                                 <DialogTitle>Enter invoice number</DialogTitle>
+                              </EditDialogHeader>
+                              <EditDialogDescription>
+                                 Make sure you are writing correct invoice
+                                 number.
+                              </EditDialogDescription>
+                              <FieldGroup>
+                                 <Field>
+                                    <Label>Invoice number</Label>
+                                    <Input
+                                       autoFocus={true}
+                                       value={draftInvoiceNumber}
+                                       onChange={(e) => {
+                                          setDraftInvoiceNumber(e.target.value);
+                                       }}
+                                    />
+                                 </Field>
+                              </FieldGroup>
+                              <EditDialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
+                                 <EditDialogCancel />
+                                 <EditDialogSave />
+                              </EditDialogFooter>
+                           </EditDialogContent>
+                        </EditDialog>
+                     ) : null}
+                     {invoiceStatus === 'RECORD' ? (
+                        <Button
+                           variant={
+                              order.invoice?.number ? 'default' : 'outline'
+                           }
+                           onClick={fulfillOrdersHandler}
+                        >
+                           <InvoiceIcon />
+                           {order.invoice?.number
+                              ? 'Approve invoice'
+                              : 'Invoice required'}
+                        </Button>
+                     ) : invoiceStatus === 'RECORDING' ? (
+                        <Button variant={'secondary'} disabled>
+                           <Marker role="status">
+                              <MarkerIcon className="animate-spin">
+                                 <SpinnerIcon />
+                              </MarkerIcon>
+                              <MarkerContent className="shimmer">
+                                 Approving
+                              </MarkerContent>
+                           </Marker>
+                        </Button>
+                     ) : (
+                        <Button variant={'outline'}>
+                           <Marker role="status">
+                              <MarkerIcon>
+                                 <SealCheckIcon />
+                              </MarkerIcon>
+                              <MarkerContent>Approved</MarkerContent>
+                           </Marker>
+                        </Button>
+                     )}
+                  </>
                ) : (
                   <>
                      <EditDialog
                         onSave={submitFiscalNumber}
-                        onCancel={() => setDraftFiscalNumber('')}
+                        onCancel={() =>
+                           setTimeout(() => setDraftFiscalNumber(''), 100)
+                        }
                      >
                         <EditDialogTrigger asChild>
                            <Button
@@ -278,7 +389,7 @@ export function Order({
                      </EditDialog>
                      {status === 'RECORD' ? (
                         <Button
-                           onClick={recordReceiptsHandler}
+                           onClick={fulfillOrdersHandler}
                            disabled={fiscalNumber ? false : true}
                         >
                            <ReceiptIcon />

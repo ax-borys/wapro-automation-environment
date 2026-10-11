@@ -6,16 +6,19 @@ import {
    ApiResponse,
    customerSchema,
    deliverySchema,
+   invoiceSchema,
    Offer,
    orderWithPositionsWithOfferSchema,
    Product,
    ReceiptPosition,
+   receiptSchema,
    recipientSchema,
 } from '@wae/types';
 import { customAlphabet } from 'nanoid';
 import {
    addOrderInputSchema,
    addOrders,
+   fulfillOrders,
    obtainDeliveries,
    obtainOrderInputSchema,
    obtainOrders,
@@ -31,9 +34,12 @@ import {
    positionsTable,
    receiptsTable,
 } from '@wae/db';
-import { NotNull } from 'drizzle-orm';
 import { obtainAddresses } from '@wae/address';
 import { obtainCustomers } from '@wae/customer';
+import { valibotJsonMiddleware } from '../helpers/valibot-middleware';
+import { createReceiptInputSchema, createReceipts } from '@wae/receipt';
+import { approveInvoiceInputSchema, approveInvoices } from '@wae/invoice';
+import { waproConfig } from '../receipt/wapro-config';
 
 const generateId = customAlphabet('0123456789', 10);
 
@@ -44,10 +50,73 @@ async function wipeOrders() {
    await db.delete(ordersTable);
 }
 export const order = new Hono()
+   .post(
+      '/fulfill/orders',
+
+      valibotJsonMiddleware(
+         v.union([
+            v.pipe(v.array(createReceiptInputSchema), v.nonEmpty()),
+            v.pipe(v.array(approveInvoiceInputSchema), v.nonEmpty()),
+         ]),
+      ),
+      async (c) => {
+         type CreateReceiptInput = v.InferOutput<
+            typeof createReceiptInputSchema
+         >;
+         type ApproveInvoiceInput = v.InferOutput<
+            typeof approveInvoiceInputSchema
+         >;
+
+         type Receipt = v.InferOutput<typeof receiptSchema>;
+         type Invoice = v.InferOutput<typeof invoiceSchema>;
+
+         const ordersDataInput = c.req.valid('json');
+
+         const result = await db.transaction(async (tx) => {
+            const createReceiptsInput: CreateReceiptInput[] = [];
+            const approveInvoicesInput: ApproveInvoiceInput[] = [];
+
+            ordersDataInput.forEach((orderDataInput) => {
+               if ('fiscalNumber' in orderDataInput) {
+                  createReceiptsInput.push(orderDataInput);
+               } else {
+                  approveInvoicesInput.push(orderDataInput);
+               }
+            });
+
+            const receipts = createReceiptsInput.length
+               ? await createReceipts(tx, createReceiptsInput, waproConfig)
+               : [];
+
+            const invoices = approveInvoicesInput.length
+               ? await approveInvoices(tx, approveInvoicesInput)
+               : [];
+
+            const receiptsAndInvoices: (Receipt | Invoice)[] = [
+               ...receipts,
+               ...invoices,
+            ];
+
+            await fulfillOrders(
+               tx,
+               receiptsAndInvoices.map(({ orderId }) => ({ id: orderId })),
+            );
+
+            return receiptsAndInvoices;
+         });
+
+         return c.json<ApiResponse<typeof result>>({
+            data: result,
+            error: null,
+         });
+      },
+   )
    .get('/orders/pending', async (c) => {
       console.log('Fetching allegro orders...');
-      const allegroOrders = await allegro.getPendingOrders();
+      const allegroOrders = await allegro.getPendingOrdersMock();
       console.log('Fetching succeeded.');
+
+      console.log(allegroOrders);
 
       if (!allegroOrders.length) {
          return c.json<ApiResponse<[]>>({

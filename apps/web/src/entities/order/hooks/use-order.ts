@@ -12,5 +12,8 @@ export function useOrder(id: OrderModel['id']) {
          store.addPosition(String(id), position),
       removePosition: (positionId: PositionModel['offer']['id']) =>
          store.removePosition(String(id), positionId),
+      setInvoiceNumber: (value: string) => store.setInvoiceNumber(id, value),
+      changeInvoiceStatus: (value: OrderModel['invoice']['status']) =>
+         store.changeInvoiceStatus(id, value),
    };
 }

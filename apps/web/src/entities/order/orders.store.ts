@@ -2,6 +2,7 @@ import {
    Address,
    Customer,
    Delivery,
+   Invoice,
    Item,
    Offer,
    Order,
@@ -30,6 +31,9 @@ export type OrderModel = Omit<Order, 'clientTag'> & {
    };
    positions: Record<PositionModel['offer']['id'], PositionModel>;
    receipt: Omit<Receipt, 'clientTag'> | null;
+   invoice: (Omit<Invoice, 'clientTag'> | { number: Invoice['number'] }) & {
+      status: 'RECORD' | 'RECORDING' | 'RECORDED';
+   };
    recipient: Omit<Recipient, 'clientTag' | 'addressId'>;
    selected: boolean;
 };
@@ -53,6 +57,11 @@ export type OrdersStore = {
    removePosition: (
       orderId: OrderModel['externalId'],
       positionId: PositionModel['offer']['id'],
+   ) => void;
+   setInvoiceNumber: (orderId: OrderModel['id'], value: string) => void;
+   changeInvoiceStatus: (
+      orderId: OrderModel['id'],
+      value: 'RECORD' | 'RECORDING' | 'RECORDED',
    ) => void;
 };
 
@@ -120,6 +129,14 @@ export const useOrdersStore = create<OrdersStore>()(
       removePosition: (orderId, positionId) =>
          set((draft) => {
             delete draft.orders[orderId].positions[positionId];
+         }),
+      setInvoiceNumber: (orderId, value) =>
+         set((draft) => {
+            draft.orders[orderId].invoice.number = value;
+         }),
+      changeInvoiceStatus: (orderId, value) =>
+         set((draft) => {
+            draft.orders[orderId].invoice.status = value;
          }),
    })),
 );

@@ -6,3 +6,8 @@ export const productsTable = mssqlTable('ARTYKUL', {
    tax: char('VAT_SPRZEDAZY').notNull(),
    stock: int('STAN').notNull(),
 });
+
+export const tradeDocumentsTable = mssqlTable('DOKUMENT_HANDLOWY', {
+   id: int('ID_DOKUMENTU_HANDLOWEGO').primaryKey(),
+   number: text('NUMER').notNull().unique(),
+});

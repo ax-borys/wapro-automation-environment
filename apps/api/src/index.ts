@@ -25,6 +25,7 @@ import { type HandledStatusCodes } from '@wae/core';
 import { order } from './order';
 import { codeToStatus } from '@wae/error';
 import { formatError, FormattedError } from './helpers/format-error';
+import { offersTable, db } from '@wae/db';
 
 if (!process.env.API_HOST) {
    throw new Error('API_HOST environment variable is required.');
@@ -52,6 +53,18 @@ const app = new Hono()
          root: path.resolve(__dirname, '../'),
       }),
    )
+   .get('/get-offers', async (c) => {
+      const offers = await db.select().from(offersTable);
+      return c.json(offers);
+   })
+   .put('/set-src-allegro', async (c) => {
+      const newOffers = await db
+         .update(offersTable)
+         .set({ src: 'allegro' })
+         .returning();
+
+      return c.json(newOffers);
+   })
    .route('/offer', offer)
    .route('/receipt', receipt)
    .route('/product', product)

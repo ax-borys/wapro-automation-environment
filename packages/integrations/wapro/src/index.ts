@@ -6,6 +6,8 @@ export {
 
 export { createReceipt as recordReceipt } from './services/record-receipts';
 
+export * from './services/has-order-with-number';
+
 export { closeConnection, type Db as WaproDb } from './db';
 export {
    db as dbWapro,
