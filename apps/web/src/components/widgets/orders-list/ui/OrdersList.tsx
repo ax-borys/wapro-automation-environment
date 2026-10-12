@@ -6,7 +6,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
 import { useReceiptsStore } from '@/entities/receipt';
-import { recordReceipts } from '@/entities/receipt';
 import {
    normilizePositions,
    OrderModel,
@@ -15,25 +14,20 @@ import {
 import { useEffect } from 'react';
 import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
 import { Order } from '@/components/features/order';
-import { sortOrders } from '@/entities/order';
+import { sortOrders, useFulfillOrders } from '@/entities/order';
 import { normilizeItems } from '@/entities/offer';
-import { errorModelSchema, useError } from '@/entities/error';
-import * as v from 'valibot';
-
-async function wait(delay = 3000) {
-   return await new Promise((res, rej) => setTimeout(res, delay));
-}
 
 export function OrdersList() {
-   const { raiseError } = useError();
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
    const {
       receipts,
       addMany: addManyReceipts,
-      changeStatusForMany,
-      setNumber,
       setFiscalNumber,
    } = useReceiptsStore();
+
+   const fulfillOrders = useFulfillOrders(
+      Object.values(orders).map((order) => order.id),
+   );
 
    useEffect(() => {
       // Update only user refreshes page manually.
@@ -137,57 +131,16 @@ export function OrdersList() {
       }
    };
 
-   const distributeNumbers = (
-      receiptsInfo: { orderId: number; number: string }[],
-   ) => {
-      for (const receiptInfo of receiptsInfo) {
-         setNumber(receiptInfo.orderId, receiptInfo.number);
+   const fulfillSelectedOrders = async () => {
+      if (!selectedOrders.length) {
+         return;
       }
-   };
 
-   const recordSelectedReceipts = async () => {
-      const selectedReceipts = selectedOrders
-         .filter((order) => order.requiredDocumentType === 'RECEIPT')
-         .map((order) => receipts[order.id])
-         .filter((receipt) => receipt.status === 'RECORD');
-
-      const selectedReceiptsIds = selectedReceipts.map(
-         (receipt) => receipt.orderId,
+      const selectedOrdersIds = new Set(
+         selectedOrders.map((order) => order.id),
       );
 
-      if (!selectedReceipts.length) return;
-
-      try {
-         changeStatusForMany(selectedReceiptsIds, 'RECORDING');
-         const receipts = await recordReceipts(
-            selectedReceipts.map((receipt) => {
-               if (!receipt.fiscalNumber) {
-                  throw new Error("Receipt doesn't have fiscalNumber.");
-               }
-
-               return {
-                  orderId: receipt.orderId,
-                  fiscalNumber: receipt.fiscalNumber,
-               };
-            }),
-         );
-
-         changeStatusForMany(selectedReceiptsIds, 'RECORDED');
-         distributeNumbers(
-            receipts.map((i) => ({
-               orderId: i.orderId,
-               number: i.number,
-            })),
-         );
-      } catch (error) {
-         const parsedError = v.safeParse(errorModelSchema, error);
-
-         if (parsedError.success) {
-            raiseError(parsedError.output);
-         }
-
-         changeStatusForMany(selectedReceiptsIds, 'RECORD');
-      }
+      await fulfillOrders([...selectedOrdersIds]);
    };
 
    return (
@@ -223,7 +176,7 @@ export function OrdersList() {
                      size={'sm'}
                      variant={'ghost'}
                      className="cursor-pointer"
-                     onClick={recordSelectedReceipts}
+                     onClick={fulfillSelectedOrders}
                      disabled={
                         Object.values(receipts).find(
                            (r) => r.status === 'RECORDING',

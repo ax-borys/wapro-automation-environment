@@ -5,7 +5,7 @@ type Order = v.InferOutput<typeof orderValidationSchema>;
 
 export async function getPendingOrdersMock(): Promise<Order[]> {
    const mockOrder: RawOrder = {
-      id: '8f3c2a10-5b7e-11ef-9a3d-0242ac120003',
+      id: '8f3c2a10-5b7e-11ef-9a3d-0242ac120005',
 
       buyer: {
          id: '12345678',
