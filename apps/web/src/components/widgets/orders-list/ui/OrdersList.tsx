@@ -53,11 +53,11 @@ export function OrdersList() {
                   : null,
                invoice: order.invoice
                   ? {
-                       ...order.invoice,
+                       number: order.invoice.number,
                        status: 'RECORDED',
                     }
                   : {
-                       number: '',
+                       number: null,
                        status: 'RECORD',
                     },
                selected: false,

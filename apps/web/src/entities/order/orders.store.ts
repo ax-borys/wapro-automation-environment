@@ -15,6 +15,8 @@ import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { OfferModel, ProductModel } from '../offer';
 
+type Status = 'RECORD' | 'RECORDING' | 'RECORDED';
+
 export type PositionModel = Omit<OrderPoisition, 'clientTag' | 'receiptId'> & {
    offer: OfferModel;
 };
@@ -31,9 +33,7 @@ export type OrderModel = Omit<Order, 'clientTag'> & {
    };
    positions: Record<PositionModel['offer']['id'], PositionModel>;
    receipt: Omit<Receipt, 'clientTag'> | null;
-   invoice: (Omit<Invoice, 'clientTag'> | { number: Invoice['number'] }) & {
-      status: 'RECORD' | 'RECORDING' | 'RECORDED';
-   };
+   invoice: { status: Status; number: string | null };
    recipient: Omit<Recipient, 'clientTag' | 'addressId'>;
    selected: boolean;
 };

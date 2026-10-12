@@ -54,10 +54,12 @@ export const order = new Hono()
       '/fulfill/orders',
 
       valibotJsonMiddleware(
-         v.union([
-            v.pipe(v.array(createReceiptInputSchema), v.nonEmpty()),
-            v.pipe(v.array(approveInvoiceInputSchema), v.nonEmpty()),
-         ]),
+         v.pipe(
+            v.array(
+               v.union([createReceiptInputSchema, approveInvoiceInputSchema]),
+            ),
+            v.nonEmpty(),
+         ),
       ),
       async (c) => {
          type CreateReceiptInput = v.InferOutput<

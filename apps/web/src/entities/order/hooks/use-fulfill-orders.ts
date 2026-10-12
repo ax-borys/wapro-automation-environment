@@ -8,9 +8,6 @@ import {
    fulfillOrders as fulfillOrdersApi,
    FulfillOrdersInput,
 } from '../api/fulfill-orders';
-import { number } from 'valibot';
-import { formatError } from '../../../../../api/dist/helpers/format-error';
-import { setRequestMeta } from 'next/dist/server/request-meta';
 
 export function useFulfillOrders(orderIds: OrderModel['id'][]) {
    const { raiseError } = useError();
@@ -36,31 +33,39 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
    };
 
    const fulfillOrders = async (orderIdsOverride?: typeof orderIds) => {
-      const finalOrderIds = orderIdsOverride ?? orderIds;
-
-      if (!finalOrderIds.length) return;
-
-      const fulfillableOrders = ordersList
-         .filter((order) => finalOrderIds.find((id) => order.id === id))
-         .filter(
-            (order) =>
-               order.invoice.number ||
-               receiptsList.find((r) => r.orderId === order.id)?.fiscalNumber,
-         );
-
-      fulfillableOrders.forEach((order) => changeStatus(order.id, 'RECORDING'));
-
-      const fulfillOrdersInput: FulfillOrdersInput = fulfillableOrders.map(
-         (order) => {
-            const receipt = receiptsList.find((r) => r.orderId === order.id);
-
-            return {
-               orderId: order.id,
-               number: order.invoice.number,
-               fiscalNumber: receipt?.fiscalNumber,
-            };
-         },
+      const finalOrderIds = new Set(orderIdsOverride ?? orderIds);
+      const receiptByOrderId = new Map(
+         receiptsList.map((receipt) => [receipt.orderId, receipt]),
       );
+
+      if (!finalOrderIds.size) return;
+
+      const fulfillOrdersInput: FulfillOrdersInput = [];
+
+      for (const order of ordersList) {
+         if (!finalOrderIds.has(order.id)) continue;
+
+         const receipt = receiptByOrderId.get(order.id);
+
+         const invoiceNumber = order.invoice.number;
+         const fiscalNumber = receipt?.fiscalNumber || null;
+
+         if (!invoiceNumber && !fiscalNumber) continue;
+
+         if (fiscalNumber) {
+            fulfillOrdersInput.push({
+               orderId: order.id,
+               fiscalNumber,
+            });
+         } else if (invoiceNumber) {
+            fulfillOrdersInput.push({
+               orderId: order.id,
+               number: invoiceNumber,
+            });
+         }
+
+         changeStatus(order.id, 'RECORDING');
+      }
 
       try {
          const receiptsAndInvoices = await fulfillOrdersApi(fulfillOrdersInput);
@@ -79,8 +84,8 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
             }
          });
 
-         fulfillableOrders.forEach((order) =>
-            changeStatus(order.id, 'RECORDED'),
+         fulfillOrdersInput.forEach((input) =>
+            changeStatus(input.orderId, 'RECORDED'),
          );
       } catch (error) {
          const parsedError = v.safeParse(errorModelSchema, error);
@@ -89,7 +94,9 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
             raiseError(parsedError.output);
          }
 
-         fulfillableOrders.forEach((order) => changeStatus(order.id, 'RECORD'));
+         fulfillOrdersInput.forEach((input) =>
+            changeStatus(input.orderId, 'RECORD'),
+         );
       }
    };
 
