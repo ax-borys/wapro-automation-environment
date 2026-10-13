@@ -19,6 +19,8 @@ import {
    addOrderInputSchema,
    addOrders,
    fulfillOrders,
+   getFulfilledOrdersByFilter,
+   getFulfilledOrdersByFilterInputSchema,
    obtainDeliveries,
    obtainOrderInputSchema,
    obtainOrders,
@@ -109,6 +111,20 @@ export const order = new Hono()
 
          return c.json<ApiResponse<typeof result>>({
             data: result,
+            error: null,
+         });
+      },
+   )
+   .post(
+      '/orders/fulfilled',
+      valibotJsonMiddleware(getFulfilledOrdersByFilterInputSchema),
+      async (c) => {
+         const input = c.req.valid('json');
+
+         const data = await getFulfilledOrdersByFilter(input);
+
+         return c.json<ApiResponse<typeof data>>({
+            data,
             error: null,
          });
       },

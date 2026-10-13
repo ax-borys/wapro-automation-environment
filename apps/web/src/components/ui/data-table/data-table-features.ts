@@ -24,6 +24,7 @@ import {
    TableFeatures,
    RowData,
    SortFn,
+   sortFn_datetime,
 } from '@tanstack/react-table';
 
 export interface FuzzyFilterMeta {
@@ -72,6 +73,7 @@ export const features = tableFeatures({
       alphanumeric: sortFn_alphanumeric,
       text: sortFn_text,
       fuzzy: fuzzySort,
+      datetime: sortFn_datetime,
    },
    filterMeta: metaHelper<FuzzyFilterMeta>(),
 });

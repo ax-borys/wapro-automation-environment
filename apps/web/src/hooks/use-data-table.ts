@@ -19,12 +19,13 @@ export function useDataTable<TData extends RowData>(
          pageIndex?: number;
          pageSize?: number;
       };
+      columnVisibility?: ColumnVisibilityState;
    },
 ) {
    const [date, setDate] = useState<DateRange | undefined>();
 
    const [columnVisibility, setColumnVisibility] =
-      useState<ColumnVisibilityState>({});
+      useState<ColumnVisibilityState>(options?.columnVisibility ?? {});
 
    const [globalFilter, setGlobalFilter] = useState('');
 
