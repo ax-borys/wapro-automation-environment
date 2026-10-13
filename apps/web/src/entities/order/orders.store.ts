@@ -39,10 +39,10 @@ export type OrderModel = Omit<Order, 'clientTag'> & {
 };
 
 export type OrdersStore = {
-   orders: Record<OrderModel['externalId'], OrderModel>;
+   orders: Record<OrderModel['id'], OrderModel>;
    add: (order: OrderModel) => void;
    addMany: (orders: OrderModel[]) => void;
-   remove: (orderId: OrderModel['externalId']) => void;
+   remove: (orderId: OrderModel['id']) => void;
    select: (id: OrderModel['id']) => void;
    unselect: (id: OrderModel['id']) => void;
    selectMany: (ids: OrderModel['id'][]) => void;
@@ -50,12 +50,9 @@ export type OrdersStore = {
    selectAll: () => void;
    unselectAll: () => void;
    selectToggle: (id: OrderModel['id']) => void;
-   addPosition: (
-      orderId: OrderModel['externalId'],
-      position: PositionModel,
-   ) => void;
+   addPosition: (orderId: OrderModel['id'], position: PositionModel) => void;
    removePosition: (
-      orderId: OrderModel['externalId'],
+      orderId: OrderModel['id'],
       positionId: PositionModel['offer']['id'],
    ) => void;
    setInvoiceNumber: (orderId: OrderModel['id'], value: string) => void;
@@ -84,7 +81,9 @@ export const useOrdersStore = create<OrdersStore>()(
          }),
       addMany: (orders) =>
          set((draft) => {
-            orders.forEach((order) => (draft.orders[order.id] = order));
+            orders.forEach((order) => {
+               draft.orders[order.id] = order;
+            });
          }),
       remove: (orderId) =>
          set((draft) => {

@@ -11,23 +11,36 @@ import {
    OrderModel,
    useOrdersStore,
 } from '@/entities/order/orders.store';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
 import { Order } from '@/components/features/order';
 import { sortOrders, useFulfillOrders } from '@/entities/order';
 import { normilizeItems } from '@/entities/offer';
+import { enableMapSet } from 'immer';
+import { useStore } from 'zustand';
+
+enableMapSet();
 
 export function OrdersList() {
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
+
+   const [sortedOrderIds, setSortedOrderIds] = useState<Set<OrderModel['id']>>(
+      new Set(
+         Object.values(orders)
+            .map((order) => order.id)
+            .sort((idA, idB) => sortOrders(orders[idA], orders[idB])),
+      ),
+   );
+
    const {
       receipts,
       addMany: addManyReceipts,
       setFiscalNumber,
    } = useReceiptsStore();
 
-   const fulfillOrders = useFulfillOrders(
-      Object.values(orders).map((order) => order.id),
-   );
+   const fulfillOrders = useFulfillOrders([...sortedOrderIds]);
+
+   const ordersList = [...sortedOrderIds].map((id) => orders[id]);
 
    useEffect(() => {
       // Update only user refreshes page manually.
@@ -36,8 +49,8 @@ export function OrdersList() {
       const promise = fetchPendingOrders();
 
       promise.then((pendingOrders) => {
-         addMany(
-            pendingOrders.map((order) => ({
+         const orders = pendingOrders.map(
+            (order): OrderModel => ({
                ...order,
                receipt: order.receipt
                   ? {
@@ -72,7 +85,13 @@ export function OrdersList() {
                createdAt: new Date(order.createdAt),
                preparedAt: new Date(order.preparedAt),
                fulfilledAt: null,
-            })),
+            }),
+         );
+
+         addMany(orders);
+
+         setSortedOrderIds(
+            new Set(orders.sort(sortOrders).map((order) => order.id)),
          );
 
          addManyReceipts(
@@ -89,10 +108,6 @@ export function OrdersList() {
          );
       });
    }, []);
-
-   const ordersList = Object.values(orders);
-
-   ordersList.sort(sortOrders);
 
    const generateBulkFiscalNumber = (
       orderId: OrderModel['id'],

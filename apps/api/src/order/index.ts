@@ -115,7 +115,7 @@ export const order = new Hono()
    )
    .get('/orders/pending', async (c) => {
       console.log('Fetching allegro orders...');
-      const allegroOrders = await allegro.getPendingOrdersMock();
+      const allegroOrders = await allegro.getPendingOrders();
       console.log('Fetching succeeded.');
 
       console.log(allegroOrders);

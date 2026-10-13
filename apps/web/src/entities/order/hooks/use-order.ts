@@ -8,10 +8,9 @@ export function useOrder(id: OrderModel['id']) {
       select: () => store.select(id),
       unselect: () => store.unselect(id),
       selectToggle: () => store.selectToggle(id),
-      addPosition: (position: PositionModel) =>
-         store.addPosition(String(id), position),
+      addPosition: (position: PositionModel) => store.addPosition(id, position),
       removePosition: (positionId: PositionModel['offer']['id']) =>
-         store.removePosition(String(id), positionId),
+         store.removePosition(id, positionId),
       setInvoiceNumber: (value: string) => store.setInvoiceNumber(id, value),
       changeInvoiceStatus: (value: OrderModel['invoice']['status']) =>
          store.changeInvoiceStatus(id, value),
