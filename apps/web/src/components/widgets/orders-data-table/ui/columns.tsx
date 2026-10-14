@@ -89,6 +89,11 @@ export const columns = columnHelper.columns([
       {
          id: 'recipient full name',
          header: () => <div className="w-30">Recipient name</div>,
+         cell: ({ row: r }) => {
+            const value = r.getValue('recipient full name') as string;
+
+            return <div className="w-50 max-w-50 overflow-x-auto">{value}</div>;
+         },
          size: 200,
       },
    ),
@@ -107,18 +112,19 @@ export const columns = columnHelper.columns([
          const value = r.getValue('externalId') as string;
 
          return (
-            <div className="text-center">
+            <div className="w-full flex justify-center">
                <Link
-                  className="underline flex items-center gap-1"
+                  className="underline flex items-center justify-center gap-1"
                   href={'https://salescenter.allegro.com/orders?query=' + value}
                   target="_blank"
                >
-                  {value} <ArrowSquareOutIcon />
+                  <span className="w-50 overflow-x-auto">{value}</span>{' '}
+                  <ArrowSquareOutIcon />
                </Link>
             </div>
          );
       },
-      size: 100,
+      size: 200,
    }),
    columnHelper.accessor('packages', {
       header: () => <div className="text-center">Packages</div>,
