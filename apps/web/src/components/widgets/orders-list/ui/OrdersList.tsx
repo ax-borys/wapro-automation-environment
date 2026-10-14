@@ -36,7 +36,11 @@ export function OrdersList() {
 
    const fulfillOrders = useFulfillOrders(
       [...sortedOrderIds].filter(
-         (id) => !orders[id].receipt && orders[id].invoice.status === 'RECORD',
+         (id) =>
+            !orders[id].receipt?.id &&
+            orders[id].receipt?.number &&
+            orders[id].invoice.status === 'RECORD' &&
+            orders[id].invoice.number,
       ),
    );
 
