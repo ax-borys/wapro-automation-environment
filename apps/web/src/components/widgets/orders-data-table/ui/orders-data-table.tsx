@@ -39,6 +39,8 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
          setData(
             r.map((i) => ({
                ...i,
+               receipt: i.receipt || null,
+               invoice: i.invoice || null,
                preparedAt: new Date(i.preparedAt),
             })),
          );

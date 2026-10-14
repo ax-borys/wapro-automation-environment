@@ -60,6 +60,10 @@ export type OrdersStore = {
       orderId: OrderModel['id'],
       value: 'RECORD' | 'RECORDING' | 'RECORDED',
    ) => void;
+   changeRequiredDocuemntType: (
+      orderId: OrderModel['id'],
+      value: OrderModel['requiredDocumentType'],
+   ) => void;
 };
 
 export function normilizePositions(
@@ -136,6 +140,10 @@ export const useOrdersStore = create<OrdersStore>()(
       changeInvoiceStatus: (orderId, value) =>
          set((draft) => {
             draft.orders[orderId].invoice.status = value;
+         }),
+      changeRequiredDocuemntType: (orderId, value) =>
+         set((draft) => {
+            draft.orders[orderId].requiredDocumentType = value;
          }),
    })),
 );

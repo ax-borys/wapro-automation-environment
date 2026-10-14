@@ -18,6 +18,8 @@ import { customAlphabet } from 'nanoid';
 import {
    addOrderInputSchema,
    addOrders,
+   changeRequiredDocumentType,
+   changeRequiredDocumentTypeInputSchema,
    fulfillOrders,
    getFulfilledOrdersByFilter,
    getFulfilledOrdersByFilterInputSchema,
@@ -52,6 +54,22 @@ async function wipeOrders() {
    await db.delete(ordersTable);
 }
 export const order = new Hono()
+   .put(
+      '/required-document-type',
+      valibotJsonMiddleware(changeRequiredDocumentTypeInputSchema),
+      async (c) => {
+         const input = c.req.valid('json');
+
+         const order = await db.transaction(async (tx) =>
+            changeRequiredDocumentType(tx, input),
+         );
+
+         return c.json<ApiResponse<typeof order>>({
+            data: order,
+            error: null,
+         });
+      },
+   )
    .post(
       '/fulfill/orders',
 

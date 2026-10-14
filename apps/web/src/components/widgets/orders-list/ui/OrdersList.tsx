@@ -16,10 +16,6 @@ import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
 import { Order } from '@/components/features/order';
 import { sortOrders, useFulfillOrders } from '@/entities/order';
 import { normilizeItems } from '@/entities/offer';
-import { enableMapSet } from 'immer';
-import { useStore } from 'zustand';
-
-enableMapSet();
 
 export function OrdersList() {
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();

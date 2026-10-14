@@ -25,6 +25,7 @@ import {
    CashRegisterIcon,
    FloppyDiskIcon,
    InvoiceIcon,
+   PenIcon,
    ReceiptIcon,
    SealCheckIcon,
    SpinnerIcon,
@@ -37,6 +38,7 @@ import {
    useOrdersStore,
    useFulfillOrders,
    type OrderModel,
+   useChangeRequiredDocumentType,
 } from '@/entities/order';
 import {
    Dialog,
@@ -72,9 +74,58 @@ import {
 } from '@/components/ui/edit-dalog';
 import { useCallback, useState } from 'react';
 import { InvoiceNumberBadge } from '@/components/ui/badges';
+import {
+   DropdownMenu,
+   DropdownMenuContent,
+   DropdownMenuGroup,
+   DropdownMenuItem,
+   DropdownMenuLabel,
+   DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { EllipsisVerticalIcon } from 'lucide-react';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
+}
+
+function Actions({ orderId }: { orderId: OrderModel['id'] }) {
+   const { requiredDocumentType } = useOrdersStore((s) => s.orders[orderId]);
+   const changeRequiredDocumentType = useChangeRequiredDocumentType(orderId);
+
+   return (
+      <DropdownMenu>
+         <DropdownMenuTrigger asChild>
+            <Button
+               variant={'ghost'}
+               className="focus-visible:outline-none focus-visible:ring-0 border-0"
+            >
+               <EllipsisVerticalIcon />
+            </Button>
+         </DropdownMenuTrigger>
+         <DropdownMenuContent onChange={() => {}} className="min-w-40">
+            <DropdownMenuGroup>
+               <DropdownMenuLabel className="flex items-center gap-1">
+                  Actions
+               </DropdownMenuLabel>
+               {requiredDocumentType === 'INVOICE' ? (
+                  <DropdownMenuItem
+                     onSelect={() => changeRequiredDocumentType('RECEIPT')}
+                  >
+                     <ReceiptIcon />
+                     Require receipt
+                  </DropdownMenuItem>
+               ) : (
+                  <DropdownMenuItem
+                     onSelect={() => changeRequiredDocumentType('INVOICE')}
+                  >
+                     <InvoiceIcon />
+                     Require invoice
+                  </DropdownMenuItem>
+               )}
+            </DropdownMenuGroup>
+         </DropdownMenuContent>
+      </DropdownMenu>
+   );
 }
 
 export function Order({
@@ -174,6 +225,7 @@ export function Order({
                ) : (
                   <BadgePickup />
                )}
+               <Actions orderId={order.id} />
             </div>
          </OrderCardHeader>
          <OrderCardBody>
@@ -310,6 +362,7 @@ export function Order({
                               order.invoice?.number ? 'default' : 'outline'
                            }
                            onClick={fulfillOrdersHandler}
+                           disabled={!order.invoice?.number}
                         >
                            <InvoiceIcon />
                            {order.invoice?.number

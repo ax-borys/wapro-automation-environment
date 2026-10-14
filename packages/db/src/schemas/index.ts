@@ -78,7 +78,10 @@ export const ordersTable = sqliteTable(
          .$type<'PREPAID' | 'POSTPAID'>()
          .notNull(),
       packages: int().notNull().default(1),
-      requiredDocumentType: text().notNull().default('RECEIPT'),
+      requiredDocumentType: text()
+         .$type<'RECEIPT' | 'INVOICE'>()
+         .notNull()
+         .default('RECEIPT'),
       fulfilledAt: int('fulfilled_at', { mode: 'timestamp_ms' }),
       preparedAt: int('prepared_at', { mode: 'timestamp_ms' }).notNull(),
       createdAt: int('created_at', { mode: 'timestamp_ms' })
