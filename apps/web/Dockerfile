@@ -17,6 +17,7 @@ COPY packages/customer/package.json packages/customer/package.json
 COPY packages/order/package.json packages/order/package.json
 COPY packages/offer/package.json packages/offer/package.json
 COPY packages/receipt/package.json packages/receipt/package.json
+COPY packages/invoice/package.json packages/invoice/package.json
 COPY packages/api-types/package.json packages/api-types/package.json
 
 COPY packages/core/package.json packages/core/package.json

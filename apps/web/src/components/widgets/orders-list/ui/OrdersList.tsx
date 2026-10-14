@@ -34,7 +34,11 @@ export function OrdersList() {
       setFiscalNumber,
    } = useReceiptsStore();
 
-   const fulfillOrders = useFulfillOrders([...sortedOrderIds]);
+   const fulfillOrders = useFulfillOrders(
+      [...sortedOrderIds].filter(
+         (id) => !orders[id].receipt && orders[id].invoice.status === 'RECORD',
+      ),
+   );
 
    const ordersList = [...sortedOrderIds].map((id) => orders[id]);
 
