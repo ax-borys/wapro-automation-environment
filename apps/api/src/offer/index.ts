@@ -14,6 +14,10 @@ import {
 import { ApiResponse } from '@wae/types';
 import { valibotJsonMiddleware } from '../helpers/valibot-middleware';
 
+import * as allegro from '@wae/allegro';
+import { db, offersTable } from '@wae/db';
+import { eq } from 'drizzle-orm';
+
 export const offer = new Hono()
    .post('/', valibotJsonMiddleware(createOfferInputSchema), async (c) => {
       const offer = c.req.valid('json');
@@ -57,4 +61,50 @@ export const offer = new Hono()
             200,
          );
       },
-   );
+   )
+   .get('/sync-offers', async (c) => {
+      const data = await syncOffers();
+
+      return c.json<ApiResponse<typeof data>>({ data, error: null });
+   })
+   .get('/normalize-images', async (c) => {
+      const data = await convertImgSrcToS128b();
+
+      return c.json<ApiResponse<typeof data>>({ data, error: null });
+   });
+
+async function syncOffers() {
+   const offers = await allegro.getAllOffers();
+
+   const createdOffers: CreateOfferOutput[] = [];
+
+   const existingOffers = await getAllOffers();
+
+   for (const offer of offers) {
+      if (existingOffers.map((i) => i.externalId).includes(offer.externalId))
+         return;
+      const ret = await createOffer(offer);
+      createdOffers.push(ret);
+   }
+
+   return createdOffers;
+}
+
+export async function convertImgSrcToS128b() {
+   const offers = await getAllOffers();
+
+   const newOffers: Offer[] = [];
+   for (const offer of offers) {
+      const [newOffer] = await db
+         .update(offersTable)
+         .set({
+            imgSrc: allegro.originalImgSrcTos128b(offer.imgSrc) ?? offer.imgSrc,
+         })
+         .where(eq(offersTable.id, offer.id))
+         .returning();
+
+      newOffers.push(newOffer);
+   }
+
+   return newOffers;
+}
