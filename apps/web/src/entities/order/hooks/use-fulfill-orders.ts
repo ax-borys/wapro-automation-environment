@@ -42,9 +42,8 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
 
       const fulfillOrdersInput: FulfillOrdersInput = [];
 
-      for (const order of ordersList) {
-         if (!finalOrderIds.has(order.id)) continue;
-
+      for (const orderId of finalOrderIds) {
+         const order = orders[orderId];
          const receipt = receiptByOrderId.get(order.id);
 
          const invoiceNumber = order.invoice.number;
