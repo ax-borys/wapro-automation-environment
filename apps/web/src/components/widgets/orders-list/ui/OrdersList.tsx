@@ -11,11 +11,12 @@ import {
    OrderModel,
    useOrdersStore,
 } from '@/entities/order/orders.store';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
 import { Order } from '@/components/features/order';
 import { sortOrders, useFulfillOrders } from '@/entities/order';
 import { normilizeItems } from '@/entities/offer';
+import { CachedScrollWrapper } from '@/components/ui/cached-scroll-wrapper';
 
 export function OrdersList() {
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
@@ -208,7 +209,10 @@ export function OrdersList() {
             ) : null}
          </div>
          <Separator />
-         <div className="overflow-y-scroll min-h-0 flex-1">
+         <CachedScrollWrapper
+            cacheKey="pending-orders"
+            className="overflow-y-scroll min-h-0 flex-1"
+         >
             {Object.values(receipts).length
                ? ordersList.map((order, i) => (
                     <Fragment key={order.id}>
@@ -224,7 +228,7 @@ export function OrdersList() {
                     </Fragment>
                  ))
                : null}
-         </div>
+         </CachedScrollWrapper>
       </div>
    );
 }

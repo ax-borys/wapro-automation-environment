@@ -51,6 +51,7 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
       data,
       columns,
       {
+         pagination: { pageSize: 20 },
          initialSortingState: [{ id: 'preparedAt', desc: false }],
          columnVisibility: { preparedAt: false },
       },

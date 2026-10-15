@@ -19,9 +19,11 @@ import {
    BadgePickup,
    BadgeReceiptNumber,
 } from '@/components/ui/receipt-card';
+import { Separator } from '@/components/ui/separator';
 import {
    ArrowSquareOutIcon,
    CashRegisterIcon,
+   LinkIcon,
    PenIcon,
 } from '@phosphor-icons/react';
 import { ArrowSquareOut } from '@phosphor-icons/react/dist/ssr';
@@ -74,6 +76,31 @@ const formatFullname = (
 };
 
 export const columns = columnHelper.columns([
+   columnHelper.display({
+      id: 'link',
+      cell: ({ row: r }) => {
+         const value = r.original.externalId;
+
+         return (
+            <div className="flex flex-col w-fit">
+               <Button variant={'ghost'} className="text-blue-700" asChild>
+                  <Link
+                     className="underline flex items-center justify-center gap-1"
+                     href={
+                        'https://salescenter.allegro.com/orders?query=' + value
+                     }
+                     target="_blank"
+                  >
+                     <ArrowSquareOutIcon />
+                  </Link>
+               </Button>
+            </div>
+         );
+      },
+      size: 36,
+      minSize: 36,
+      maxSize: 36,
+   }),
    columnHelper.accessor('preparedAt', {
       id: 'preparedAt',
       enableHiding: true,
@@ -104,27 +131,7 @@ export const columns = columnHelper.columns([
 
          return <div className="text-left">{value}</div>;
       },
-      size: 100,
-   }),
-   columnHelper.accessor('externalId', {
-      header: () => <div className="text-center">External id</div>,
-      cell: ({ row: r }) => {
-         const value = r.getValue('externalId') as string;
-
-         return (
-            <div className="w-full flex justify-center">
-               <Link
-                  className="underline flex items-center justify-center gap-1"
-                  href={'https://salescenter.allegro.com/orders?query=' + value}
-                  target="_blank"
-               >
-                  <span className="w-50 overflow-x-auto">{value}</span>{' '}
-                  <ArrowSquareOutIcon />
-               </Link>
-            </div>
-         );
-      },
-      size: 200,
+      size: 600,
    }),
    columnHelper.accessor('packages', {
       header: () => <div className="text-center">Packages</div>,
@@ -202,22 +209,26 @@ export const columns = columnHelper.columns([
       },
       size: 150,
    }),
-   columnHelper.accessor('totalToPay', {
-      header: () => <div className="text-right">Total</div>,
-      cell: ({ row: r }) => {
-         const total = r.getValue('totalToPay') as number;
-         const formatted = currency(total, {
+   columnHelper.accessor(
+      (r) =>
+         currency(r.totalToPay, {
             decimal: ',',
             symbol: 'zł',
             pattern: '# !',
             separator: ' ',
             fromCents: true,
-         }).format();
+         }).format(),
+      {
+         header: () => <div className="text-right">Total</div>,
+         id: 'totalToPay',
+         cell: ({ row: r }) => {
+            const total = r.getValue('totalToPay') as string;
 
-         return <div className="text-right font-medium">{formatted}</div>;
+            return <div className="text-right font-medium">{total}</div>;
+         },
+         size: 600,
       },
-      size: 200,
-   }),
+   ),
    columnHelper.display({
       id: 'actions',
       cell: ({ row: r }) => {
