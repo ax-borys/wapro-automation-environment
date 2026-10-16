@@ -26,12 +26,14 @@ import {
    CashRegisterIcon,
    FloppyDiskIcon,
    InvoiceIcon,
+   LinkIcon,
    PenIcon,
    ReceiptIcon,
    SealCheckIcon,
    SpinnerIcon,
    TruckIcon,
    WarningIcon,
+   XIcon,
 } from '@phosphor-icons/react';
 import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import {
@@ -84,6 +86,11 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EllipsisVerticalIcon } from 'lucide-react';
+import {
+   Tooltip,
+   TooltipContent,
+   TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -265,35 +272,95 @@ export function Order({
                         gross={currency(item.price, { fromCents: true }).value}
                      >
                         <>
-                           {item.offer.externalId === 'delivery' ? (
-                              <TruckIcon className="size-6 mx-0.75" />
-                           ) : (
-                              <Image
-                                 src={item.offer.imgSrc}
-                                 alt="Product preview"
-                                 width={30}
-                                 height={30}
-                                 className="rounded-sm"
-                              />
-                           )}
-                           <div className="overflow-auto">
-                              {item.offer.title}
-                           </div>
-                           {!Object.values(
-                              (offers[item.offer.id] ?? item.offer).items,
+                           {Object.values(
+                              offers[item.offer.id]?.items ?? item.offer.items,
                            ).length ? (
-                              <EditOffer
-                                 trigger={
-                                    <Button
-                                       variant={'destructive'}
-                                       className="cursor-pointer"
+                              <Tooltip>
+                                 <TooltipContent>
+                                    {offers[item.offer.id]?.items
+                                       ? Object.values(
+                                            offers[item.offer.id]?.items ?? {},
+                                         ).map((item) => (
+                                            <span
+                                               key={item.id}
+                                               className="flex items-center gap-2"
+                                            >
+                                               {item.name}
+                                               <XIcon />
+                                               {item.quantity}
+                                            </span>
+                                         ))
+                                       : null}
+                                 </TooltipContent>
+                                 <TooltipTrigger className="flex items-center gap-2">
+                                    <Link
+                                       href={
+                                          item.offer.src === 'allegro' &&
+                                          item.offer.externalId !== 'delivery'
+                                             ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${item.offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
+                                             : '#pending-orders'
+                                       }
+                                       target="_blank"
+                                       className="flex items-center gap-2 underline"
                                     >
-                                       <WarningIcon className="w-fit" />{' '}
-                                    </Button>
-                                 }
-                                 offer={offers[item.offer.id] ?? item.offer}
-                              />
-                           ) : null}
+                                       {item.offer.externalId === 'delivery' ? (
+                                          <TruckIcon className="size-6 mx-0.75" />
+                                       ) : (
+                                          <Image
+                                             src={item.offer.imgSrc}
+                                             alt="Product preview"
+                                             width={30}
+                                             height={30}
+                                             className="rounded-sm"
+                                          />
+                                       )}
+                                       <div className="overflow-auto">
+                                          {item.offer.title}
+                                       </div>
+                                    </Link>
+                                    <LinkIcon />
+                                 </TooltipTrigger>
+                              </Tooltip>
+                           ) : (
+                              <>
+                                 <Link
+                                    href={
+                                       item.offer.src === 'allegro' &&
+                                       item.offer.externalId !== 'delivery'
+                                          ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${item.offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
+                                          : '#pending-orders'
+                                    }
+                                    className="flex items-center gap-2 underline"
+                                    target="_blank"
+                                 >
+                                    {item.offer.externalId === 'delivery' ? (
+                                       <TruckIcon className="size-6 mx-0.75" />
+                                    ) : (
+                                       <Image
+                                          src={item.offer.imgSrc}
+                                          alt="Product preview"
+                                          width={30}
+                                          height={30}
+                                          className="rounded-sm"
+                                       />
+                                    )}
+                                    <div className="overflow-auto">
+                                       {item.offer.title}
+                                    </div>
+                                 </Link>
+                                 <EditOffer
+                                    trigger={
+                                       <Button
+                                          variant={'destructive'}
+                                          className="cursor-pointer"
+                                       >
+                                          <WarningIcon className="w-fit" />{' '}
+                                       </Button>
+                                    }
+                                    offer={offers[item.offer.id] ?? item.offer}
+                                 />
+                              </>
+                           )}
                         </>
                      </OrderCardTablePosition>
                   ))}
