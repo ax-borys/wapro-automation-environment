@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils';
 import currency from 'currency.js';
 import React from 'react';
 import { Address, Delivery } from '@wae/types';
+import { ProductModel } from '@/entities/offer';
 
 export function BadgePaid({
    className,
@@ -205,7 +206,7 @@ export function OrderCardTablePosition({
    ...props
 }: React.ComponentProps<typeof TableRow> & {
    quantity: number;
-   tax: '8' | '23';
+   tax: ProductModel['tax'];
    net: number;
    gross: number;
 }) {
@@ -215,7 +216,7 @@ export function OrderCardTablePosition({
             {children}
          </TableCell>
          <TableCell className="text-center">x{quantity}</TableCell>
-         <TableCell className="text-center">{Number.parseInt(tax)}%</TableCell>
+         <TableCell className="text-center">{tax}%</TableCell>
          <TableCell className="text-right">
             {currency(net, {
                decimal: ',',

@@ -12,7 +12,7 @@ import {
    useOrdersStore,
 } from '@/entities/order/orders.store';
 import { useEffect, useState } from 'react';
-import { fetchPendingOrders } from '@/entities/order/fetch-pending-orders';
+import { fetchPendingOrders } from '@/entities/order/api/fetch-pending-orders';
 import { Order } from '@/components/features/order';
 import { sortOrders, useFulfillOrders } from '@/entities/order';
 import { normilizeItems } from '@/entities/offer';

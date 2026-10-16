@@ -1,13 +1,9 @@
+import { Product } from '@wae/types';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
-export type ProductModel = {
-   id: number;
-   name: string;
-   externalId: string;
-   // Implement it here `cuz i don't want to create Item type for that
+export type ProductModel = Product & {
    quantity: number;
-   stock: number;
 };
 
 export type OfferModel = {

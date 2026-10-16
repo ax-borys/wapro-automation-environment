@@ -3,10 +3,7 @@ import { Offer } from '../schemas';
 import { db, itemsTable, productsTable } from '@wae/db';
 import * as v from 'valibot';
 import { and, eq, inArray } from 'drizzle-orm';
-
-const productOutputSchema = createSelectSchema(productsTable);
-
-type Product = v.InferOutput<typeof productOutputSchema>;
+import { Product } from '@wae/types';
 
 export type GetAllOffersWithItemsOutput = (Offer & {
    items: (Product & { quantity: number })[];

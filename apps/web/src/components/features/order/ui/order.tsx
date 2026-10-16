@@ -57,7 +57,7 @@ import { ReceiptModel, useReceipt } from '@/entities/receipt';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { EditOffer } from '../../edit-offer';
-import { useOffersStore } from '@/entities/offer';
+import { OfferModel, ProductModel, useOffersStore } from '@/entities/offer';
 import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
 import { useError } from '@/entities/error';
 import * as v from 'valibot';
@@ -175,6 +175,25 @@ export function Order({
       return navigator.clipboard.writeText(value);
    };
 
+   const calculateTax = (offer: OfferModel): ProductModel['tax'] => {
+      const items = offers[offer.id]?.items ?? offer.items;
+
+      const itemsList = Object.values(items);
+
+      if (itemsList.length) {
+         return itemsList.reduce((a, b) => {
+            if (a.tax !== b.tax)
+               throw new Error(
+                  `Failed to obtain tax for offer, because several products linked to it have different tax. Product 1: ${a.name} (${a.tax}); Product 2: ${b.name} (${b.tax})`,
+               );
+
+            return b;
+         }).tax;
+      } else {
+         return 0;
+      }
+   };
+
    return (
       <OrderCard className="flex h-fit">
          <OrderCardHeader>
@@ -236,7 +255,7 @@ export function Order({
                      <OrderCardTablePosition
                         key={item.offer.externalId + i}
                         quantity={item.quantity}
-                        tax="23"
+                        tax={calculateTax(item.offer)}
                         net={
                            currency(item.price, { fromCents: true }).divide(
                               1.23,

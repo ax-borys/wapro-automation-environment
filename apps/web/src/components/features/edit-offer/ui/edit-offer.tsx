@@ -24,7 +24,10 @@ import { produce } from 'immer';
 import { EditIcon, XIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-type ProductData = Pick<ProductModel, 'name' | 'id' | 'externalId' | 'stock'>;
+type ProductData = Pick<
+   ProductModel,
+   'name' | 'id' | 'externalId' | 'stock' | 'imgSrc' | 'tax'
+>;
 
 type OfferData = Pick<
    OfferModel,
