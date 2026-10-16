@@ -11,6 +11,7 @@ import {
    OrderCardFooter,
    OrderCardFooterActions,
    OrderCardHeader,
+   OrderCardPackage,
    OrderCardRecipient,
    OrderCardTable,
    OrderCardTableBody,
@@ -322,10 +323,14 @@ export function Order({
                   order.preparedAt ?? Date.now(),
                ).toLocaleString()}
             />
-            <OrderCardDeliveryCard
-               title={order.delivery.pointName || 'Delivery'}
-               address={order.delivery.address}
-            />
+            <div className="flex w-125 justify-between">
+               <OrderCardDeliveryCard
+                  className="w-75"
+                  title={order.delivery.pointName || 'Delivery'}
+                  address={order.delivery.address}
+               />
+               <OrderCardPackage numberOfPackages={order.packages} />
+            </div>
             <OrderCardFooterActions>
                {order.requiredDocumentType === 'INVOICE' ? (
                   <>

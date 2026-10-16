@@ -20,6 +20,7 @@ import {
    CashRegisterIcon,
    CopyIcon,
    HandCoinsIcon,
+   PackageIcon,
    ReceiptIcon,
    SealCheckIcon,
    TruckIcon,
@@ -256,7 +257,7 @@ export function OrderCardRecipient({
    orderProcessedAt: string;
 }) {
    return (
-      <Item className="w-100">
+      <Item className="w-60">
          <ItemMedia variant={'icon'}>
             <UserIcon />
          </ItemMedia>
@@ -282,12 +283,14 @@ export function OrderCardFooterActions({
 export function OrderCardDeliveryCard({
    title,
    address,
-}: {
+   className,
+   ...props
+}: React.ComponentProps<typeof Item> & {
    title: string;
    address: Omit<Address, 'id' | 'clientTag'>;
 }) {
    return (
-      <Item className="w-100">
+      <Item className={cn('w-100', className)} {...props}>
          <ItemMedia variant={'icon'}>
             <TruckIcon />
          </ItemMedia>
@@ -299,6 +302,30 @@ export function OrderCardDeliveryCard({
                   {address.postalCode} {address.city} {address.countryCode}
                </span>
             </ItemDescription>
+         </ItemContent>
+      </Item>
+   );
+}
+
+export function OrderCardPackage({
+   numberOfPackages,
+   className,
+   ...props
+}: React.ComponentProps<typeof Item> & {
+   numberOfPackages: number;
+}) {
+   return (
+      <Item className={cn('w-50 mb-auto', className)} {...props}>
+         <ItemMedia variant={'icon'}>
+            <PackageIcon />
+         </ItemMedia>
+         <ItemContent>
+            <ItemTitle>
+               {numberOfPackages}
+               <span className="font-regular">
+                  {numberOfPackages === 1 ? 'package' : 'packages'}
+               </span>
+            </ItemTitle>
          </ItemContent>
       </Item>
    );
