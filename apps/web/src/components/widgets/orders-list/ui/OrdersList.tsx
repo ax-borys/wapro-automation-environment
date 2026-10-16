@@ -17,6 +17,40 @@ import { Order } from '@/components/features/order';
 import { sortOrders, useFulfillOrders } from '@/entities/order';
 import { normilizeItems } from '@/entities/offer';
 import { CachedScrollWrapper } from '@/components/ui/cached-scroll-wrapper';
+import {
+   Select,
+   SelectContent,
+   SelectGroup,
+   SelectItem,
+   SelectTrigger,
+   SelectValue,
+} from '@/components/ui/select';
+
+type RequiredDocumentTypeFilter = OrderModel['requiredDocumentType'] | 'ALL';
+
+function RequiredDocumentTypeFilterSelect({
+   items,
+   ...props
+}: React.ComponentProps<typeof Select> & {
+   items: { label: string; value: RequiredDocumentTypeFilter }[];
+}) {
+   return (
+      <Select {...props}>
+         <SelectTrigger className="w-30">
+            <SelectValue placeholder="Document" />
+         </SelectTrigger>
+         <SelectContent>
+            <SelectGroup>
+               {items.map((item) => (
+                  <SelectItem key={item.value} value={item.value}>
+                     {item.label}
+                  </SelectItem>
+               ))}
+            </SelectGroup>
+         </SelectContent>
+      </Select>
+   );
+}
 
 export function OrdersList() {
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
@@ -29,6 +63,28 @@ export function OrdersList() {
       ),
    );
 
+   const [filters, setFilters] = useState<{
+      requiredDocumentType: RequiredDocumentTypeFilter;
+   }>({ requiredDocumentType: 'ALL' });
+
+   const filter = (orderIds: number[]) => {
+      return orderIds.filter((id) => {
+         const order = orders[id];
+
+         if (filters.requiredDocumentType !== 'ALL') {
+            if (order.requiredDocumentType !== filters.requiredDocumentType) {
+               return false;
+            }
+
+            return true;
+         }
+
+         return true;
+      });
+   };
+
+   const filtredOrderIds = filter([...sortedOrderIds]);
+
    const {
       receipts,
       addMany: addManyReceipts,
@@ -36,7 +92,7 @@ export function OrdersList() {
    } = useReceiptsStore();
 
    const fulfillOrders = useFulfillOrders(
-      [...sortedOrderIds].filter(
+      [...filtredOrderIds].filter(
          (id) =>
             !orders[id].receipt?.id &&
             orders[id].receipt?.number &&
@@ -45,7 +101,7 @@ export function OrdersList() {
       ),
    );
 
-   const ordersList = [...sortedOrderIds].map((id) => orders[id]);
+   const ordersList = [...filtredOrderIds].map((id) => orders[id]);
 
    useEffect(() => {
       // Update only user refreshes page manually.
@@ -174,10 +230,10 @@ export function OrdersList() {
                   checked={selectedOrders.length === ordersList.length}
                   className="cursor-pointer"
                />
-               <span className="">
+               <span className="select-none">
                   Select all{' '}
-                  {Object.values(receipts).length && !selectedOrders.length
-                     ? `(${Object.values(receipts).length})`
+                  {filtredOrderIds.length && !selectedOrders.length
+                     ? `(${filtredOrderIds.length})`
                      : null}
                </span>
             </div>
@@ -207,6 +263,22 @@ export function OrdersList() {
                   </Button>
                </>
             ) : null}
+            <div className="ml-auto">
+               <RequiredDocumentTypeFilterSelect
+                  value={filters.requiredDocumentType}
+                  onValueChange={(v) =>
+                     setFilters({
+                        ...filters,
+                        requiredDocumentType: v as RequiredDocumentTypeFilter,
+                     })
+                  }
+                  items={[
+                     { label: 'All', value: 'ALL' },
+                     { label: 'Receipt', value: 'RECEIPT' },
+                     { label: 'Invoice', value: 'INVOICE' } as const,
+                  ]}
+               />
+            </div>
          </div>
          <Separator />
          <CachedScrollWrapper

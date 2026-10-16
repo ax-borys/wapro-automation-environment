@@ -19,6 +19,7 @@
       "@wae/receipt": "workspace:*",
       "class-variance-authority": "^0.7.1",
       "clsx": "^2.1.1",
+      "cn": "^0.4.0",
       "currency.js": "^2.0.4",
       "date-fns": "^4.4.0",
       "hono": "^4.13.2",
