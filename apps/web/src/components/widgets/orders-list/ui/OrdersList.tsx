@@ -56,11 +56,7 @@ export function OrdersList() {
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
 
    const [sortedOrderIds, setSortedOrderIds] = useState<Set<OrderModel['id']>>(
-      new Set(
-         Object.values(orders)
-            .map((order) => order.id)
-            .sort((idA, idB) => sortOrders(orders[idA], orders[idB])),
-      ),
+      new Set(Object.values(orders).map((order) => order.id)),
    );
 
    const [filters, setFilters] = useState<{
