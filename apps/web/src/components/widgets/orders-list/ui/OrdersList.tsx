@@ -74,7 +74,7 @@ export function OrdersList() {
 
             return true;
          }
-
+         ``;
          return true;
       });
    };
@@ -209,8 +209,12 @@ export function OrdersList() {
       }
 
       const selectedOrdersIds = new Set(
-         selectedOrders.map((order) => order.id),
+         selectedOrders
+            .filter((order) => receipts[order.id].status === 'RECORD')
+            .map((order) => order.id),
       );
+
+      if (!selectedOrdersIds.size) return;
 
       await fulfillOrders([...selectedOrdersIds]);
    };
