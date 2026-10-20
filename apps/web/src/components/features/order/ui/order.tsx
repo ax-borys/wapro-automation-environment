@@ -190,10 +190,12 @@ export function Order({
 
       if (itemsList.length) {
          return itemsList.reduce((a, b) => {
-            if (a.tax !== b.tax)
-               throw new Error(
-                  `Failed to obtain tax for offer, because several products linked to it have different tax. Product 1: ${a.name} (${a.tax}); Product 2: ${b.name} (${b.tax})`,
-               );
+            if (a.tax !== b.tax) {
+               // if taxes for one offer are different (several products have different tax rate)
+               // return 0 to handle it manually
+               a.tax = 0;
+               return a;
+            }
 
             return b;
          }).tax;
@@ -259,55 +261,87 @@ export function Order({
             <OrderCardTable>
                <OrderCardTableHeader />
                <OrderCardTableBody>
-                  {Object.values(order.positions).map((item, i) => (
-                     <OrderCardTablePosition
-                        key={item.offer.externalId + i}
-                        quantity={item.quantity}
-                        tax={calculateTax(item.offer)}
-                        net={
-                           currency(item.price, { fromCents: true }).divide(
-                              1.23,
-                           ).value
-                        }
-                        gross={currency(item.price, { fromCents: true }).value}
-                     >
-                        <>
-                           {Object.values(
-                              offers[item.offer.id]?.items ?? item.offer.items,
-                           ).length ? (
-                              <Tooltip>
-                                 <TooltipContent>
-                                    {offers[item.offer.id]?.items
-                                       ? Object.values(
-                                            offers[item.offer.id]?.items ?? {},
-                                         ).map((item) => (
-                                            <span
-                                               key={item.id}
-                                               className="flex items-center gap-2"
-                                            >
-                                               {item.name}
-                                               <XIcon />
-                                               {item.quantity}
-                                            </span>
-                                         ))
-                                       : null}
-                                 </TooltipContent>
-                                 <TooltipTrigger className="flex items-center gap-2">
+                  {Object.values(order.positions).map((position, i) => {
+                     const offer = offers[position.offerId] ?? position.offer;
+                     const isOfferLinked = !!Object.values(offer.items).length;
+                     const items = Object.values(offer.items);
+
+                     return (
+                        <OrderCardTablePosition
+                           key={offer.externalId + i}
+                           quantity={position.quantity}
+                           tax={calculateTax(offer)}
+                           net={
+                              currency(position.price, {
+                                 fromCents: true,
+                              }).divide(1.23).value
+                           }
+                           gross={
+                              currency(position.price, { fromCents: true })
+                                 .value
+                           }
+                        >
+                           <>
+                              {isOfferLinked ? (
+                                 <Tooltip>
+                                    <TooltipContent>
+                                       {items.map((itemc) => (
+                                          <span
+                                             key={itemc.id}
+                                             className="flex items-center gap-2"
+                                          >
+                                             {itemc.name}
+                                             <XIcon />
+                                             {itemc.quantity}
+                                          </span>
+                                       ))}
+                                    </TooltipContent>
+                                    <TooltipTrigger className="flex items-center gap-2">
+                                       <Link
+                                          href={
+                                             offer.src === 'allegro' &&
+                                             offer.externalId !== 'delivery'
+                                                ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
+                                                : '#pending-orders'
+                                          }
+                                          target="_blank"
+                                          className="flex items-center gap-2 underline"
+                                       >
+                                          {offer.externalId === 'delivery' ? (
+                                             <TruckIcon className="size-6 mx-0.75" />
+                                          ) : (
+                                             <Image
+                                                src={offer.imgSrc}
+                                                alt="Product preview"
+                                                width={30}
+                                                height={30}
+                                                className="rounded-sm"
+                                             />
+                                          )}
+                                          <div className="overflow-auto">
+                                             {offer.title}
+                                          </div>
+                                       </Link>
+                                       <LinkIcon />
+                                    </TooltipTrigger>
+                                 </Tooltip>
+                              ) : (
+                                 <>
                                     <Link
                                        href={
-                                          item.offer.src === 'allegro' &&
-                                          item.offer.externalId !== 'delivery'
-                                             ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${item.offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
+                                          offer.src === 'allegro' &&
+                                          offer.externalId !== 'delivery'
+                                             ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
                                              : '#pending-orders'
                                        }
-                                       target="_blank"
                                        className="flex items-center gap-2 underline"
+                                       target="_blank"
                                     >
-                                       {item.offer.externalId === 'delivery' ? (
+                                       {offer.externalId === 'delivery' ? (
                                           <TruckIcon className="size-6 mx-0.75" />
                                        ) : (
                                           <Image
-                                             src={item.offer.imgSrc}
+                                             src={offer.imgSrc}
                                              alt="Product preview"
                                              width={30}
                                              height={30}
@@ -315,55 +349,26 @@ export function Order({
                                           />
                                        )}
                                        <div className="overflow-auto">
-                                          {item.offer.title}
+                                          {offer.title}
                                        </div>
                                     </Link>
-                                    <LinkIcon />
-                                 </TooltipTrigger>
-                              </Tooltip>
-                           ) : (
-                              <>
-                                 <Link
-                                    href={
-                                       item.offer.src === 'allegro' &&
-                                       item.offer.externalId !== 'delivery'
-                                          ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${item.offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
-                                          : '#pending-orders'
-                                    }
-                                    className="flex items-center gap-2 underline"
-                                    target="_blank"
-                                 >
-                                    {item.offer.externalId === 'delivery' ? (
-                                       <TruckIcon className="size-6 mx-0.75" />
-                                    ) : (
-                                       <Image
-                                          src={item.offer.imgSrc}
-                                          alt="Product preview"
-                                          width={30}
-                                          height={30}
-                                          className="rounded-sm"
-                                       />
-                                    )}
-                                    <div className="overflow-auto">
-                                       {item.offer.title}
-                                    </div>
-                                 </Link>
-                                 <EditOffer
-                                    trigger={
-                                       <Button
-                                          variant={'destructive'}
-                                          className="cursor-pointer"
-                                       >
-                                          <WarningIcon className="w-fit" />{' '}
-                                       </Button>
-                                    }
-                                    offer={offers[item.offer.id] ?? item.offer}
-                                 />
-                              </>
-                           )}
-                        </>
-                     </OrderCardTablePosition>
-                  ))}
+                                    <EditOffer
+                                       trigger={
+                                          <Button
+                                             variant={'destructive'}
+                                             className="cursor-pointer"
+                                          >
+                                             <WarningIcon className="w-fit" />
+                                          </Button>
+                                       }
+                                       offer={offers[offer.id] ?? offer}
+                                    />
+                                 </>
+                              )}
+                           </>
+                        </OrderCardTablePosition>
+                     );
+                  })}
                </OrderCardTableBody>
                <OrderCardTableFooter
                   totalNet={
