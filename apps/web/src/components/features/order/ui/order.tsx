@@ -55,15 +55,11 @@ import {
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { DialogClose } from 'radix-ui/dialog';
-import { ReceiptModel, useReceipt } from '@/entities/receipt';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { EditOffer } from '../../edit-offer';
 import { OfferModel, ProductModel, useOffersStore } from '@/entities/offer';
 import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
-import { useError } from '@/entities/error';
-import * as v from 'valibot';
 import Link from 'next/link';
 import {
    EditDialog,
@@ -91,6 +87,7 @@ import {
    TooltipContent,
    TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useReceipt } from '@/entities/receipt';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
