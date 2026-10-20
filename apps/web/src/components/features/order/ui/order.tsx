@@ -305,7 +305,7 @@ export function Order({
                                                 : '#pending-orders'
                                           }
                                           target="_blank"
-                                          className="flex items-center gap-2 underline"
+                                          className="flex items-center gap-2"
                                        >
                                           {offer.externalId === 'delivery' ? (
                                              <TruckIcon className="size-6 mx-0.75" />
@@ -318,7 +318,7 @@ export function Order({
                                                 className="rounded-sm"
                                              />
                                           )}
-                                          <div className="overflow-auto">
+                                          <div className="overflow-auto border-primary border-b border-dashed">
                                              {offer.title}
                                           </div>
                                        </Link>
@@ -334,7 +334,7 @@ export function Order({
                                              ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
                                              : '#pending-orders'
                                        }
-                                       className="flex items-center gap-2 underline"
+                                       className="flex items-center gap-2"
                                        target="_blank"
                                     >
                                        {offer.externalId === 'delivery' ? (
