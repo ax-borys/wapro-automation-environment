@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { enableMapSet } from 'immer';
-import React, { useEffect, useId, useRef } from 'react';
+import React, { useEffect, useId, useLayoutEffect, useRef } from 'react';
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 
@@ -48,33 +48,29 @@ export function useScrollCache(
 export function CachedScrollWrapper({
    className,
    cacheKey,
+   onScroll,
    ...props
 }: React.ComponentProps<'div'> & { cacheKey: string }) {
-   const [scroll, setScroll] = useScrollCache(cacheKey);
    const wrapperRef = useRef<HTMLDivElement>(null);
 
-   useEffect(() => {
-      const handleScroll = () => {
-         if (!wrapperRef.current) return;
+   // Restore once per key, before paint. Read imperatively so we don't subscribe.
+   useLayoutEffect(() => {
+      const el = wrapperRef.current;
+      if (!el) return;
+      el.scrollTop = useScrollStore.getState().getPosition(cacheKey) ?? 0;
+   }, [cacheKey]);
 
-         setScroll(wrapperRef.current.scrollTop);
-      };
-
-      if (!wrapperRef.current) return;
-
-      wrapperRef.current.addEventListener('scroll', handleScroll, {
-         passive: true,
-      });
-
-      return () =>
-         wrapperRef.current?.removeEventListener('scroll', handleScroll);
-   }, []);
-
-   useEffect(() => {
-      if (!wrapperRef.current) return;
-
-      wrapperRef.current.scrollTop = scroll;
-   }, []);
-
-   return <div ref={wrapperRef} className={cn(className)} {...props} />;
+   return (
+      <div
+         {...props}
+         ref={wrapperRef}
+         className={cn(className)}
+         onScroll={(e) => {
+            useScrollStore
+               .getState()
+               .setPosition(cacheKey, e.currentTarget.scrollTop);
+            onScroll?.(e);
+         }}
+      />
+   );
 }

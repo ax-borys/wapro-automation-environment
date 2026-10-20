@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from 'react';
 import { fetchPendingOrders } from '@/entities/order/api/fetch-pending-orders';
 import { Order } from '@/components/features/order';
-import { sortOrders, useFulfillOrders } from '@/entities/order';
+import { sortOrders } from '../utils/sort-orders';
 import { normilizeItems } from '@/entities/offer';
 import { CachedScrollWrapper } from '@/components/ui/cached-scroll-wrapper';
 import {
@@ -27,56 +27,20 @@ import {
 } from '@/components/ui/select';
 import { OrdersListFilters, useOrdersListStore } from '../model/store';
 import { useOrdersFilter } from '../model/use-orders-filter';
-
-function RequiredDocumentTypeFilterSelect({ ...props }) {
-   const items = [
-      { label: 'Receipts', value: 'RECEIPT' },
-      { label: 'Invoices', value: 'INVOICE' },
-      { label: 'All', value: 'ALL' },
-   ] as const;
-
-   const setRequiredDocumentTypeFilter = useOrdersListStore(
-      (s) => s.setRequiredDocumentTypeFilter,
-   );
-
-   const requiredDocumentType = useOrdersListStore(
-      (s) => s.filters.requiredDocumentType,
-   );
-
-   return (
-      <Select
-         onValueChange={(v: OrdersListFilters['requiredDocumentType']) =>
-            setRequiredDocumentTypeFilter(v)
-         }
-         value={requiredDocumentType}
-         {...props}
-      >
-         <SelectTrigger className="w-30">
-            <SelectValue placeholder="Document" />
-         </SelectTrigger>
-         <SelectContent>
-            <SelectGroup>
-               {items.map((item) => (
-                  <SelectItem key={item.value} value={item.value}>
-                     {item.label}
-                  </SelectItem>
-               ))}
-            </SelectGroup>
-         </SelectContent>
-      </Select>
-   );
-}
+import { useFulfillOrders } from '@/entities/order';
+import { RequiredDocumentTypeFilterSelect } from './required-document-type-filter-select';
 
 export function OrdersList() {
    const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
 
-   const [sortedOrderIds, setSortedOrderIds] = useState<Set<OrderModel['id']>>(
-      new Set(Object.values(orders).map((order) => order.id)),
-   );
+   const sortedOrderIds = useOrdersListStore((s) => s.sortedOrderIds);
+   const setSortedOrderIds = useOrdersListStore((s) => s.setSortedOrderIds);
 
    const sortedOrdersList = [...sortedOrderIds].map((id) => orders[id]);
 
+   const currentFilters = useOrdersListStore((s) => s.filters);
    const filter = useOrdersFilter();
+
    const filtredOrders = filter(sortedOrdersList);
    const filtredOrdersIds = filtredOrders.map((order) => order.id);
 
@@ -268,7 +232,7 @@ export function OrdersList() {
          </div>
          <Separator />
          <CachedScrollWrapper
-            cacheKey="pending-orders"
+            cacheKey={`pending-orders-${currentFilters.requiredDocumentType}`}
             className="overflow-y-scroll min-h-0 flex-1"
          >
             {Object.values(receipts).length
