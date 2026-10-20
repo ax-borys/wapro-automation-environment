@@ -25,17 +25,32 @@ import {
    SelectTrigger,
    SelectValue,
 } from '@/components/ui/select';
+import { OrdersListFilters, useOrdersListStore } from '../model/store';
+import { useOrdersFilter } from '../model/use-orders-filter';
 
-type RequiredDocumentTypeFilter = OrderModel['requiredDocumentType'] | 'ALL';
+function RequiredDocumentTypeFilterSelect({ ...props }) {
+   const items = [
+      { label: 'Receipts', value: 'RECEIPT' },
+      { label: 'Invoices', value: 'INVOICE' },
+      { label: 'All', value: 'ALL' },
+   ] as const;
 
-function RequiredDocumentTypeFilterSelect({
-   items,
-   ...props
-}: React.ComponentProps<typeof Select> & {
-   items: { label: string; value: RequiredDocumentTypeFilter }[];
-}) {
+   const setRequiredDocumentTypeFilter = useOrdersListStore(
+      (s) => s.setRequiredDocumentTypeFilter,
+   );
+
+   const requiredDocumentType = useOrdersListStore(
+      (s) => s.filters.requiredDocumentType,
+   );
+
    return (
-      <Select {...props}>
+      <Select
+         onValueChange={(v: OrdersListFilters['requiredDocumentType']) =>
+            setRequiredDocumentTypeFilter(v)
+         }
+         value={requiredDocumentType}
+         {...props}
+      >
          <SelectTrigger className="w-30">
             <SelectValue placeholder="Document" />
          </SelectTrigger>
@@ -59,27 +74,13 @@ export function OrdersList() {
       new Set(Object.values(orders).map((order) => order.id)),
    );
 
-   const [filters, setFilters] = useState<{
-      requiredDocumentType: RequiredDocumentTypeFilter;
-   }>({ requiredDocumentType: 'ALL' });
+   const sortedOrdersList = [...sortedOrderIds].map((id) => orders[id]);
 
-   const filter = (orderIds: number[]) => {
-      return orderIds.filter((id) => {
-         const order = orders[id];
+   const filter = useOrdersFilter();
+   const filtredOrders = filter(sortedOrdersList);
+   const filtredOrdersIds = filtredOrders.map((order) => order.id);
 
-         if (filters.requiredDocumentType !== 'ALL') {
-            if (order.requiredDocumentType !== filters.requiredDocumentType) {
-               return false;
-            }
-
-            return true;
-         }
-         ``;
-         return true;
-      });
-   };
-
-   const filtredOrderIds = filter([...sortedOrderIds]);
+   const ordersList = filtredOrders;
 
    const {
       receipts,
@@ -88,7 +89,7 @@ export function OrdersList() {
    } = useReceiptsStore();
 
    const fulfillOrders = useFulfillOrders(
-      [...filtredOrderIds].filter(
+      [...filtredOrdersIds].filter(
          (id) =>
             !orders[id].receipt?.id &&
             orders[id].receipt?.number &&
@@ -96,8 +97,6 @@ export function OrdersList() {
             orders[id].invoice.number,
       ),
    );
-
-   const ordersList = [...filtredOrderIds].map((id) => orders[id]);
 
    useEffect(() => {
       // Update only user refreshes page manually.
@@ -232,8 +231,8 @@ export function OrdersList() {
                />
                <span className="select-none">
                   Select all{' '}
-                  {filtredOrderIds.length && !selectedOrders.length
-                     ? `(${filtredOrderIds.length})`
+                  {filtredOrdersIds.length && !selectedOrders.length
+                     ? `(${filtredOrdersIds.length})`
                      : null}
                </span>
             </div>
@@ -264,20 +263,7 @@ export function OrdersList() {
                </>
             ) : null}
             <div className="ml-auto">
-               <RequiredDocumentTypeFilterSelect
-                  value={filters.requiredDocumentType}
-                  onValueChange={(v) =>
-                     setFilters({
-                        ...filters,
-                        requiredDocumentType: v as RequiredDocumentTypeFilter,
-                     })
-                  }
-                  items={[
-                     { label: 'All', value: 'ALL' },
-                     { label: 'Receipt', value: 'RECEIPT' },
-                     { label: 'Invoice', value: 'INVOICE' } as const,
-                  ]}
-               />
+               <RequiredDocumentTypeFilterSelect />
             </div>
          </div>
          <Separator />
