@@ -30,7 +30,7 @@ import { Receipt } from '@wae/types';
 import { EditIcon } from 'lucide-react';
 import { ChangeEventHandler, useCallback, useEffect, useState } from 'react';
 
-export function EditFiscalNumber({
+export function UpdateFiscalNumber({
    receiptId,
    trigger,
    defaultOpen = false,

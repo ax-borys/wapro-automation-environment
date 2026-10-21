@@ -1,5 +1,5 @@
 'use client';
-import { EditFiscalNumber } from '@/components/features/edit-fiscal-number/ui/edit-fiscal-number';
+import { UpdateFiscalNumber } from '@/components/features/update-fiscal-number';
 import { Button } from '@/components/ui/button';
 import { DataTableFeatures } from '@/components/ui/data-table/data-table-features';
 import {
@@ -191,7 +191,7 @@ export const columns = columnHelper.columns([
                   </DropdownMenuContent>
                </DropdownMenu>
                {selected === 'FISCAL_NUMBER' ? (
-                  <EditFiscalNumber
+                  <UpdateFiscalNumber
                      receiptId={r.original.id}
                      defaultOpen={true}
                      onClose={() => setTimeout(() => setSelected(null), 100)}

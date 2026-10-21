@@ -73,7 +73,7 @@ import {
    EditDialogTrigger,
 } from '@/components/ui/edit-dalog';
 import { useCallback, useState } from 'react';
-import { InvoiceNumberBadge } from '@/components/ui/badges';
+import { InvoiceNumberBadge, ReceiptNumberBadge } from '@/components/ui/badges';
 import {
    DropdownMenu,
    DropdownMenuContent,
@@ -205,26 +205,13 @@ export function Order({
             ) : null}
             <div className="ml-auto flex gap-2 h-9">
                {receipt.number ? (
-                  <Button
-                     onClick={() => copyToClipboard(number as string)}
-                     className="bg-transparent hover:bg-transparent cursor-pointer px-0"
-                  >
-                     <BadgeReceiptNumber value={number as string} />
-                  </Button>
+                  <ReceiptNumberBadge value={receipt.number} />
                ) : null}
                {fiscalNumber ? (
                   <BadgeFiskalNumber value={fiscalNumber} />
                ) : null}
                {order.invoice?.number ? (
-                  <Button
-                     onClick={() =>
-                        order.invoice?.number &&
-                        copyToClipboard(order.invoice?.number)
-                     }
-                     className="bg-transparent hover:bg-transparent cursor-pointer px-0"
-                  >
-                     <InvoiceNumberBadge value={order.invoice.number} />
-                  </Button>
+                  <InvoiceNumberBadge value={order.invoice.number} />
                ) : null}
                {order.paymentMethod === 'PREPAID' ? (
                   <BadgePaid />
