@@ -180,27 +180,6 @@ export function Order({
       return navigator.clipboard.writeText(value);
    };
 
-   const calculateTax = (offer: OfferModel): ProductModel['tax'] => {
-      const items = offers[offer.id]?.items ?? offer.items;
-
-      const itemsList = Object.values(items);
-
-      if (itemsList.length) {
-         return itemsList.reduce((a, b) => {
-            if (a.tax !== b.tax) {
-               // if taxes for one offer are different (several products have different tax rate)
-               // return 0 to handle it manually
-               a.tax = 0;
-               return a;
-            }
-
-            return b;
-         }).tax;
-      } else {
-         return 0;
-      }
-   };
-
    return (
       <OrderCard className="flex h-fit">
          <OrderCardHeader>
@@ -260,110 +239,26 @@ export function Order({
                <OrderCardTableBody>
                   {Object.values(order.positions).map((position, i) => {
                      const offer = offers[position.offerId] ?? position.offer;
-                     const isOfferLinked = !!Object.values(offer.items).length;
-                     const items = Object.values(offer.items);
 
                      return (
                         <OrderCardTablePosition
                            key={offer.externalId + i}
-                           quantity={position.quantity}
-                           tax={calculateTax(offer)}
-                           net={
-                              currency(position.price, {
-                                 fromCents: true,
-                              }).divide(1.23).value
-                           }
-                           gross={
-                              currency(position.price, { fromCents: true })
-                                 .value
-                           }
-                        >
-                           <>
-                              {isOfferLinked ? (
-                                 <Tooltip>
-                                    <TooltipContent>
-                                       {items.map((itemc) => (
-                                          <span
-                                             key={itemc.id}
-                                             className="flex items-center gap-2"
-                                          >
-                                             {itemc.name}
-                                             <XIcon />
-                                             {itemc.quantity}
-                                          </span>
-                                       ))}
-                                    </TooltipContent>
-                                    <TooltipTrigger className="flex items-center gap-2">
-                                       <Link
-                                          href={
-                                             offer.src === 'allegro' &&
-                                             offer.externalId !== 'delivery'
-                                                ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
-                                                : '#pending-orders'
-                                          }
-                                          target="_blank"
-                                          className="flex items-center gap-2"
-                                       >
-                                          {offer.externalId === 'delivery' ? (
-                                             <TruckIcon className="size-6 mx-0.75" />
-                                          ) : (
-                                             <Image
-                                                src={offer.imgSrc}
-                                                alt="Product preview"
-                                                width={30}
-                                                height={30}
-                                                className="rounded-sm"
-                                             />
-                                          )}
-                                          <div className="overflow-auto border-primary border-b border-dashed">
-                                             {offer.title}
-                                          </div>
-                                       </Link>
-                                       <LinkIcon />
-                                    </TooltipTrigger>
-                                 </Tooltip>
-                              ) : (
-                                 <>
-                                    <Link
-                                       href={
-                                          offer.src === 'allegro' &&
-                                          offer.externalId !== 'delivery'
-                                             ? `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`
-                                             : '#pending-orders'
-                                       }
-                                       className="flex items-center gap-2"
-                                       target="_blank"
+                           position={position}
+                           offer={offer}
+                           editOfferComp={
+                              <EditOffer
+                                 trigger={
+                                    <Button
+                                       variant={'destructive'}
+                                       className="cursor-pointer"
                                     >
-                                       {offer.externalId === 'delivery' ? (
-                                          <TruckIcon className="size-6 mx-0.75" />
-                                       ) : (
-                                          <Image
-                                             src={offer.imgSrc}
-                                             alt="Product preview"
-                                             width={30}
-                                             height={30}
-                                             className="rounded-sm"
-                                          />
-                                       )}
-                                       <div className="overflow-auto">
-                                          {offer.title}
-                                       </div>
-                                    </Link>
-                                    <EditOffer
-                                       trigger={
-                                          <Button
-                                             variant={'destructive'}
-                                             className="cursor-pointer"
-                                          >
-                                             <WarningIcon className="w-fit" />
-                                          </Button>
-                                       }
-                                       offer={offers[offer.id] ?? offer}
-                                    />
-                                 </>
-                              )}
-                           </>
-                        </OrderCardTablePosition>
+                                       <WarningIcon className="w-fit" />
+                                    </Button>
+                                 }
+                                 offer={offer}
+                              />
+                           }
+                        />
                      );
                   })}
                </OrderCardTableBody>

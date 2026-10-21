@@ -1,7 +1,5 @@
-'use client';
 import Image from 'next/image';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './card';
-import { Checkbox } from './checkbox';
+import { Card, CardContent, CardFooter, CardHeader } from './card';
 import {
    Table,
    TableBody,
@@ -9,37 +7,43 @@ import {
    TableHeader,
    TableRow,
    TableCell,
-   TableCaption,
    TableFooter,
 } from './table';
 import { Badge } from './badge';
-import { Button } from './button';
-import { Separator } from './separator';
-import { BadgeCheck } from 'lucide-react';
 import {
    CashRegisterIcon,
    CopyIcon,
    HandCoinsIcon,
+   LinkIcon,
    PackageIcon,
-   ReceiptIcon,
    SealCheckIcon,
    TruckIcon,
-   User,
    UserIcon,
+   XIcon,
 } from '@phosphor-icons/react';
 import {
    Item,
    ItemContent,
    ItemMedia,
    ItemTitle,
-   ItemActions,
    ItemDescription,
 } from './item';
 import { cn } from '@/lib/utils';
 import currency from 'currency.js';
 import React from 'react';
-import { Address, Delivery } from '@wae/types';
-import { ProductModel } from '@/entities/offer';
+import { Address } from '@wae/types';
+import { OfferModel, ProductModel } from '@/entities/offer';
+import { PositionModel } from '@/entities/order';
+import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
+import Link from 'next/link';
+
+const formatPln = (value: currency.Any) =>
+   currency(value, {
+      decimal: ',',
+      separator: ' ',
+      pattern: '# !',
+      symbol: 'zł',
+   }).format();
 
 export function BadgePaid({
    className,
@@ -121,7 +125,7 @@ export function OrderCardBody({
    className,
    children,
    ...props
-}: React.ComponentProps<typeof CardHeader>) {
+}: React.ComponentProps<typeof CardContent>) {
    return (
       <CardContent className={cn(className)} {...props}>
          {children}
@@ -169,21 +173,9 @@ export function OrderCardTableFooter({
       <TableFooter {...props}>
          <TableRow>
             <TableCell colSpan={3}>Total</TableCell>
+            <TableCell className="text-right">{formatPln(totalNet)}</TableCell>
             <TableCell className="text-right">
-               {currency(totalNet, {
-                  decimal: ',',
-                  separator: ' ',
-                  pattern: '# !',
-                  symbol: 'zł',
-               }).format()}
-            </TableCell>
-            <TableCell className="text-right">
-               {currency(totalGross, {
-                  decimal: ',',
-                  separator: ' ',
-                  pattern: '# !',
-                  symbol: 'zł',
-               }).format()}
+               {formatPln(totalGross)}
             </TableCell>
          </TableRow>
       </TableFooter>
@@ -199,41 +191,118 @@ export function OrderCardTableBody({
 
 export function OrderCardTablePosition({
    className,
-   quantity,
-   tax,
-   net,
-   gross,
-   children,
+   position,
+   editOfferComp,
+   offer,
    ...props
 }: React.ComponentProps<typeof TableRow> & {
-   quantity: number;
-   tax: ProductModel['tax'];
-   net: number;
-   gross: number;
+   position: Omit<PositionModel, 'offer'>;
+   editOfferComp: React.ReactElement;
+   offer: OfferModel;
 }) {
+   const isOfferLinked = !!Object.values(offer.items).length;
+   const items = Object.values(offer.items);
+
+   const calculateTax = (offer: OfferModel): ProductModel['tax'] => {
+      const taxes = new Set(Object.values(offer.items).map((i) => i.tax));
+      return taxes.size === 1 ? [...taxes][0] : 0;
+   };
+
+   const tax = calculateTax(offer);
+
+   const gross = currency(position.price, { fromCents: true }).value;
+
+   const net = currency(position.price, {
+      fromCents: true,
+   }).divide((100 + (tax / 100) * 100) / 100).value;
+
+   const fromAllegro =
+      offer.src === 'allegro' && offer.externalId !== 'delivery';
+
+   const allegroOfferUrl = `https://salescenter.allegro.com/my-assortment?limit=20&phrase=${offer.externalId}&sellingMode.format=BUY_NOW&context.marketplace=allegro-pl`;
+
    return (
       <TableRow className={cn(className)} {...props}>
          <TableCell className="font-medium text-sm flex items-center gap-2">
-            {children}
+            <>
+               {isOfferLinked ? (
+                  <Tooltip>
+                     <TooltipContent>
+                        {items.map((item) => (
+                           <span
+                              key={item.id}
+                              className="flex items-center gap-2"
+                           >
+                              {item.name}
+                              <XIcon />
+                              {item.quantity}
+                           </span>
+                        ))}
+                     </TooltipContent>
+                     <TooltipTrigger
+                        asChild
+                        className="flex items-center gap-2"
+                     >
+                        <Link
+                           href={
+                              fromAllegro ? allegroOfferUrl : '#pending-orders'
+                           }
+                           target={fromAllegro ? '_blank' : '_self'}
+                           rel={'noopener noreferrer'}
+                        >
+                           {offer.externalId === 'delivery' ? (
+                              <TruckIcon className="size-6 mx-0.75" />
+                           ) : (
+                              <Image
+                                 src={offer.imgSrc}
+                                 alt=""
+                                 width={30}
+                                 height={30}
+                                 className="rounded-sm"
+                              />
+                           )}
+                           <div className="overflow-auto border-primary border-b border-dashed">
+                              {offer.title}
+                           </div>
+                           <LinkIcon />
+                        </Link>
+                     </TooltipTrigger>
+                  </Tooltip>
+               ) : (
+                  <>
+                     <Link
+                        href={
+                           offer.src === 'allegro' &&
+                           offer.externalId !== 'delivery'
+                              ? allegroOfferUrl
+                              : '#pending-orders'
+                        }
+                        className="flex items-center gap-2"
+                        target={fromAllegro ? '_blank' : '_self'}
+                        rel={'noopener noreferrer'}
+                     >
+                        {offer.externalId === 'delivery' ? (
+                           <TruckIcon className="size-6 mx-0.75" />
+                        ) : (
+                           <Image
+                              src={offer.imgSrc}
+                              alt="Product preview"
+                              width={30}
+                              height={30}
+                              className="rounded-sm"
+                           />
+                        )}
+                        <div className="overflow-auto">{offer.title}</div>
+                     </Link>
+                     {editOfferComp}
+                  </>
+               )}
+            </>
          </TableCell>
-         <TableCell className="text-center">x{quantity}</TableCell>
+         <TableCell className="text-center">x{position.quantity}</TableCell>
          <TableCell className="text-center">{tax}%</TableCell>
-         <TableCell className="text-right">
-            {currency(net, {
-               decimal: ',',
-               separator: ' ',
-               pattern: '# !',
-               symbol: 'zł',
-            }).format()}
-         </TableCell>
-         <TableCell className="text-right">
-            {currency(gross, {
-               decimal: ',',
-               separator: ' ',
-               pattern: '# !',
-               symbol: 'zł',
-            }).format()}
-         </TableCell>
+         <TableCell className="text-right">{formatPln(net)}</TableCell>
+         <TableCell className="text-right">{formatPln(gross)}</TableCell>
       </TableRow>
    );
 }
@@ -322,7 +391,7 @@ export function OrderCardPackage({
          <ItemContent>
             <ItemTitle>
                {numberOfPackages}
-               <span className="font-regular">
+               <span className="font-normal">
                   {numberOfPackages === 1 ? 'package' : 'packages'}
                </span>
             </ItemTitle>
