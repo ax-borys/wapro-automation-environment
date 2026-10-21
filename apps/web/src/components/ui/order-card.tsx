@@ -14,9 +14,12 @@ import {
    CashRegisterIcon,
    CopyIcon,
    HandCoinsIcon,
+   Icon,
+   InvoiceIcon,
    LinkIcon,
    PackageIcon,
    SealCheckIcon,
+   SpinnerIcon,
    TruckIcon,
    UserIcon,
    XIcon,
@@ -33,9 +36,11 @@ import currency from 'currency.js';
 import React from 'react';
 import { Address } from '@wae/types';
 import { OfferModel, ProductModel } from '@/entities/offer';
-import { PositionModel } from '@/entities/order';
+import { OrderModel, PositionModel } from '@/entities/order';
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip';
 import Link from 'next/link';
+import { Button } from './button';
+import { Marker, MarkerContent, MarkerIcon } from './marker';
 
 const formatPln = (value: currency.Any) =>
    currency(value, {
@@ -397,5 +402,49 @@ export function OrderCardPackage({
             </ItemTitle>
          </ItemContent>
       </Item>
+   );
+}
+
+type Appearance = { icon: React.ReactNode; label: React.ReactNode };
+
+export function OrderCardActionButton({
+   status,
+   idle,
+   pending,
+   done,
+   ...props
+}: Omit<React.ComponentProps<typeof Button>, 'children'> & {
+   status: 'RECORD' | 'RECORDED' | 'RECORDING';
+   idle: Appearance;
+   pending: Appearance & { spin?: boolean };
+   done: Appearance;
+}) {
+   if (status === 'RECORD') {
+      return (
+         <Button {...props}>
+            {idle.icon}
+            {idle.label}
+         </Button>
+      );
+   }
+
+   const isPending = status === 'RECORDING';
+   const { icon, label } = isPending ? pending : done;
+   const spin = !!pending.spin;
+
+   return (
+      <Button
+         variant={isPending ? 'secondary' : 'outline'}
+         disabled={isPending}
+      >
+         <Marker role="status">
+            <MarkerIcon className={cn(isPending && spin && 'animate-spin')}>
+               {icon}
+            </MarkerIcon>
+            <MarkerContent className={cn(isPending && 'shimmer')}>
+               {label}
+            </MarkerContent>
+         </Marker>
+      </Button>
    );
 }

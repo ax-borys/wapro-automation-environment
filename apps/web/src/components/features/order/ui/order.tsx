@@ -6,6 +6,7 @@ import {
    BadgePickup,
    BadgeReceiptNumber,
    OrderCard,
+   OrderCardActionButton,
    OrderCardBody,
    OrderCardDeliveryCard,
    OrderCardFooter,
@@ -344,40 +345,21 @@ export function Order({
                            </EditDialogContent>
                         </EditDialog>
                      ) : null}
-                     {invoiceStatus === 'RECORD' ? (
-                        <Button
-                           variant={
-                              order.invoice?.number ? 'default' : 'outline'
-                           }
-                           onClick={fulfillOrdersHandler}
-                           disabled={!order.invoice?.number}
-                        >
-                           <InvoiceIcon />
-                           {order.invoice?.number
-                              ? 'Approve invoice'
-                              : 'Invoice required'}
-                        </Button>
-                     ) : invoiceStatus === 'RECORDING' ? (
-                        <Button variant={'secondary'} disabled>
-                           <Marker role="status">
-                              <MarkerIcon className="animate-spin">
-                                 <SpinnerIcon />
-                              </MarkerIcon>
-                              <MarkerContent className="shimmer">
-                                 Approving
-                              </MarkerContent>
-                           </Marker>
-                        </Button>
-                     ) : (
-                        <Button variant={'outline'}>
-                           <Marker role="status">
-                              <MarkerIcon>
-                                 <SealCheckIcon />
-                              </MarkerIcon>
-                              <MarkerContent>Approved</MarkerContent>
-                           </Marker>
-                        </Button>
-                     )}
+                     <OrderCardActionButton
+                        status={invoiceStatus}
+                        variant={order.invoice?.number ? 'default' : 'outline'}
+                        disabled={!order.invoice?.number}
+                        idle={{
+                           icon: <InvoiceIcon />,
+                           label: 'Approve invoice',
+                        }}
+                        pending={{
+                           icon: <SpinnerIcon />,
+                           label: 'Recording',
+                        }}
+                        done={{ icon: <SealCheckIcon />, label: 'Recorded' }}
+                        onClick={fulfillOrdersHandler}
+                     />
                   </>
                ) : (
                   <>
@@ -389,7 +371,9 @@ export function Order({
                      >
                         <EditDialogTrigger asChild>
                            <Button
-                              variant={'outline'}
+                              variant={
+                                 receipt.fiscalNumber ? 'outline' : 'default'
+                              }
                               disabled={receipt.status !== 'RECORD'}
                            >
                               <CashRegisterIcon />
@@ -428,35 +412,21 @@ export function Order({
                            </EditDialogFooter>
                         </EditDialogContent>
                      </EditDialog>
-                     {status === 'RECORD' ? (
-                        <Button
-                           onClick={fulfillOrdersHandler}
-                           disabled={fiscalNumber ? false : true}
-                        >
-                           <ReceiptIcon />
-                           Record a receipt
-                        </Button>
-                     ) : status === 'RECORDING' ? (
-                        <Button variant={'secondary'} disabled>
-                           <Marker role="status">
-                              <MarkerIcon className="animate-spin">
-                                 <SpinnerIcon />
-                              </MarkerIcon>
-                              <MarkerContent className="shimmer">
-                                 Recording
-                              </MarkerContent>
-                           </Marker>
-                        </Button>
-                     ) : (
-                        <Button variant={'outline'}>
-                           <Marker role="status">
-                              <MarkerIcon>
-                                 <FloppyDiskIcon />
-                              </MarkerIcon>
-                              <MarkerContent>Recorded</MarkerContent>
-                           </Marker>
-                        </Button>
-                     )}
+                     <OrderCardActionButton
+                        status={status}
+                        variant={receipt.fiscalNumber ? 'default' : 'outline'}
+                        disabled={!receipt.fiscalNumber}
+                        idle={{
+                           icon: <ReceiptIcon />,
+                           label: 'Record receipt',
+                        }}
+                        pending={{
+                           icon: <SpinnerIcon />,
+                           label: 'Recording',
+                        }}
+                        done={{ icon: <FloppyDiskIcon />, label: 'Recorded' }}
+                        onClick={fulfillOrdersHandler}
+                     />
                   </>
                )}
             </OrderCardFooterActions>
