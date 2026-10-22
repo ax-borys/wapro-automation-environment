@@ -1,8 +1,9 @@
-import { OrderModel, useOrdersStore } from '../orders.store';
 import { changeRequiredDocumentType as changeRequiredDocumentTypeApi } from '../api/change-required-document-type';
 import { errorModelSchema, useError } from '@/entities/error';
 
 import * as v from 'valibot';
+import { OrderModel } from '../types';
+import { useOrdersStore } from '../orders.store';
 
 export function useChangeRequiredDocumentType(orderId: OrderModel['id']) {
    const { raiseError } = useError();

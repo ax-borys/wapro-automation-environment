@@ -14,34 +14,26 @@ import {
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { OfferModel, ProductModel } from '../offer';
-
-type Status = 'RECORD' | 'RECORDING' | 'RECORDED';
-
-export type PositionModel = Omit<OrderPoisition, 'clientTag' | 'receiptId'> & {
-   offer: OfferModel;
-};
-
-export type OrderModel = Omit<Order, 'clientTag'> & {
-   customer: Omit<Customer, 'clientTag'> & {
-      address:
-         | Omit<Address, 'clientTag' | 'orderId' | 'customerId'>
-         | null
-         | undefined;
-   };
-   delivery: Omit<Delivery, 'clientTag'> & {
-      address: Omit<Address, 'clientTag'>;
-   };
-   positions: Record<PositionModel['offer']['id'], PositionModel>;
-   receipt: Omit<Receipt, 'clientTag'> | null;
-   invoice: { status: Status; number: string | null };
-   recipient: Omit<Recipient, 'clientTag' | 'addressId'>;
-   selected: boolean;
-};
+import {
+   InvoiceModel,
+   OrderModel,
+   OriginalInvoice,
+   OriginalReceipt,
+   PositionModel,
+   ReceiptModel,
+   Status,
+} from './types';
+import {
+   getInvoiceStatus,
+   getReceiptStatus,
+} from './utils/get-document-status';
 
 export type OrdersStore = {
    orders: Record<OrderModel['id'], OrderModel>;
    add: (order: OrderModel) => void;
    addMany: (orders: OrderModel[]) => void;
+   attachReceipt: (orderId: OrderModel['id'], receipt: OriginalReceipt) => void;
+   attachInvoice: (orderId: OrderModel['id'], invoice: OriginalInvoice) => void;
    remove: (orderId: OrderModel['id']) => void;
    select: (id: OrderModel['id']) => void;
    unselect: (id: OrderModel['id']) => void;
@@ -55,15 +47,18 @@ export type OrdersStore = {
       orderId: OrderModel['id'],
       positionId: PositionModel['offer']['id'],
    ) => void;
-   setInvoiceNumber: (orderId: OrderModel['id'], value: string) => void;
-   changeInvoiceStatus: (
+   setDraftInvoiceNumber: (orderId: OrderModel['id'], value: string) => void;
+   setDraftFiscalNumber: (
       orderId: OrderModel['id'],
-      value: 'RECORD' | 'RECORDING' | 'RECORDED',
+      value: Receipt['fiscalNumber'],
    ) => void;
    changeRequiredDocuemntType: (
       orderId: OrderModel['id'],
       value: OrderModel['requiredDocumentType'],
    ) => void;
+   getStatus: (orderId: OrderModel['id']) => Status;
+   startRecording: (orderId: OrderModel['id']) => void;
+   finishRecording: (orderId: OrderModel['id']) => void;
 };
 
 export function normilizePositions(
@@ -89,40 +84,52 @@ export const useOrdersStore = create<OrdersStore>()(
                draft.orders[order.id] = order;
             });
          }),
+      attachReceipt: (orderId, receipt) =>
+         set((draft) => {
+            if (draft.orders[orderId].receipt.original) return;
+
+            draft.orders[orderId].receipt.original = receipt;
+         }),
+      attachInvoice: (orderId, invoice) =>
+         set((draft) => {
+            if (draft.orders[orderId].invoice.original) return;
+
+            draft.orders[orderId].invoice.original = invoice;
+         }),
       remove: (orderId) =>
          set((draft) => {
             delete draft.orders[orderId];
          }),
       select: (id) =>
          set((s) => {
-            s.orders[id].selected = true;
+            s.orders[id].isSelected = true;
          }),
       unselect: (id) =>
          set((s) => {
-            s.orders[id].selected = false;
+            s.orders[id].isSelected = false;
          }),
       selectToggle: (id) =>
          set((s) => {
-            s.orders[id].selected = !s.orders[id].selected;
+            s.orders[id].isSelected = !s.orders[id].isSelected;
          }),
       selectMany: (ids) =>
          set((s) => {
-            ids.forEach((id) => (s.orders[id].selected = true));
+            ids.forEach((id) => (s.orders[id].isSelected = true));
          }),
       unselectMany: (ids) =>
          set((s) => {
-            ids.forEach((id) => (s.orders[id].selected = false));
+            ids.forEach((id) => (s.orders[id].isSelected = false));
          }),
       selectAll: () =>
          set((s) => {
             Object.values(s.orders).forEach((receipt) => {
-               receipt.selected = true;
+               receipt.isSelected = true;
             });
          }),
       unselectAll: () =>
          set((s) => {
             Object.values(s.orders).forEach((receipt) => {
-               receipt.selected = false;
+               receipt.isSelected = false;
             });
          }),
       addPosition: (orderId, position) =>
@@ -133,17 +140,90 @@ export const useOrdersStore = create<OrdersStore>()(
          set((draft) => {
             delete draft.orders[orderId].positions[positionId];
          }),
-      setInvoiceNumber: (orderId, value) =>
+      setDraftInvoiceNumber: (orderId, value) =>
          set((draft) => {
-            draft.orders[orderId].invoice.number = value;
+            draft.orders[orderId].invoice.draft.number = value;
          }),
-      changeInvoiceStatus: (orderId, value) =>
+      setDraftFiscalNumber: (orderId, value) =>
          set((draft) => {
-            draft.orders[orderId].invoice.status = value;
+            draft.orders[orderId].receipt.draft.fiscalNumber = value;
          }),
       changeRequiredDocuemntType: (orderId, value) =>
          set((draft) => {
             draft.orders[orderId].requiredDocumentType = value;
          }),
+      getStatus: (orderId) => {
+         const order = get().orders[orderId];
+
+         switch (order.requiredDocumentType) {
+            case 'RECEIPT':
+               return getReceiptStatus(order);
+            case 'INVOICE':
+               return getInvoiceStatus(order);
+         }
+      },
+      startRecording: (orderId) =>
+         set((draft) => {
+            const order = draft.orders[orderId];
+
+            switch (order.requiredDocumentType) {
+               case 'RECEIPT':
+                  order.receipt.isRecording = true;
+                  break;
+               case 'INVOICE':
+                  order.invoice.isRecording = true;
+                  break;
+               default:
+                  break;
+            }
+         }),
+      finishRecording: (orderId) =>
+         set((draft) => {
+            const order = draft.orders[orderId];
+
+            switch (order.requiredDocumentType) {
+               case 'RECEIPT':
+                  order.receipt.isRecording = false;
+                  break;
+               case 'INVOICE':
+                  order.invoice.isRecording = false;
+                  break;
+               default:
+                  break;
+            }
+         }),
    })),
 );
+
+export function useInvoiceNumber(orderId: OrderModel['id']) {
+   const invoiceNumber = useOrdersStore(
+      (s) =>
+         s.orders[orderId]?.invoice.draft.number ??
+         s.orders[orderId]?.invoice.original?.number ??
+         null,
+   );
+
+   return invoiceNumber;
+}
+
+export function useFiscalNumber(orderId: OrderModel['id']) {
+   const fiscalNumber = useOrdersStore(
+      (s) =>
+         s.orders[orderId]?.receipt.draft.fiscalNumber ??
+         s.orders[orderId].receipt.original?.number ??
+         null,
+   );
+   return fiscalNumber;
+}
+
+export function useReceipt(orderId: OfferModel['id']) {
+   const receipt = useOrdersStore((s) => s.orders[orderId]?.receipt);
+
+   return receipt;
+}
+
+export function useInvoice(orderId: OfferModel['id']) {
+   const invoice = useOrdersStore((s) => s.orders[orderId]?.invoice);
+
+   return invoice;
+}

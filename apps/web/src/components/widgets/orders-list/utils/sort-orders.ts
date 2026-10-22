@@ -1,18 +1,14 @@
-type Order = {
-   receipt: any;
-   invoice?: { status: 'RECORDED' | 'RECORD' | 'RECORDING' };
-   preparedAt: Date;
-};
+import { OrderModel } from '@/entities/order';
 
-const isRecorded = (order: Order) =>
-   Boolean(order.receipt) || order.invoice?.status === 'RECORDED';
+const isRecorded = (order: OrderModel) =>
+   order.invoice.original || order.receipt.original;
 
-export const sortOrders = (a: Order, b: Order) => {
+export const sortOrders = (a: OrderModel, b: OrderModel) => {
    const recordedDiff = Number(isRecorded(a)) - Number(isRecorded(b));
 
    if (recordedDiff !== 0) {
       return recordedDiff; // not recorded (0) first, recorded (1) last
    }
 
-   return a.preparedAt.getTime() - b.preparedAt.getTime();
+   return a.original.preparedAt.getTime() - b.original.preparedAt.getTime();
 };

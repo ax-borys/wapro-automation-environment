@@ -43,6 +43,10 @@ import {
    useFulfillOrders,
    type OrderModel,
    useChangeRequiredDocumentType,
+   useInvoice,
+   useReceipt,
+   useFiscalNumber,
+   useInvoiceNumber,
 } from '@/entities/order';
 import {
    Dialog,
@@ -88,7 +92,6 @@ import {
    TooltipContent,
    TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { useReceipt } from '@/entities/receipt';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -141,79 +144,78 @@ export function Order({
    id: OrderModel['id'];
    onChangeFiscalNumber?: (value: number | null) => void;
 }) {
-   const { order, selectToggle, setInvoiceNumber } = useOrder(id);
-   const { receipt, setFiscalNumber } = useReceipt(order.id);
+   const {
+      order,
+      selectToggle,
+      setDraftInvoiceNumber,
+      setDraftFiscalNumber,
+      status,
+   } = useOrder(id);
+
+   const receipt = useReceipt(order.id);
+   const invoice = useInvoice(order.id);
+
+   const fiscalNumber = useFiscalNumber(order.id);
+   const invoiceNumber = useInvoiceNumber(order.id);
+
    const { offers } = useOffersStore();
 
    const fulfillOrder = useFulfillOrders([order.id]);
 
-   const [draftFiscalNumber, setDraftFiscalNumber] = useState<string>('');
-   const [draftInvoiceNumber, setDraftInvoiceNumber] = useState<string>('');
+   const [fiscalNumberInput, setFiscalNumberInput] = useState<string>('');
+   const [invoiceNumberInput, setInvoiceNumberInput] = useState<string>('');
 
    useGetAndStoreOffers();
 
-   const { number, status, fiscalNumber } = receipt;
-
-   const invoiceStatus = order.invoice.status;
-
    const fulfillOrdersHandler = async () => {
-      // Guarantee that at least one field has value
-      if (!order.invoice?.number && !receipt.fiscalNumber) {
-         return;
-      }
-
       await fulfillOrder();
    };
 
    const submitFiscalNumber = useCallback(() => {
-      setFiscalNumber(Number(draftFiscalNumber));
-      onChangeFiscalNumber?.(Number(draftFiscalNumber));
+      setDraftFiscalNumber(fiscalNumberInput);
+      onChangeFiscalNumber?.(Number(fiscalNumber));
 
       setTimeout(() => setDraftFiscalNumber(''), 100);
-   }, [draftFiscalNumber]);
+   }, [fiscalNumberInput]);
 
    const submitInvoiceNumber = useCallback(() => {
-      setInvoiceNumber(draftInvoiceNumber);
+      setDraftInvoiceNumber(invoiceNumberInput);
       setTimeout(() => setDraftInvoiceNumber(''), 100);
-   }, [draftInvoiceNumber]);
-
-   const copyToClipboard = (value: string) => {
-      return navigator.clipboard.writeText(value);
-   };
+   }, [invoiceNumberInput]);
 
    return (
       <OrderCard className="flex h-fit">
          <OrderCardHeader>
             <Checkbox
                className="cursor-pointer"
-               checked={order.selected}
+               checked={order.isSelected}
                onCheckedChange={() => selectToggle()}
             />
             <span className="font-medium underline">
                <Link
                   href={
                      'https://salescenter.allegro.com/orders?query=' +
-                     order.externalId
+                     order.original.externalId
                   }
                   target="_blank"
                >
-                  Order #{order.externalId}
+                  Order #{order.original.externalId}
                </Link>
             </span>
             {order.requiredDocumentType === 'INVOICE' ? (
                <Badge>Invoice</Badge>
             ) : null}
             <div className="ml-auto flex gap-2 h-9">
-               {receipt.number ? (
-                  <ReceiptNumberBadge value={receipt.number} />
+               {receipt.original?.number ? (
+                  <ReceiptNumberBadge value={receipt.original?.number} />
                ) : null}
                {fiscalNumber ? (
                   <BadgeFiskalNumber value={fiscalNumber} />
                ) : null}
-               {order.invoice?.number ? (
-                  <InvoiceNumberBadge value={order.invoice.number} />
+               {invoiceNumber ? (
+                  <InvoiceNumberBadge value={invoiceNumber} />
                ) : null}
-               {order.paymentMethod === 'PREPAID' ? (
+               {order.original.paymentMethod === 'PREPAID' ? (
                   <BadgePaid />
                ) : (
                   <BadgePickup />
@@ -252,12 +254,13 @@ export function Order({
                </OrderCardTableBody>
                <OrderCardTableFooter
                   totalNet={
-                     currency(order.totalToPay, { fromCents: true }).divide(
-                        1.23,
-                     ).value
+                     currency(order.original.totalToPay, {
+                        fromCents: true,
+                     }).divide(1.23).value
                   }
                   totalGross={
-                     currency(order.totalToPay, { fromCents: true }).value
+                     currency(order.original.totalToPay, { fromCents: true })
+                        .value
                   }
                />
             </OrderCardTable>
@@ -265,28 +268,29 @@ export function Order({
          <OrderCardFooter>
             <OrderCardRecipient
                recipientFullName={
-                  order.recipient.firstName && order.recipient.lastName
-                     ? order.recipient.firstName +
+                  order.original.recipient.firstName &&
+                  order.original.recipient.lastName
+                     ? order.original.recipient.firstName +
                        ' ' +
-                       order.recipient.lastName
-                     : order.recipient.companyName + ''
+                       order.original.recipient.lastName
+                     : order.original.recipient.companyName + ''
                }
                orderProcessedAt={new Date(
-                  order.preparedAt ?? Date.now(),
+                  order.original.preparedAt ?? Date.now(),
                ).toLocaleString()}
             />
             <div className="flex w-125 justify-between">
                <OrderCardDeliveryCard
                   className="w-75"
-                  title={order.delivery.pointName || 'Delivery'}
-                  address={order.delivery.address}
+                  title={order.original.delivery.pointName || 'Delivery'}
+                  address={order.original.delivery.address}
                />
-               <OrderCardPackage numberOfPackages={order.packages} />
+               <OrderCardPackage numberOfPackages={order.original.packages} />
             </div>
             <OrderCardFooterActions>
                {order.requiredDocumentType === 'INVOICE' ? (
                   <>
-                     {invoiceStatus !== 'RECORDED' ? (
+                     {status !== 'RECORDED' ? (
                         <EditDialog
                            onSave={submitInvoiceNumber}
                            onCancel={() =>
@@ -296,11 +300,11 @@ export function Order({
                            <EditDialogTrigger asChild>
                               <Button
                                  variant={
-                                    order.invoice?.number
+                                    order.invoice.draft.number
                                        ? 'outline'
                                        : 'default'
                                  }
-                                 disabled={receipt.status !== 'RECORD'}
+                                 disabled={status !== 'RECORD'}
                               >
                                  <InvoiceIcon />
                               </Button>
@@ -318,9 +322,9 @@ export function Order({
                                     <Label>Invoice number</Label>
                                     <Input
                                        autoFocus={true}
-                                       value={draftInvoiceNumber}
+                                       value={invoiceNumberInput}
                                        onChange={(e) => {
-                                          setDraftInvoiceNumber(e.target.value);
+                                          setInvoiceNumberInput(e.target.value);
                                        }}
                                     />
                                  </Field>
@@ -333,9 +337,9 @@ export function Order({
                         </EditDialog>
                      ) : null}
                      <OrderCardActionButton
-                        status={invoiceStatus}
-                        variant={order.invoice?.number ? 'default' : 'outline'}
-                        disabled={!order.invoice?.number}
+                        status={status}
+                        variant={invoiceNumber ? 'default' : 'outline'}
+                        disabled={!invoiceNumber}
                         idle={{
                            icon: <InvoiceIcon />,
                            label: 'Approve invoice',
@@ -358,10 +362,8 @@ export function Order({
                      >
                         <EditDialogTrigger asChild>
                            <Button
-                              variant={
-                                 receipt.fiscalNumber ? 'outline' : 'default'
-                              }
-                              disabled={receipt.status !== 'RECORD'}
+                              variant={fiscalNumber ? 'outline' : 'default'}
+                              disabled={status !== 'RECORD'}
                            >
                               <CashRegisterIcon />
                            </Button>
@@ -380,14 +382,14 @@ export function Order({
                                  <Label>Fiscal number</Label>
                                  <Input
                                     autoFocus={true}
-                                    value={draftFiscalNumber}
+                                    value={fiscalNumberInput}
                                     onChange={(e) => {
                                        if (
                                           Number.isInteger(
                                              Number(e.target.value),
                                           )
                                        ) {
-                                          setDraftFiscalNumber(e.target.value);
+                                          setFiscalNumberInput(e.target.value);
                                        }
                                     }}
                                  />
@@ -401,8 +403,8 @@ export function Order({
                      </EditDialog>
                      <OrderCardActionButton
                         status={status}
-                        variant={receipt.fiscalNumber ? 'default' : 'outline'}
-                        disabled={!receipt.fiscalNumber}
+                        variant={fiscalNumber ? 'default' : 'outline'}
+                        disabled={!fiscalNumber}
                         idle={{
                            icon: <ReceiptIcon />,
                            label: 'Record receipt',

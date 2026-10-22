@@ -10,7 +10,7 @@ import {
    normilizePositions,
    OrderModel,
    useOrdersStore,
-} from '@/entities/order/orders.store';
+} from '@/entities/order';
 import { useEffect, useState } from 'react';
 import { fetchPendingOrders } from '@/entities/order/api/fetch-pending-orders';
 import { Order } from '@/components/features/order';
@@ -29,9 +29,19 @@ import { OrdersListFilters, useOrdersListStore } from '../model/store';
 import { useOrdersFilter } from '../model/use-orders-filter';
 import { useFulfillOrders } from '@/entities/order';
 import { RequiredDocumentTypeFilterSelect } from './required-document-type-filter-select';
+import { nonNullable } from 'valibot';
+import { isFulfillable } from '@/entities/order';
 
 export function OrdersList() {
-   const { orders, addMany, selectAll, unselectAll } = useOrdersStore();
+   const {
+      orders,
+      addMany,
+      selectAll,
+      unselectAll,
+      getStatus,
+      setDraftFiscalNumber,
+      setDraftInvoiceNumber,
+   } = useOrdersStore();
 
    const sortedOrderIds = useOrdersListStore((s) => s.sortedOrderIds);
    const setSortedOrderIds = useOrdersListStore((s) => s.setSortedOrderIds);
@@ -46,20 +56,8 @@ export function OrdersList() {
 
    const ordersList = filtredOrders;
 
-   const {
-      receipts,
-      addMany: addManyReceipts,
-      setFiscalNumber,
-   } = useReceiptsStore();
-
    const fulfillOrders = useFulfillOrders(
-      [...filtredOrdersIds].filter(
-         (id) =>
-            !orders[id].receipt?.id &&
-            orders[id].receipt?.number &&
-            orders[id].invoice.status === 'RECORD' &&
-            orders[id].invoice.number,
-      ),
+      [...filtredOrdersIds].filter((id) => isFulfillable(orders[id])),
    );
 
    useEffect(() => {
@@ -72,22 +70,45 @@ export function OrdersList() {
          const orders = pendingOrders.map(
             (order): OrderModel => ({
                ...order,
+               original: {
+                  ...order,
+                  createdAt: new Date(order.createdAt),
+                  preparedAt: new Date(order.preparedAt),
+                  fulfilledAt: order.fulfilledAt
+                     ? new Date(order.fulfilledAt)
+                     : null,
+               },
+
                receipt: order.receipt
                   ? {
-                       ...order.receipt,
-                       createdAt: new Date(order.receipt.createdAt),
-                    }
-                  : null,
-               invoice: order.invoice
-                  ? {
-                       number: order.invoice.number,
-                       status: 'RECORDED',
+                       original: {
+                          ...order.receipt,
+                          createdAt: new Date(order.receipt.createdAt),
+                       },
+                       isRecording: false,
+                       draft: { fiscalNumber: null },
                     }
                   : {
-                       number: null,
-                       status: 'RECORD',
+                       original: null,
+                       isRecording: false,
+                       draft: { fiscalNumber: null },
                     },
-               selected: false,
+
+               invoice: order.invoice
+                  ? {
+                       original: {
+                          ...order.invoice,
+                          createdAt: new Date(order.invoice.createdAt),
+                       },
+                       draft: { number: null },
+                       isRecording: false,
+                    }
+                  : {
+                       original: null,
+                       draft: { number: null },
+                       isRecording: false,
+                    },
+               isSelected: false,
                positions: normilizePositions(
                   order.positions.map((position) => ({
                      ...position,
@@ -102,9 +123,6 @@ export function OrdersList() {
                      },
                   })),
                ),
-               createdAt: new Date(order.createdAt),
-               preparedAt: new Date(order.preparedAt),
-               fulfilledAt: null,
             }),
          );
 
@@ -113,48 +131,39 @@ export function OrdersList() {
          setSortedOrderIds(
             new Set(orders.sort(sortOrders).map((order) => order.id)),
          );
-
-         addManyReceipts(
-            pendingOrders.map((order) => ({
-               orderId: order.id,
-               ...(order.receipt
-                  ? {
-                       status: 'RECORDED',
-                       fiscalNumber: order.receipt.fiscalNumber,
-                       number: order.receipt.number,
-                    }
-                  : { status: 'RECORD' }),
-            })),
-         );
       });
    }, []);
 
    const generateBulkFiscalNumber = (
       orderId: OrderModel['id'],
-      value: number,
+      value: string,
    ) => {
       const filtredOrders = ordersList.filter(
          (order) => order.requiredDocumentType === 'RECEIPT',
       );
 
-      const sortedReceipts = filtredOrders.map((order) => receipts[order.id]);
-      const currentReceiptIndex = sortedReceipts
-         .map((receipt) => receipt.orderId)
+      const currentReceiptIndex = filtredOrders
+         .map((order) => order.id)
          .indexOf(orderId);
 
       if (currentReceiptIndex === -1) return;
 
-      const restReceipts = sortedReceipts.slice(currentReceiptIndex + 1);
+      const restOrders = filtredOrders.slice(currentReceiptIndex + 1);
 
-      restReceipts.forEach((receipt, i) => {
-         if (receipt.status === 'RECORDED') return;
-         const newValue = value + i + 1;
+      restOrders.forEach((order, i) => {
+         const status = getStatus(order.id);
 
-         setFiscalNumber(receipt.orderId, newValue);
+         if (status !== 'RECORD') {
+            return;
+         }
+
+         const newValue = Number(value) + i + 1;
+
+         setDraftFiscalNumber(order.id, String(newValue));
       });
    };
 
-   const selectedOrders = ordersList.filter((order) => order.selected);
+   const selectedOrders = ordersList.filter((order) => order.isSelected);
 
    const selectAllHandler = () => {
       const isSelectedAll = selectedOrders.length === ordersList.length;
@@ -173,7 +182,7 @@ export function OrdersList() {
 
       const selectedOrdersIds = new Set(
          selectedOrders
-            .filter((order) => receipts[order.id].status === 'RECORD')
+            .filter((order) => isFulfillable(order))
             .map((order) => order.id),
       );
 
@@ -216,11 +225,11 @@ export function OrdersList() {
                      variant={'ghost'}
                      className="cursor-pointer"
                      onClick={fulfillSelectedOrders}
-                     disabled={
-                        Object.values(receipts).find(
-                           (r) => r.status === 'RECORDING',
-                        ) && true
-                     }
+                     disabled={selectedOrders.every(
+                        (order) =>
+                           getStatus(order.id) === 'RECORDED' ||
+                           getStatus(order.id) === 'RECORDING',
+                     )}
                   >
                      <ReceiptIcon /> Record selected
                   </Button>
@@ -235,7 +244,7 @@ export function OrdersList() {
             cacheKey={`pending-orders-${currentFilters.requiredDocumentType}`}
             className="overflow-y-scroll min-h-0 flex-1"
          >
-            {Object.values(receipts).length
+            {ordersList.length
                ? ordersList.map((order, i) => (
                     <Fragment key={order.id}>
                        <Order
@@ -243,7 +252,7 @@ export function OrdersList() {
                           onChangeFiscalNumber={(value) => {
                              if (!value) return;
 
-                             generateBulkFiscalNumber(order.id, value);
+                             generateBulkFiscalNumber(order.id, String(value));
                           }}
                        />
                        {i + 1 === ordersList.length ? null : <Separator />}

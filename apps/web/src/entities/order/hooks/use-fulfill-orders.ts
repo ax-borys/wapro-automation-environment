@@ -1,5 +1,5 @@
 import { ReceiptModel, useReceiptsStore } from '@/entities/receipt';
-import { OrderModel, useOrdersStore } from '../orders.store';
+import { useOrdersStore } from '../orders.store';
 import { errorModelSchema, useError } from '@/entities/error';
 
 import * as v from 'valibot';
@@ -8,29 +8,22 @@ import {
    fulfillOrders as fulfillOrdersApi,
    FulfillOrdersInput,
 } from '../api/fulfill-orders';
+import { isFulfillable } from '../utils/is-fulfillable';
+import { OrderModel } from '../types';
 
 export function useFulfillOrders(orderIds: OrderModel['id'][]) {
    const { raiseError } = useError();
 
    const orders = useOrdersStore((s) => s.orders);
-   const ordersList: OrderModel[] = Object.values(orders);
 
    const receipts = useReceiptsStore((s) => s.receipts);
    const receiptsList: ReceiptModel[] = Object.values(receipts);
 
-   const changeReceiptStatus = useReceiptsStore((s) => s.changeStatus);
-   const changeInvoiceStatus = useOrdersStore((s) => s.changeInvoiceStatus);
+   const startRecording = useOrdersStore((s) => s.startRecording);
+   const finishRecording = useOrdersStore((s) => s.finishRecording);
 
-   const setReceiptNumber = useReceiptsStore((s) => s.setNumber);
-   const setInvoiceNumber = useOrdersStore((s) => s.setInvoiceNumber);
-
-   const changeStatus = (
-      orderId: OrderModel['id'],
-      status: OrderModel['invoice']['status'],
-   ) => {
-      changeReceiptStatus(orderId, status);
-      changeInvoiceStatus(orderId, status);
-   };
+   const attachReceipt = useOrdersStore((s) => s.attachReceipt);
+   const attachInvoice = useOrdersStore((s) => s.attachInvoice);
 
    const fulfillOrders = async (orderIdsOverride?: typeof orderIds) => {
       const finalOrderIds = new Set(orderIdsOverride ?? orderIds);
@@ -44,26 +37,10 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
 
       for (const orderId of finalOrderIds) {
          const order = orders[orderId];
-         const receipt = receiptByOrderId.get(order.id);
 
-         const invoiceNumber = order.invoice.number;
-         const fiscalNumber = receipt?.fiscalNumber || null;
+         if (!isFulfillable(order)) continue;
 
-         if (!invoiceNumber && !fiscalNumber) continue;
-
-         if (fiscalNumber) {
-            fulfillOrdersInput.push({
-               orderId: order.id,
-               fiscalNumber,
-            });
-         } else if (invoiceNumber) {
-            fulfillOrdersInput.push({
-               orderId: order.id,
-               number: invoiceNumber,
-            });
-         }
-
-         changeStatus(order.id, 'RECORDING');
+         startRecording(order.id);
       }
 
       try {
@@ -71,31 +48,25 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
 
          receiptsAndInvoices.forEach((receiptOrInvoice) => {
             if ('fiscalNumber' in receiptOrInvoice) {
-               setReceiptNumber(
-                  receiptOrInvoice.orderId,
-                  receiptOrInvoice.number,
-               );
+               attachReceipt(receiptOrInvoice.orderId, {
+                  ...receiptOrInvoice,
+                  createdAt: new Date(receiptOrInvoice.createdAt),
+               });
             } else {
-               setInvoiceNumber(
-                  receiptOrInvoice.orderId,
-                  receiptOrInvoice.number,
-               );
+               attachInvoice(receiptOrInvoice.orderId, {
+                  ...receiptOrInvoice,
+                  createdAt: new Date(receiptOrInvoice.createdAt),
+               });
             }
          });
-
-         fulfillOrdersInput.forEach((input) =>
-            changeStatus(input.orderId, 'RECORDED'),
-         );
       } catch (error) {
          const parsedError = v.safeParse(errorModelSchema, error);
 
          if (parsedError.success) {
             raiseError(parsedError.output);
          }
-
-         fulfillOrdersInput.forEach((input) =>
-            changeStatus(input.orderId, 'RECORD'),
-         );
+      } finally {
+         fulfillOrdersInput.forEach((input) => finishRecording(input.orderId));
       }
    };
 
