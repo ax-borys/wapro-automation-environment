@@ -87,11 +87,6 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EllipsisVerticalIcon } from 'lucide-react';
-import {
-   Tooltip,
-   TooltipContent,
-   TooltipTrigger,
-} from '@/components/ui/tooltip';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -151,6 +146,7 @@ export function Order({
       setDraftFiscalNumber,
       status,
    } = useOrder(id);
+   console.log(order.receipt.draft.fiscalNumber);
 
    const receipt = useReceipt(order.id);
    const invoice = useInvoice(order.id);
@@ -173,15 +169,15 @@ export function Order({
 
    const submitFiscalNumber = useCallback(() => {
       setDraftFiscalNumber(fiscalNumberInput);
-      onChangeFiscalNumber?.(Number(fiscalNumber));
+      onChangeFiscalNumber?.(Number(fiscalNumberInput));
 
-      setTimeout(() => setDraftFiscalNumber(''), 100);
-   }, [fiscalNumberInput]);
+      setTimeout(() => setFiscalNumberInput(''), 100);
+   }, [fiscalNumberInput, setDraftFiscalNumber]);
 
    const submitInvoiceNumber = useCallback(() => {
       setDraftInvoiceNumber(invoiceNumberInput);
-      setTimeout(() => setDraftInvoiceNumber(''), 100);
-   }, [invoiceNumberInput]);
+      setTimeout(() => setInvoiceNumberInput(''), 100);
+   }, [invoiceNumberInput, setDraftInvoiceNumber]);
 
    return (
       <OrderCard className="flex h-fit">
