@@ -14,6 +14,12 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
    const { raiseError } = useError();
 
    const orders = useOrdersStore((s) => s.orders);
+   const clearDraftFiscalNumber = useOrdersStore(
+      (s) => s.clearDraftFiscalNumber,
+   );
+   const clearDraftInvoiceNumber = useOrdersStore(
+      (s) => s.clearDraftInvoiceNumber,
+   );
 
    const startRecording = useOrdersStore((s) => s.startRecording);
    const finishRecording = useOrdersStore((s) => s.finishRecording);
@@ -34,6 +40,18 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
          if (!isFulfillable(order)) continue;
 
          startRecording(order.id);
+
+         if (order.invoice.draft.number) {
+            fulfillOrdersInput.push({
+               orderId: order.id,
+               number: order.invoice.draft.number,
+            });
+         } else if (order.receipt.draft.fiscalNumber) {
+            fulfillOrdersInput.push({
+               orderId: order.id,
+               fiscalNumber: order.receipt.draft.fiscalNumber,
+            });
+         }
       }
 
       try {
@@ -45,11 +63,15 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
                   ...receiptOrInvoice,
                   createdAt: new Date(receiptOrInvoice.createdAt),
                });
+
+               clearDraftFiscalNumber(receiptOrInvoice.orderId);
             } else {
                attachInvoice(receiptOrInvoice.orderId, {
                   ...receiptOrInvoice,
                   createdAt: new Date(receiptOrInvoice.createdAt),
                });
+
+               clearDraftInvoiceNumber(receiptOrInvoice.orderId);
             }
          });
       } catch (error) {

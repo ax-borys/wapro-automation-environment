@@ -50,6 +50,8 @@ export type OrdersStore = {
    ) => void;
    setDraftInvoiceNumber: (orderId: OrderModel['id'], value: string) => void;
    setDraftFiscalNumber: (orderId: OrderModel['id'], value: number) => void;
+   clearDraftInvoiceNumber: (orderId: OrderModel['id']) => void;
+   clearDraftFiscalNumber: (orderId: OrderModel['id']) => void;
    changeRequiredDocuemntType: (
       orderId: OrderModel['id'],
       value: OrderModel['requiredDocumentType'],
@@ -191,6 +193,14 @@ export const useOrdersStore = create<OrdersStore>()(
                default:
                   break;
             }
+         }),
+      clearDraftFiscalNumber: (orderId) =>
+         set((draft) => {
+            draft.orders[orderId].receipt.draft.fiscalNumber = null;
+         }),
+      clearDraftInvoiceNumber: (orderId) =>
+         set((draft) => {
+            draft.orders[orderId].invoice.draft.number = null;
          }),
    })),
 );
