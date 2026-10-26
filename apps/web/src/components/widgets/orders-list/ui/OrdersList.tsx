@@ -5,7 +5,6 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
-import { useReceiptsStore } from '@/entities/receipt';
 import {
    normilizePositions,
    OrderModel,
@@ -159,7 +158,7 @@ export function OrdersList() {
 
          const newValue = Number(value) + i + 1;
 
-         setDraftFiscalNumber(order.id, String(newValue));
+         setDraftFiscalNumber(order.id, newValue);
       });
    };
 

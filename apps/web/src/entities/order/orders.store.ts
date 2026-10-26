@@ -27,6 +27,7 @@ import {
    getInvoiceStatus,
    getReceiptStatus,
 } from './utils/get-document-status';
+import { formatFiscalNumber } from './utils/format-fiscal-number';
 
 export type OrdersStore = {
    orders: Record<OrderModel['id'], OrderModel>;
@@ -48,10 +49,7 @@ export type OrdersStore = {
       positionId: PositionModel['offer']['id'],
    ) => void;
    setDraftInvoiceNumber: (orderId: OrderModel['id'], value: string) => void;
-   setDraftFiscalNumber: (
-      orderId: OrderModel['id'],
-      value: Receipt['fiscalNumber'],
-   ) => void;
+   setDraftFiscalNumber: (orderId: OrderModel['id'], value: number) => void;
    changeRequiredDocuemntType: (
       orderId: OrderModel['id'],
       value: OrderModel['requiredDocumentType'],
@@ -146,7 +144,9 @@ export const useOrdersStore = create<OrdersStore>()(
          }),
       setDraftFiscalNumber: (orderId, value) =>
          set((draft) => {
-            draft.orders[orderId].receipt.draft.fiscalNumber = value;
+            const formattedValue = formatFiscalNumber(value);
+
+            draft.orders[orderId].receipt.draft.fiscalNumber = formattedValue;
          }),
       changeRequiredDocuemntType: (orderId, value) =>
          set((draft) => {

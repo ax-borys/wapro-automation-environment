@@ -1,4 +1,3 @@
-import { ReceiptModel, useReceiptsStore } from '@/entities/receipt';
 import { useOrdersStore } from '../orders.store';
 import { errorModelSchema, useError } from '@/entities/error';
 
@@ -16,9 +15,6 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
 
    const orders = useOrdersStore((s) => s.orders);
 
-   const receipts = useReceiptsStore((s) => s.receipts);
-   const receiptsList: ReceiptModel[] = Object.values(receipts);
-
    const startRecording = useOrdersStore((s) => s.startRecording);
    const finishRecording = useOrdersStore((s) => s.finishRecording);
 
@@ -27,9 +23,6 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
 
    const fulfillOrders = async (orderIdsOverride?: typeof orderIds) => {
       const finalOrderIds = new Set(orderIdsOverride ?? orderIds);
-      const receiptByOrderId = new Map(
-         receiptsList.map((receipt) => [receipt.orderId, receipt]),
-      );
 
       if (!finalOrderIds.size) return;
 

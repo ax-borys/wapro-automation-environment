@@ -168,7 +168,7 @@ export function Order({
    };
 
    const submitFiscalNumber = useCallback(() => {
-      setDraftFiscalNumber(fiscalNumberInput);
+      setDraftFiscalNumber(Number(fiscalNumberInput));
       onChangeFiscalNumber?.(Number(fiscalNumberInput));
 
       setTimeout(() => setFiscalNumberInput(''), 100);
@@ -290,7 +290,7 @@ export function Order({
                         <EditDialog
                            onSave={submitInvoiceNumber}
                            onCancel={() =>
-                              setTimeout(() => setDraftInvoiceNumber(''), 100)
+                              setTimeout(() => setInvoiceNumberInput(''), 100)
                            }
                         >
                            <EditDialogTrigger asChild>
@@ -353,7 +353,7 @@ export function Order({
                      <EditDialog
                         onSave={submitFiscalNumber}
                         onCancel={() =>
-                           setTimeout(() => setDraftFiscalNumber(''), 100)
+                           setTimeout(() => setFiscalNumberInput(''), 100)
                         }
                      >
                         <EditDialogTrigger asChild>

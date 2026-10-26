@@ -23,7 +23,7 @@ export function useOrder(id: OrderModel['id']) {
       addPosition: (position: PositionModel) => addPosition(id, position),
       removePosition: (positionId: PositionModel['offer']['id']) =>
          removePosition(id, positionId),
-      setDraftFiscalNumber: (value: string) => setDraftFiscalNumber(id, value),
+      setDraftFiscalNumber: (value: number) => setDraftFiscalNumber(id, value),
       setDraftInvoiceNumber: (value: string) =>
          setDraftInvoiceNumber(id, value),
    };
