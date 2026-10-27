@@ -138,7 +138,7 @@ export function EditDialogContent({
    onAnimationEnd,
    ...props
 }: React.ComponentProps<typeof DialogContent>) {
-   const [{ onClosed }] = useEditDialogHandlers();
+   const [{ onClosed, onCancel }] = useEditDialogHandlers();
 
    return (
       <DialogContent
@@ -151,6 +151,7 @@ export function EditDialogContent({
                onClosed?.();
             }
          }}
+         onClose={() => onCancel?.()}
          {...props}
       />
    );
