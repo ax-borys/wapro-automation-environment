@@ -89,6 +89,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { EllipsisVerticalIcon } from 'lucide-react';
 import { OrderActions } from '../../order-actions';
+import { SetFiscalNumber } from '../../set-fiscal-number';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -118,7 +119,6 @@ export function Order({
 
    const fulfillOrder = useFulfillOrders([order.id]);
 
-   const [fiscalNumberInput, setFiscalNumberInput] = useState<string>('');
    const [invoiceNumberInput, setInvoiceNumberInput] = useState<string>('');
 
    useGetAndStoreOffers();
@@ -126,13 +126,6 @@ export function Order({
    const fulfillOrdersHandler = async () => {
       await fulfillOrder();
    };
-
-   const submitFiscalNumber = useCallback(() => {
-      setDraftFiscalNumber(Number(fiscalNumberInput));
-      onChangeFiscalNumber?.(Number(fiscalNumberInput));
-
-      setTimeout(() => setFiscalNumberInput(''), 100);
-   }, [fiscalNumberInput, setDraftFiscalNumber]);
 
    const submitInvoiceNumber = useCallback(() => {
       setDraftInvoiceNumber(invoiceNumberInput);
@@ -310,53 +303,7 @@ export function Order({
                   </>
                ) : (
                   <>
-                     <EditDialog
-                        onSave={submitFiscalNumber}
-                        onCancel={() =>
-                           setTimeout(() => setFiscalNumberInput(''), 100)
-                        }
-                     >
-                        <EditDialogTrigger asChild>
-                           <Button
-                              variant={fiscalNumber ? 'outline' : 'default'}
-                              disabled={status !== 'RECORD'}
-                           >
-                              <CashRegisterIcon />
-                           </Button>
-                        </EditDialogTrigger>
-                        <EditDialogContent>
-                           <EditDialogHeader>
-                              <DialogTitle>
-                                 Enter receipt's fiscal number
-                              </DialogTitle>
-                           </EditDialogHeader>
-                           <EditDialogDescription>
-                              Make sure you are writing correct fiscal number.
-                           </EditDialogDescription>
-                           <FieldGroup>
-                              <Field>
-                                 <Label>Fiscal number</Label>
-                                 <Input
-                                    autoFocus={true}
-                                    value={fiscalNumberInput}
-                                    onChange={(e) => {
-                                       if (
-                                          Number.isInteger(
-                                             Number(e.target.value),
-                                          )
-                                       ) {
-                                          setFiscalNumberInput(e.target.value);
-                                       }
-                                    }}
-                                 />
-                              </Field>
-                           </FieldGroup>
-                           <EditDialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
-                              <EditDialogCancel />
-                              <EditDialogSave />
-                           </EditDialogFooter>
-                        </EditDialogContent>
-                     </EditDialog>
+                     <SetFiscalNumber orderId={order.id} />
                      <OrderCardActionButton
                         status={status}
                         variant={fiscalNumber ? 'default' : 'outline'}
