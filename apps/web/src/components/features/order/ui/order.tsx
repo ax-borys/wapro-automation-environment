@@ -59,6 +59,7 @@ import { useCallback, useState } from 'react';
 import { InvoiceNumberBadge, ReceiptNumberBadge } from '@/components/ui/badges';
 import { OrderActions } from '../../order-actions';
 import { SetFiscalNumber } from '../../set-fiscal-number';
+import { SetInvoiceNumber } from '../../set-invoice-number';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
@@ -93,11 +94,6 @@ export function Order({
    const fulfillOrdersHandler = async () => {
       await fulfillOrder();
    };
-
-   const submitInvoiceNumber = useCallback(() => {
-      setDraftInvoiceNumber(invoiceNumberInput);
-      setTimeout(() => setInvoiceNumberInput(''), 100);
-   }, [invoiceNumberInput, setDraftInvoiceNumber]);
 
    return (
       <OrderCard className="flex h-fit">
@@ -207,50 +203,7 @@ export function Order({
                {order.requiredDocumentType === 'INVOICE' ? (
                   <>
                      {status !== 'RECORDED' ? (
-                        <EditDialog
-                           onSave={submitInvoiceNumber}
-                           onCancel={() =>
-                              setTimeout(() => setInvoiceNumberInput(''), 100)
-                           }
-                        >
-                           <EditDialogTrigger asChild>
-                              <Button
-                                 variant={
-                                    order.invoice.draft.number
-                                       ? 'outline'
-                                       : 'default'
-                                 }
-                                 disabled={status !== 'RECORD'}
-                              >
-                                 <InvoiceIcon />
-                              </Button>
-                           </EditDialogTrigger>
-                           <EditDialogContent>
-                              <EditDialogHeader>
-                                 <DialogTitle>Enter invoice number</DialogTitle>
-                              </EditDialogHeader>
-                              <EditDialogDescription>
-                                 Make sure you are writing correct invoice
-                                 number.
-                              </EditDialogDescription>
-                              <FieldGroup>
-                                 <Field>
-                                    <Label>Invoice number</Label>
-                                    <Input
-                                       autoFocus={true}
-                                       value={invoiceNumberInput}
-                                       onChange={(e) => {
-                                          setInvoiceNumberInput(e.target.value);
-                                       }}
-                                    />
-                                 </Field>
-                              </FieldGroup>
-                              <EditDialogFooter className="-m-6 p-6 py-4 mt-0 bg-sidebar rounded-b-xl border-t border-border">
-                                 <EditDialogCancel />
-                                 <EditDialogSave />
-                              </EditDialogFooter>
-                           </EditDialogContent>
-                        </EditDialog>
+                        <SetInvoiceNumber orderId={order.id} />
                      ) : null}
                      <OrderCardActionButton
                         status={status}
@@ -270,10 +223,12 @@ export function Order({
                   </>
                ) : (
                   <>
-                     <SetFiscalNumber
-                        orderId={order.id}
-                        onFiscalNumberSet={onChangeFiscalNumber}
-                     />
+                     {status !== 'RECORDED' ? (
+                        <SetFiscalNumber
+                           orderId={order.id}
+                           onFiscalNumberSet={onChangeFiscalNumber}
+                        />
+                     ) : null}
                      <OrderCardActionButton
                         status={status}
                         variant={fiscalNumber ? 'default' : 'outline'}
