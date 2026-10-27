@@ -1,6 +1,6 @@
 'use client';
 import { UpdateFiscalNumber } from '@/components/features/update-fiscal-number';
-import { InvoiceNumberBadge } from '@/components/ui/badges';
+import { InvoiceNumberBadge, ReceiptNumberBadge } from '@/components/ui/badges';
 import { Button } from '@/components/ui/button';
 import { DataTableFeatures } from '@/components/ui/data-table/data-table-features';
 import {
@@ -61,6 +61,7 @@ export type OrderData = {
    paymentMethod: Order['paymentMethod'];
    totalToPay: Order['totalToPay'];
    preparedAt: Order['preparedAt'];
+   requiredDocumentType: 'INVOICE' | 'RECEIPT';
 };
 
 const columnHelper = createColumnHelper<DataTableFeatures, OrderData>();
@@ -154,23 +155,9 @@ export const columns = columnHelper.columns([
          return (
             <div className="text-center">
                {receiptNumber ? (
-                  <Button
-                     onClick={() =>
-                        navigator.clipboard.writeText(receiptNumber)
-                     }
-                     className="bg-transparent hover:bg-transparent cursor-pointer px-0"
-                  >
-                     <BadgeReceiptNumber value={receiptNumber} />
-                  </Button>
+                  <ReceiptNumberBadge value={receiptNumber} />
                ) : (
-                  <Button
-                     onClick={() =>
-                        navigator.clipboard.writeText(invoiceNumber ?? 'N/D')
-                     }
-                     className="bg-transparent hover:bg-transparent cursor-pointer px-0"
-                  >
-                     <InvoiceNumberBadge value={invoiceNumber ?? 'N/D'} />
-                  </Button>
+                  <InvoiceNumberBadge value={invoiceNumber ?? 'N/D'} />
                )}
             </div>
          );
@@ -234,7 +221,8 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          const [selected, setSelected] = useState<'FISCAL_NUMBER' | null>(null);
 
-         const receiptId = r.original.receipt?.id;
+         const orderId = r.original.id;
+         const requiredDocumentType = r.original.requiredDocumentType;
 
          return (
             <div className="flex flex-col w-full">
@@ -250,7 +238,7 @@ export const columns = columnHelper.columns([
                            <PenIcon />
                            Edit
                         </DropdownMenuLabel>
-                        {receiptId ? (
+                        {orderId ? (
                            <DropdownMenuItem
                               onSelect={() => setSelected('FISCAL_NUMBER')}
                            >
@@ -260,11 +248,12 @@ export const columns = columnHelper.columns([
                      </DropdownMenuGroup>
                   </DropdownMenuContent>
                </DropdownMenu>
-               {selected === 'FISCAL_NUMBER' && receiptId ? (
+               {selected === 'FISCAL_NUMBER' &&
+               requiredDocumentType === 'RECEIPT' ? (
                   <UpdateFiscalNumber
-                     receiptId={receiptId}
+                     orderId={orderId}
                      defaultOpen={true}
-                     onClose={() => setTimeout(() => setSelected(null), 100)}
+                     onClosed={() => setSelected(null)}
                   />
                ) : null}
             </div>

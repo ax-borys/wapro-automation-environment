@@ -59,6 +59,10 @@ export type OrdersStore = {
    getStatus: (orderId: OrderModel['id']) => Status;
    startRecording: (orderId: OrderModel['id']) => void;
    finishRecording: (orderId: OrderModel['id']) => void;
+   refreshReceipt: (
+      orderId: OrderModel['id'],
+      receipt: OriginalReceipt,
+   ) => void;
 };
 
 export function normilizePositions(
@@ -201,6 +205,10 @@ export const useOrdersStore = create<OrdersStore>()(
       clearDraftInvoiceNumber: (orderId) =>
          set((draft) => {
             draft.orders[orderId].invoice.draft.number = null;
+         }),
+      refreshReceipt: (orderId, freshReceipt) =>
+         set((draft) => {
+            draft.orders[orderId].receipt.original = freshReceipt;
          }),
    })),
 );
