@@ -5,6 +5,7 @@ export {
    useInvoice,
    useInvoiceNumber,
    useReceipt,
+   useReceiptNumber,
 } from './orders.store';
 
 export * from './types';

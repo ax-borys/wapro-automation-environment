@@ -220,10 +220,17 @@ export function useFiscalNumber(orderId: OrderModel['id']) {
    const fiscalNumber = useOrdersStore(
       (s) =>
          s.orders[orderId]?.receipt.draft.fiscalNumber ??
-         s.orders[orderId].receipt.original?.number ??
+         s.orders[orderId].receipt.original?.fiscalNumber ??
          null,
    );
    return fiscalNumber;
+}
+
+export function useReceiptNumber(orderId: OrderModel['id']) {
+   const receiptNumber = useOrdersStore(
+      (s) => s.orders[orderId]?.receipt.original?.number ?? null,
+   );
+   return receiptNumber;
 }
 
 export function useReceipt(orderId: OfferModel['id']) {

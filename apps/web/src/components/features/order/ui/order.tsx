@@ -47,6 +47,7 @@ import {
    useReceipt,
    useFiscalNumber,
    useInvoiceNumber,
+   useReceiptNumber,
 } from '@/entities/order';
 import {
    Dialog,
@@ -148,9 +149,7 @@ export function Order({
    } = useOrder(id);
    console.log(order.receipt.draft.fiscalNumber);
 
-   const receipt = useReceipt(order.id);
-   const invoice = useInvoice(order.id);
-
+   const receiptNumber = useReceiptNumber(order.id);
    const fiscalNumber = useFiscalNumber(order.id);
    const invoiceNumber = useInvoiceNumber(order.id);
 
@@ -202,8 +201,8 @@ export function Order({
                <Badge>Invoice</Badge>
             ) : null}
             <div className="ml-auto flex gap-2 h-9">
-               {receipt.original?.number ? (
-                  <ReceiptNumberBadge value={receipt.original?.number} />
+               {receiptNumber ? (
+                  <ReceiptNumberBadge value={receiptNumber} />
                ) : null}
                {fiscalNumber ? (
                   <BadgeFiskalNumber value={fiscalNumber} />
