@@ -4,7 +4,6 @@ import {
    BadgeFiskalNumber,
    BadgePaid,
    BadgePickup,
-   BadgeReceiptNumber,
    OrderCard,
    OrderCardActionButton,
    OrderCardBody,
@@ -23,49 +22,28 @@ import {
 import currency from 'currency.js';
 import { Button } from '@/components/ui/button';
 import {
-   BusIcon,
-   CashRegisterIcon,
    FloppyDiskIcon,
    InvoiceIcon,
-   LinkIcon,
-   PenIcon,
    ReceiptIcon,
    SealCheckIcon,
    SpinnerIcon,
-   TruckIcon,
    WarningIcon,
-   XIcon,
 } from '@phosphor-icons/react';
-import { Marker, MarkerContent, MarkerIcon } from '@/components/ui/marker';
 import {
    useOrder,
-   useOrdersStore,
    useFulfillOrders,
    type OrderModel,
-   useChangeRequiredDocumentType,
-   useInvoice,
-   useReceipt,
    useFiscalNumber,
    useInvoiceNumber,
    useReceiptNumber,
 } from '@/entities/order';
-import {
-   Dialog,
-   DialogContent,
-   DialogDescription,
-   DialogFooter,
-   DialogHeader,
-   DialogTitle,
-   DialogTrigger,
-} from '@/components/ui/dialog';
+import { DialogTitle } from '@/components/ui/dialog';
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { EditOffer } from '../../edit-offer';
-import { OfferModel, ProductModel, useOffersStore } from '@/entities/offer';
-import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
+import { useOffersStore } from '@/entities/offer';
 import Link from 'next/link';
 import {
    EditDialog,
@@ -79,15 +57,6 @@ import {
 } from '@/components/ui/edit-dalog';
 import { useCallback, useState } from 'react';
 import { InvoiceNumberBadge, ReceiptNumberBadge } from '@/components/ui/badges';
-import {
-   DropdownMenu,
-   DropdownMenuContent,
-   DropdownMenuGroup,
-   DropdownMenuItem,
-   DropdownMenuLabel,
-   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { EllipsisVerticalIcon } from 'lucide-react';
 import { OrderActions } from '../../order-actions';
 import { SetFiscalNumber } from '../../set-fiscal-number';
 
