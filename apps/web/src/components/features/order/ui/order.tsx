@@ -88,49 +88,10 @@ import {
    DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EllipsisVerticalIcon } from 'lucide-react';
+import { OrderActions } from '../../order-actions';
 
 async function wait(delay = 3000) {
    return await new Promise((res, rej) => setTimeout(res, delay));
-}
-
-function Actions({ orderId }: { orderId: OrderModel['id'] }) {
-   const { requiredDocumentType } = useOrdersStore((s) => s.orders[orderId]);
-   const changeRequiredDocumentType = useChangeRequiredDocumentType(orderId);
-
-   return (
-      <DropdownMenu>
-         <DropdownMenuTrigger asChild>
-            <Button
-               variant={'ghost'}
-               className="focus-visible:outline-none focus-visible:ring-0 border-0"
-            >
-               <EllipsisVerticalIcon />
-            </Button>
-         </DropdownMenuTrigger>
-         <DropdownMenuContent onChange={() => {}} className="min-w-40">
-            <DropdownMenuGroup>
-               <DropdownMenuLabel className="flex items-center gap-1">
-                  Actions
-               </DropdownMenuLabel>
-               {requiredDocumentType === 'INVOICE' ? (
-                  <DropdownMenuItem
-                     onSelect={() => changeRequiredDocumentType('RECEIPT')}
-                  >
-                     <ReceiptIcon />
-                     Require receipt
-                  </DropdownMenuItem>
-               ) : (
-                  <DropdownMenuItem
-                     onSelect={() => changeRequiredDocumentType('INVOICE')}
-                  >
-                     <InvoiceIcon />
-                     Require invoice
-                  </DropdownMenuItem>
-               )}
-            </DropdownMenuGroup>
-         </DropdownMenuContent>
-      </DropdownMenu>
-   );
 }
 
 export function Order({
@@ -215,7 +176,7 @@ export function Order({
                ) : (
                   <BadgePickup />
                )}
-               <Actions orderId={order.id} />
+               <OrderActions orderId={order.id} />
             </div>
          </OrderCardHeader>
          <OrderCardBody>
