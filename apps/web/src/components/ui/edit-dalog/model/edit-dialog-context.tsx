@@ -4,6 +4,7 @@ type HandlersContext = {
    onSave?: () => void;
    onCancel?: () => void;
    onOpen?: () => void;
+   onClosed?: () => void;
 };
 
 const editDialogHandlersContext = createContext<HandlersContext>({});

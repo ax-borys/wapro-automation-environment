@@ -23,10 +23,12 @@ export function EditDialog({
    children,
    onCancel,
    onSave,
+   onClosed,
    defaultOpen = false,
 }: {
    onCancel?: () => void;
    onSave?: () => void;
+   onClosed?: () => void;
    children: React.ReactNode;
    defaultOpen?: boolean;
 }) {
@@ -39,7 +41,6 @@ export function EditDialog({
                const result = Reflect.apply(target, thisArg, args);
 
                setOpen(false);
-               console.log('Save');
 
                return result;
             },
@@ -56,8 +57,17 @@ export function EditDialog({
          }),
 
          onOpen: () => setOpen(true),
+         onClosed: new Proxy(onClosed ?? (() => {}), {
+            apply: (target, thisArg, args) => {
+               const result = Reflect.apply(target, thisArg, args);
+
+               setOpen(false);
+
+               return result;
+            },
+         }),
       }),
-      [setOpen, onCancel, onSave],
+      [setOpen, onCancel, onSave, onClosed],
    );
 
    useEffect(() => {
@@ -125,16 +135,21 @@ export function EditDialogDescription({
 }
 
 export function EditDialogContent({
-   onClose,
+   onAnimationEnd,
    ...props
 }: React.ComponentProps<typeof DialogContent>) {
-   const [{ onCancel: cancelHandler }] = useEditDialogHandlers();
+   const [{ onClosed }] = useEditDialogHandlers();
 
    return (
       <DialogContent
-         onClose={() => {
-            cancelHandler?.();
-            onClose?.();
+         onAnimationEnd={(e) => {
+            onAnimationEnd?.(e);
+            if (
+               e.target === e.currentTarget &&
+               e.currentTarget.dataset.state === 'closed'
+            ) {
+               onClosed?.();
+            }
          }}
          {...props}
       />
