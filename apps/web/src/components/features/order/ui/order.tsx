@@ -301,7 +301,10 @@ export function Order({
                   </>
                ) : (
                   <>
-                     <SetFiscalNumber orderId={order.id} />
+                     <SetFiscalNumber
+                        orderId={order.id}
+                        onFiscalNumberSet={onChangeFiscalNumber}
+                     />
                      <OrderCardActionButton
                         status={status}
                         variant={fiscalNumber ? 'default' : 'outline'}

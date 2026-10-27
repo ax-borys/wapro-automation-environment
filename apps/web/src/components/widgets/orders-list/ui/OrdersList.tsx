@@ -28,7 +28,6 @@ import { OrdersListFilters, useOrdersListStore } from '../model/store';
 import { useOrdersFilter } from '../model/use-orders-filter';
 import { useFulfillOrders } from '@/entities/order';
 import { RequiredDocumentTypeFilterSelect } from './required-document-type-filter-select';
-import { nonNullable } from 'valibot';
 import { isFulfillable } from '@/entities/order';
 import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
 
