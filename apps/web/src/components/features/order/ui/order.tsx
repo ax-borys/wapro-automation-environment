@@ -109,7 +109,7 @@ export function Order({
       setDraftFiscalNumber,
       status,
    } = useOrder(id);
-   console.log(order.receipt.draft.fiscalNumber);
+   console.log('order');
 
    const receiptNumber = useReceiptNumber(order.id);
    const fiscalNumber = useFiscalNumber(order.id);
@@ -120,8 +120,6 @@ export function Order({
    const fulfillOrder = useFulfillOrders([order.id]);
 
    const [invoiceNumberInput, setInvoiceNumberInput] = useState<string>('');
-
-   useGetAndStoreOffers();
 
    const fulfillOrdersHandler = async () => {
       await fulfillOrder();

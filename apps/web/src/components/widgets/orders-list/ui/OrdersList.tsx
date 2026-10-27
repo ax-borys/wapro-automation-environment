@@ -30,6 +30,7 @@ import { useFulfillOrders } from '@/entities/order';
 import { RequiredDocumentTypeFilterSelect } from './required-document-type-filter-select';
 import { nonNullable } from 'valibot';
 import { isFulfillable } from '@/entities/order';
+import { useGetAndStoreOffers } from '@/entities/offer/hooks/use-get-and-store-offers';
 
 export function OrdersList() {
    const {
@@ -58,6 +59,8 @@ export function OrdersList() {
    const fulfillOrders = useFulfillOrders(
       [...filtredOrdersIds].filter((id) => isFulfillable(orders[id])),
    );
+
+   useGetAndStoreOffers();
 
    useEffect(() => {
       // Update only user refreshes page manually.
