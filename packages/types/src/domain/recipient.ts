@@ -1,6 +1,7 @@
 import { recipientsTable } from '@wae/db';
 import { createInsertSchema, createSelectSchema } from 'drizzle-orm/valibot';
 import * as v from 'valibot';
+import { addressInputSchema, addressSchema } from './address';
 
 export const recipientBaseSchema = createSelectSchema(recipientsTable);
 export const recipientBaseInputSchema = createInsertSchema(recipientsTable);
@@ -55,3 +56,34 @@ export const recipientInputSchema = v.union([
 
 export type Recipient = v.InferOutput<typeof recipientSchema>;
 export type RecipientInput = v.InferInput<typeof recipientInputSchema>;
+
+export const recipientWithAddressSchema = v.union([
+   v.object({ ...recipientFullSchema.entries, address: addressSchema }),
+   v.object({
+      ...recipientWithCompanyNameSchema.entries,
+      address: addressSchema,
+   }),
+   v.object({
+      ...recipientWithFullNameSchema.entries,
+      address: addressSchema,
+   }),
+]);
+
+export type RecipientWithAddress = v.InferOutput<
+   typeof recipientWithAddressSchema
+>;
+
+export const recipientWithAddressInputSchema = v.union([
+   v.object({
+      ...recipientFullInputSchema.entries,
+      address: addressInputSchema,
+   }),
+   v.object({
+      ...recipientWithCompanyNameInputSchema.entries,
+      address: addressInputSchema,
+   }),
+   v.object({
+      ...recipientWithFullNameInputSchema.entries,
+      address: addressInputSchema,
+   }),
+]);

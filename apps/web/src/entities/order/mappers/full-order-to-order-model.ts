@@ -1,15 +1,9 @@
 import { normilizeItems } from '@/entities/offer';
-import { fetchPendingOrders } from '../api/fetch-pending-orders';
 import { normilizePositions } from '../orders.store';
 import { OrderModel } from '../types';
+import { FullOrder } from '@wae/types';
 
-type FetchedPendingOrder = Awaited<
-   ReturnType<typeof fetchPendingOrders>
->[number];
-
-export function fetchedPendingOrderToOrderModel(
-   order: FetchedPendingOrder,
-): OrderModel {
+export function fullOrderToOrderModel(order: FullOrder): OrderModel {
    return {
       ...order,
       original: {

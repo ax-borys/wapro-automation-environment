@@ -6,6 +6,10 @@ import {
    ApiResponse,
    customerSchema,
    deliverySchema,
+   FullOrder,
+   FullOrderInput,
+   fullOrderInputShema,
+   fullOrderShema,
    invoiceSchema,
    Offer,
    orderWithPositionsWithOfferSchema,
@@ -278,7 +282,7 @@ export const order = new Hono()
 
          const orders = await obtainOrders(tx, validatedObtainOrdersInput);
 
-         const completeOrders = orders.map((order) => {
+         const fullOrders = orders.map((order): FullOrder => {
             const customer = v.parse(
                customerSchema,
                customers.find((customer) => customer.id === order.customerId),
@@ -292,6 +296,13 @@ export const order = new Hono()
                recipientSchema,
                recipients.find(
                   (recipient) => recipient.id === order.recepientId,
+               ),
+            );
+
+            const recipientAddress = v.parse(
+               addressSchema,
+               recipientAddresses.find(
+                  (address) => address.id === recipient.addressId,
                ),
             );
 
@@ -309,8 +320,11 @@ export const order = new Hono()
 
             return {
                ...order,
-               customer: { ...customer, address: customerAddress },
-               recipient,
+               customer: {
+                  ...customer,
+                  address: customerAddress ?? recipientAddress,
+               },
+               recipient: { ...recipient, address: recipientAddress },
                delivery: {
                   ...delivery,
                   address: deliveryAddress,
@@ -318,12 +332,14 @@ export const order = new Hono()
             };
          });
 
+         const validatedOrders = v.parse(v.array(fullOrderShema), fullOrders);
+
          console.log('Obtaining succeeded.');
 
-         return completeOrders;
+         return validatedOrders;
       });
 
-      return c.json<ApiResponse<typeof result>>({
+      return c.json<ApiResponse<FullOrder[]>>({
          data: result,
          error: null,
       });

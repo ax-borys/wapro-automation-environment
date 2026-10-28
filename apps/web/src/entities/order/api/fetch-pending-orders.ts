@@ -1,4 +1,5 @@
 import { client } from '@/lib/client';
+import { normalizeFullOrder } from '../normalizers/normalize-full-order';
 
 export async function fetchPendingOrders() {
    const response = await client.order.orders.pending.$get();
@@ -10,5 +11,5 @@ export async function fetchPendingOrders() {
 
    const { data: orders } = await response.json();
 
-   return orders;
+   return orders.map(normalizeFullOrder);
 }

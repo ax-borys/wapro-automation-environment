@@ -20,6 +20,7 @@ import {
    BadgeReceiptNumber,
 } from '@/components/ui/receipt-card';
 import { Separator } from '@/components/ui/separator';
+import { OrderModel } from '@/entities/order';
 import {
    ArrowSquareOutIcon,
    CashRegisterIcon,
@@ -35,34 +36,7 @@ import { EditIcon, EllipsisVerticalIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
-export type OrderData = {
-   id: Order['id'];
-   recipient: {
-      id: Recipient['id'];
-      firstName: Recipient['firstName'];
-      lastName: Recipient['lastName'];
-      companyName: Recipient['companyName'];
-   };
-   customer: {
-      id: Customer['id'];
-      externalId: Customer['externalId'];
-   };
-   externalId: Order['externalId'];
-   packages: Order['packages'];
-   receipt: {
-      id: Receipt['id'];
-      number: Receipt['number'];
-      fiscalNumber: Receipt['fiscalNumber'];
-   } | null;
-   invoice: {
-      id: Invoice['id'];
-      number: Invoice['number'];
-   } | null;
-   paymentMethod: Order['paymentMethod'];
-   totalToPay: Order['totalToPay'];
-   preparedAt: Order['preparedAt'];
-   requiredDocumentType: 'INVOICE' | 'RECEIPT';
-};
+export type OrderData = OrderModel;
 
 const columnHelper = createColumnHelper<DataTableFeatures, OrderData>();
 
@@ -80,7 +54,7 @@ export const columns = columnHelper.columns([
    columnHelper.display({
       id: 'link',
       cell: ({ row: r }) => {
-         const value = r.original.externalId;
+         const value = r.original.original.externalId;
 
          return (
             <div className="flex flex-col w-fit">
@@ -107,7 +81,7 @@ export const columns = columnHelper.columns([
       minSize: 36,
       maxSize: 36,
    }),
-   columnHelper.accessor('preparedAt', {
+   columnHelper.accessor('original.preparedAt', {
       id: 'preparedAt',
       enableHiding: true,
       sortFn: 'datetime',
@@ -115,13 +89,13 @@ export const columns = columnHelper.columns([
    columnHelper.accessor(
       (r) =>
          formatFullname(
-            r?.recipient.firstName,
-            r?.recipient.lastName,
-            r?.recipient.companyName,
+            r?.original.recipient.firstName,
+            r?.original.recipient.lastName,
+            r?.original.recipient.companyName,
          ),
       {
          id: 'recipient full name',
-         header: () => <div className="w-30">Recipient name</div>,
+         header: () => <div className="w-30">Recipient</div>,
          cell: ({ row: r }) => {
             const value = r.getValue('recipient full name') as string;
 
@@ -130,32 +104,30 @@ export const columns = columnHelper.columns([
          size: 200,
       },
    ),
-   columnHelper.accessor('customer.externalId', {
-      header: () => <div className="text-left">Buyer external id</div>,
+   columnHelper.accessor('original.customer.externalId', {
+      header: () => <div className="text-left">Buyer</div>,
       cell: ({ row: r }) => {
-         const value = r.getValue('customer_externalId') as string;
+         const value = r.getValue('original_customer_externalId') as string;
 
          return <div className="text-left">{value}</div>;
       },
       size: 600,
    }),
-   columnHelper.accessor('packages', {
+   columnHelper.accessor('original.packages', {
       header: () => <div className="text-center">Packages</div>,
       cell: ({ row: r }) => {
-         const value = r.getValue('packages') as number;
+         const value = r.getValue('original_packages') as number;
 
          return <div className="text-center">{value}</div>;
       },
       size: 100,
    }),
-   columnHelper.accessor((r) => r?.receipt?.number ?? r?.invoice?.number, {
+   columnHelper.accessor((r) => '', {
       header: () => <div className="text-center">Number</div>,
       id: 'number',
       cell: ({ row: r }) => {
-         const receiptNumber = r.original.receipt?.number;
-         const invoiceNumber = r.original.invoice?.number;
-
-         console.log('Original: ', receiptNumber);
+         const receiptNumber = r.original.receipt.original?.number;
+         const invoiceNumber = r.original.invoice.original?.number;
 
          return (
             <div className="text-center">
@@ -169,10 +141,10 @@ export const columns = columnHelper.columns([
       },
       size: 150,
    }),
-   columnHelper.accessor('receipt.fiscalNumber', {
+   columnHelper.accessor('receipt.original.fiscalNumber', {
       header: () => <div className="text-center">Fiscal number</div>,
       cell: ({ row: r }) => {
-         const fiscalNumber = r.getValue('receipt_fiscalNumber') as
+         const fiscalNumber = r.getValue('receipt_original_fiscalNumber') as
             | string
             | undefined;
 
@@ -188,10 +160,12 @@ export const columns = columnHelper.columns([
       },
       size: 150,
    }),
-   columnHelper.accessor('paymentMethod', {
+   columnHelper.accessor('original.paymentMethod', {
       header: () => <div className="text-center">Payment method</div>,
       cell: ({ row: r }) => {
-         const value = r.getValue('paymentMethod') as Order['paymentMethod'];
+         const value = r.getValue(
+            'original_paymentMethod',
+         ) as Order['paymentMethod'];
 
          return (
             <div className="text-center">
@@ -203,7 +177,7 @@ export const columns = columnHelper.columns([
    }),
    columnHelper.accessor(
       (r) =>
-         currency(r.totalToPay, {
+         currency(r.original.totalToPay, {
             decimal: ',',
             symbol: 'zł',
             pattern: '# !',
@@ -226,7 +200,7 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          const [selected, setSelected] = useState<'FISCAL_NUMBER' | null>(null);
 
-         const orderId = r.original.id;
+         const orderId = r.original.original.id;
          const requiredDocumentType = r.original.requiredDocumentType;
 
          return (

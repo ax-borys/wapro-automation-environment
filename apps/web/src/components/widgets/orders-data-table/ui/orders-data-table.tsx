@@ -12,12 +12,15 @@ import {
 import { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { addDays, endOfDay, formatISO, startOfDay } from 'date-fns';
-import { ColumnVisibilityState, useTable } from '@tanstack/react-table';
-import { fetchReceipts } from '@/entities/receipt';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react';
 import { useDataTable } from '@/hooks/use-data-table';
 import { fetchFulfilledOrders } from '@/entities/order/api/fetch-fulfill-orders';
+import {
+   fetchedPendingOrderToOrderModel,
+   useOrdersStore,
+} from '@/entities/order';
+import { useShallow } from 'zustand/shallow';
 
 export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
    const [date, setDate] = useState<DateRange | undefined>({
@@ -25,7 +28,8 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
       to: new Date(),
    });
 
-   const [data, setData] = useState<OrderData[]>(initialData);
+   const data = useOrdersStore((s) => Object.values(s.orders));
+   const addOrders = useOrdersStore((s) => s.addMany);
 
    useEffect(() => {
       const result = fetchFulfilledOrders({
@@ -35,15 +39,8 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
          },
       });
 
-      result.then((r) => {
-         setData(
-            r.map((i) => ({
-               ...i,
-               receipt: i.receipt || null,
-               invoice: i.invoice || null,
-               preparedAt: new Date(i.preparedAt),
-            })),
-         );
+      result.then((orders) => {
+         addOrders(orders.map(fetchedPendingOrderToOrderModel));
       });
    }, [date]);
 

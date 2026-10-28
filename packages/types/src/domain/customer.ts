@@ -1,6 +1,7 @@
 import { addressesTable, customersTable } from '@wae/db';
 import { createInsertSchema, createSelectSchema } from 'drizzle-orm/valibot';
 import * as v from 'valibot';
+import { addressInputSchema, addressSchema } from './address';
 
 export const customerBaseSchema = createSelectSchema(customersTable);
 export const customerBaseInputSchema = createInsertSchema(customersTable);
@@ -47,7 +48,43 @@ export const customerWithCompanyNameInputSchema = v.object({
    companyName: v.nonNullish(customerBaseInputSchema.entries.companyName),
 });
 
-export const customerInputSchema = v.union([]);
+export const customerInputSchema = v.union([
+   customerFullInputSchema,
+   customerWithFullNameInputSchema,
+   customerWithCompanyNameInputSchema,
+]);
 
 export type Customer = v.InferOutput<typeof customerSchema>;
 export type CustomerInput = v.InferInput<typeof customerInputSchema>;
+
+export const customerWithAddressSchema = v.union([
+   v.object({ ...customerFullSchema.entries, address: addressSchema }),
+   v.object({ ...customerWithFullNameSchema.entries, address: addressSchema }),
+   v.object({
+      ...customerWithCompanyNameSchema.entries,
+      address: addressSchema,
+   }),
+]);
+
+export type CustomerWithAddress = v.InferOutput<
+   typeof customerWithAddressSchema
+>;
+
+export const customerWithAddressInputSchema = v.union([
+   v.object({
+      ...customerFullInputSchema.entries,
+      address: addressInputSchema,
+   }),
+   v.object({
+      ...customerWithFullNameInputSchema.entries,
+      address: addressInputSchema,
+   }),
+   v.object({
+      ...customerWithCompanyNameInputSchema.entries,
+      address: addressInputSchema,
+   }),
+]);
+
+export type CustomerWithAddressInput = v.InferInput<
+   typeof customerWithAddressInputSchema
+>;
