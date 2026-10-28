@@ -84,7 +84,11 @@ export const columns = columnHelper.columns([
 
          return (
             <div className="flex flex-col w-fit">
-               <Button variant={'ghost'} className="text-blue-700" asChild>
+               <Button
+                  variant={'ghost'}
+                  className="text-blue-700 dark:text-blue-300"
+                  asChild
+               >
                   <Link
                      className="underline flex items-center justify-center gap-1"
                      href={
