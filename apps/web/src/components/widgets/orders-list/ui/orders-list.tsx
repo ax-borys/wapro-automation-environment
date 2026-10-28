@@ -13,18 +13,10 @@ import {
 } from '@/entities/order';
 import { useEffect, useState } from 'react';
 import { fetchPendingOrders } from '@/entities/order/api/fetch-pending-orders';
-import { Order } from '@/components/features/order';
+import { Order } from './order';
 import { sortOrders } from '../utils/sort-orders';
 import { normilizeItems } from '@/entities/offer';
 import { CachedScrollWrapper } from '@/components/ui/cached-scroll-wrapper';
-import {
-   Select,
-   SelectContent,
-   SelectGroup,
-   SelectItem,
-   SelectTrigger,
-   SelectValue,
-} from '@/components/ui/select';
 import { OrdersListFilters, useOrdersListStore } from '../model/store';
 import { useOrdersFilter } from '../model/use-orders-filter';
 import { useFulfillOrders } from '@/entities/order';

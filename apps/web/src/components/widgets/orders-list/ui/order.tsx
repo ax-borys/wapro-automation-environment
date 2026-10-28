@@ -37,33 +37,14 @@ import {
    useInvoiceNumber,
    useReceiptNumber,
 } from '@/entities/order';
-import { DialogTitle } from '@/components/ui/dialog';
-import { Field, FieldGroup } from '@/components/ui/field';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { EditOffer } from '../../edit-offer';
 import { useOffersStore } from '@/entities/offer';
 import Link from 'next/link';
-import {
-   EditDialog,
-   EditDialogCancel,
-   EditDialogContent,
-   EditDialogDescription,
-   EditDialogFooter,
-   EditDialogHeader,
-   EditDialogSave,
-   EditDialogTrigger,
-} from '@/components/ui/edit-dalog';
-import { useCallback, useState } from 'react';
 import { InvoiceNumberBadge, ReceiptNumberBadge } from '@/components/ui/badges';
-import { OrderActions } from '../../order-actions';
-import { SetFiscalNumber } from '../../set-fiscal-number';
-import { SetInvoiceNumber } from '../../set-invoice-number';
-
-async function wait(delay = 3000) {
-   return await new Promise((res, rej) => setTimeout(res, delay));
-}
+import { OrderActions } from '@/components/features/order-actions';
+import { EditOffer } from '@/components/features/edit-offer';
+import { SetInvoiceNumber } from '@/components/features/set-invoice-number';
+import { SetFiscalNumber } from '@/components/features/set-fiscal-number';
 
 export function Order({
    id,
@@ -72,14 +53,7 @@ export function Order({
    id: OrderModel['id'];
    onChangeFiscalNumber?: (value: number | null) => void;
 }) {
-   const {
-      order,
-      selectToggle,
-      setDraftInvoiceNumber,
-      setDraftFiscalNumber,
-      status,
-   } = useOrder(id);
-   console.log('order');
+   const { order, selectToggle, status } = useOrder(id);
 
    const receiptNumber = useReceiptNumber(order.id);
    const fiscalNumber = useFiscalNumber(order.id);
@@ -88,8 +62,6 @@ export function Order({
    const { offers } = useOffersStore();
 
    const fulfillOrder = useFulfillOrders([order.id]);
-
-   const [invoiceNumberInput, setInvoiceNumberInput] = useState<string>('');
 
    const fulfillOrdersHandler = async () => {
       await fulfillOrder();
