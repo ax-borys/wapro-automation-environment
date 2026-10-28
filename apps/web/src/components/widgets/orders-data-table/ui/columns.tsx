@@ -91,6 +91,7 @@ export const columns = columnHelper.columns([
                         'https://salescenter.allegro.com/orders?query=' + value
                      }
                      target="_blank"
+                     rel="noopener noreferrer"
                   >
                      <ArrowSquareOutIcon />
                   </Link>
