@@ -1,4 +1,3 @@
-import { ReceiptRecorded } from '@/components/widgets/receipts-data-table';
 import {
    compareItems,
    RankingInfo,

@@ -63,6 +63,10 @@ export type OrdersStore = {
       orderId: OrderModel['id'],
       receipt: OriginalReceipt,
    ) => void;
+   hasReceiptWithId: (receiptId: OriginalReceipt['id']) => boolean;
+   getOrderByReceiptId: (
+      receiptId: OriginalReceipt['id'],
+   ) => OrderModel | undefined;
 };
 
 export function normilizePositions(
@@ -210,6 +214,22 @@ export const useOrdersStore = create<OrdersStore>()(
          set((draft) => {
             draft.orders[orderId].receipt.original = freshReceipt;
          }),
+      hasReceiptWithId: (receiptId) => {
+         const orders = Object.values(get().orders);
+
+         return !!orders.find(
+            (order) => order.receipt.original?.id === receiptId,
+         );
+      },
+      getOrderByReceiptId: (receiptId) => {
+         const orders = Object.values(get().orders);
+
+         const order = orders.find(
+            (order) => order.receipt.original?.id === receiptId,
+         );
+
+         return order;
+      },
    })),
 );
 

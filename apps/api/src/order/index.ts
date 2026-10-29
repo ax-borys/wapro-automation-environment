@@ -145,7 +145,7 @@ export const order = new Hono()
 
          const data = await getFulfilledOrdersByFilter(input);
 
-         return c.json<ApiResponse<typeof data>>({
+         return c.json<ApiResponse<FullOrder[]>>({
             data,
             error: null,
          });

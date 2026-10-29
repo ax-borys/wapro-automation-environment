@@ -9,6 +9,8 @@ import {
    Recipient,
 } from '@wae/types';
 import { OfferModel } from '../offer';
+import { client } from '@/lib/client';
+import { InferResponseType } from 'hono/client';
 
 export type Status = 'RECORD' | 'RECORDING' | 'RECORDED';
 
@@ -53,3 +55,7 @@ export type OrderModel = {
    isSelected: boolean;
    requiredDocumentType: Order['requiredDocumentType'];
 };
+
+export type ServerFullOrder = NonNullable<
+   InferResponseType<typeof client.order.orders.pending.$get>['data']
+>[number];

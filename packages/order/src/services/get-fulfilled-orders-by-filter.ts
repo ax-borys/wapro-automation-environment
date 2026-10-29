@@ -1,11 +1,5 @@
 import { db } from '@wae/db';
-import {
-   customerSchema,
-   invoiceSchema,
-   orderSchema,
-   receiptSchema,
-   recipientSchema,
-} from '@wae/types';
+import { fullOrderShema } from '@wae/types';
 import * as v from 'valibot';
 
 export const getFulfilledOrdersByFilterInputSchema = v.object({
@@ -17,13 +11,7 @@ export const getFulfilledOrdersByFilterInputSchema = v.object({
    ),
 });
 
-const fullOrderDataSchema = v.object({
-   ...orderSchema.entries,
-   customer: customerSchema,
-   recipient: recipientSchema,
-   receipt: v.nullish(receiptSchema),
-   invoice: v.nullish(invoiceSchema),
-});
+const fullOrderDataSchema = fullOrderShema;
 
 export const getFulfilledOrdersByFilterReturnSchema =
    v.array(fullOrderDataSchema);
@@ -53,8 +41,12 @@ export async function getFulfilledOrdersByFilter({
       with: {
          receipt: true,
          invoice: true,
-         recipient: true,
-         customer: true,
+         recipient: { with: { address: true } },
+         customer: { with: { address: true } },
+         delivery: { with: { address: true } },
+         positions: {
+            with: { offer: { with: { items: { with: { product: true } } } } },
+         },
       },
       where: {
          createdAt: {
@@ -76,9 +68,12 @@ export async function getFulfilledOrdersByFilter({
       }
    }
 
-   v.assert(getFulfilledOrdersByFilterReturnSchema, orders);
+   const validatedOrders = v.parse(
+      getFulfilledOrdersByFilterReturnSchema,
+      orders,
+   );
 
    console.log('Assertion completed.');
 
-   return orders;
+   return validatedOrders;
 }

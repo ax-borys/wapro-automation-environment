@@ -1,5 +1,5 @@
 'use client';
-import { DataTable, features } from '@/components/ui/data-table';
+import { DataTable } from '@/components/ui/data-table';
 import { columns, OrderData } from './columns';
 import {
    Toolbar,
@@ -9,17 +9,14 @@ import {
    ToolbarSelectMenu,
    ToolbarSelectMenuCheckboxItem,
 } from '@/components/ui/toolbar';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { addDays, endOfDay, formatISO, startOfDay } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react';
 import { useDataTable } from '@/hooks/use-data-table';
 import { fetchFulfilledOrders } from '@/entities/order/api/fetch-fulfill-orders';
-import {
-   fetchedPendingOrderToOrderModel,
-   useOrdersStore,
-} from '@/entities/order';
+import { useOrdersStore } from '@/entities/order';
 import { useShallow } from 'zustand/shallow';
 
 export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
@@ -28,7 +25,33 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
       to: new Date(),
    });
 
-   const data = useOrdersStore((s) => Object.values(s.orders));
+   const fromTime = date?.from ? startOfDay(date.from).getTime() : 0;
+   const toTime = date?.to ? endOfDay(date.to).getTime() : Infinity;
+
+   const satisfiesDateRange = useCallback(
+      (time: Date): boolean => {
+         const t = time.getTime();
+
+         return t >= fromTime && t <= toTime;
+      },
+      [fromTime, toTime],
+   );
+
+   const orders = useOrdersStore((s) => s.orders);
+   console.log('Orders-list');
+
+   const orderList = useMemo(
+      () =>
+         Object.values(orders).filter(
+            (order) =>
+               satisfiesDateRange(order.original.createdAt) &&
+               order.original.status === 'FULFILLED',
+         ),
+      [orders, satisfiesDateRange],
+   );
+
+   const data = orderList;
+
    const addOrders = useOrdersStore((s) => s.addMany);
 
    useEffect(() => {
@@ -40,7 +63,7 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
       });
 
       result.then((orders) => {
-         addOrders(orders.map(fetchedPendingOrderToOrderModel));
+         addOrders(orders);
       });
    }, [date]);
 

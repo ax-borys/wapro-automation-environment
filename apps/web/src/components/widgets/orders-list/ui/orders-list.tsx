@@ -5,12 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
-import {
-   fetchedPendingOrderToOrderModel,
-   normilizePositions,
-   OrderModel,
-   useOrdersStore,
-} from '@/entities/order';
+import { OrderModel, useOrdersStore } from '@/entities/order';
 import { useEffect, useState } from 'react';
 import { fetchPendingOrders } from '@/entities/order/api/fetch-pending-orders';
 import { Order } from './order';
@@ -56,12 +51,16 @@ export function OrdersList() {
 
    useEffect(() => {
       // Update only user refreshes page manually.
-
-      if (Object.values(orders).length) return;
+      if (
+         Object.values(orders).filter(
+            (order) => order.original.status === 'READY_FOR_PROCESSING',
+         ).length
+      )
+         return;
       const promise = fetchPendingOrders();
 
       promise.then((pendingOrders) => {
-         const orders = pendingOrders.map(fetchedPendingOrderToOrderModel);
+         const orders = pendingOrders;
 
          addMany(orders);
 

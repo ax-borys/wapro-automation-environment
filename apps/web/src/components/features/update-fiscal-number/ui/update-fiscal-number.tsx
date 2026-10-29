@@ -12,7 +12,11 @@ import {
 import { Field, FieldGroup } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { OrderModel, useUpdateFiscalNumber } from '@/entities/order';
+import {
+   OrderModel,
+   OriginalReceipt,
+   useUpdateFiscalNumber,
+} from '@/entities/order';
 import { Receipt } from '@wae/types';
 import { EditIcon } from 'lucide-react';
 import { ChangeEventHandler, useCallback, useState } from 'react';
@@ -23,7 +27,7 @@ export function UpdateFiscalNumber({
    defaultOpen = false,
    onClosed,
 }: {
-   orderId: OrderModel['id'];
+   orderId: OriginalReceipt['id'];
    trigger?: React.ReactElement;
    defaultOpen?: boolean;
    onClosed?: () => void;

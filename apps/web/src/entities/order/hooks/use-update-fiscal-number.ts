@@ -4,23 +4,26 @@ import { OrderModel } from '../types';
 import { formatFiscalNumber } from '../utils/format-fiscal-number';
 
 export function useUpdateFiscalNumber(orderId: OrderModel['id']) {
-   const isOrderStored = useOrdersStore((s) => !!s.orders[orderId]);
-   const refreshReceipt = useOrdersStore((s) => s.refreshReceipt).bind(
-      null,
-      orderId,
-   );
+   const order = useOrdersStore((s) => s.orders[orderId]);
+
+   const refreshReceipt = useOrdersStore((s) => s.refreshReceipt);
 
    return async (number: number) => {
+      const originalReceipt = order.receipt.original;
+
+      if (!originalReceipt) return;
+
       const formattedFiscalNumber = formatFiscalNumber(number);
 
       const receipt = await updateFiscalNumber({
          fiscalNumber: formattedFiscalNumber,
-         id: orderId,
+         id: originalReceipt.id,
       });
 
-      if (isOrderStored) {
-         refreshReceipt({ ...receipt, createdAt: new Date(receipt.createdAt) });
-      }
+      refreshReceipt(order.id, {
+         ...receipt,
+         createdAt: new Date(receipt.createdAt),
+      });
 
       return receipt;
    };

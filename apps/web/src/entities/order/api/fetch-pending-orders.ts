@@ -1,7 +1,8 @@
 import { client } from '@/lib/client';
-import { normalizeFullOrder } from '../normalizers/normalize-full-order';
+import { OrderModel } from '../types';
+import { serverFullOrderToOrderModel } from '../mappers/server-full-order-to-order-model';
 
-export async function fetchPendingOrders() {
+export async function fetchPendingOrders(): Promise<OrderModel[]> {
    const response = await client.order.orders.pending.$get();
 
    if (!response.ok) {
@@ -11,5 +12,7 @@ export async function fetchPendingOrders() {
 
    const { data: orders } = await response.json();
 
-   return orders.map(normalizeFullOrder);
+   const transformedOrders = orders.map(serverFullOrderToOrderModel);
+
+   return transformedOrders;
 }

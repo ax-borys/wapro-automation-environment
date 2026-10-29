@@ -200,8 +200,8 @@ export const columns = columnHelper.columns([
       cell: ({ row: r }) => {
          const [selected, setSelected] = useState<'FISCAL_NUMBER' | null>(null);
 
-         const orderId = r.original.original.id;
-         const requiredDocumentType = r.original.requiredDocumentType;
+         const receiptId = r.original.receipt.original?.id;
+         const orderId = r.original.id;
 
          return (
             <div className="flex flex-col w-full">
@@ -217,7 +217,7 @@ export const columns = columnHelper.columns([
                            <PenIcon />
                            Edit
                         </DropdownMenuLabel>
-                        {orderId ? (
+                        {receiptId ? (
                            <DropdownMenuItem
                               onSelect={() => setSelected('FISCAL_NUMBER')}
                            >
@@ -227,8 +227,7 @@ export const columns = columnHelper.columns([
                      </DropdownMenuGroup>
                   </DropdownMenuContent>
                </DropdownMenu>
-               {selected === 'FISCAL_NUMBER' &&
-               requiredDocumentType === 'RECEIPT' ? (
+               {selected === 'FISCAL_NUMBER' && receiptId ? (
                   <UpdateFiscalNumber
                      orderId={orderId}
                      defaultOpen={true}
