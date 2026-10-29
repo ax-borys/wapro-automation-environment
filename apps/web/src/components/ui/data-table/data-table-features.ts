@@ -24,6 +24,8 @@ import {
    RowData,
    SortFn,
    sortFn_datetime,
+   rowExpandingFeature,
+   createExpandedRowModel,
 } from '@tanstack/react-table';
 
 export interface FuzzyFilterMeta {
@@ -63,10 +65,12 @@ export const features = tableFeatures({
    rowPaginationFeature,
    rowSelectionFeature,
    rowSortingFeature,
+   rowExpandingFeature,
    globalFilteringFeature,
    filteredRowModel: createFilteredRowModel(),
    paginatedRowModel: createPaginatedRowModel(),
    sortedRowModel: createSortedRowModel(),
+   expandedRowModel: createExpandedRowModel(),
    filterFns: { includesString: filterFn_includesString, fuzzy: fuzzyFilter },
    sortFns: {
       alphanumeric: sortFn_alphanumeric,

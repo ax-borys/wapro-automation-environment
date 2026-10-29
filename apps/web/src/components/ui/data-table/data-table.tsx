@@ -1,6 +1,7 @@
 'use client';
 import {
    ColumnDef,
+   Row,
    RowData,
    type Table as TableType,
    flexRender,
@@ -22,6 +23,7 @@ import {
    EmptyTitle,
 } from '../empty';
 import { FileTextIcon, RecordIcon } from '@phosphor-icons/react';
+import React, { Fragment, ReactNode } from 'react';
 
 interface DataTableProps<TData extends RowData> {
    table: TableType<typeof features, TData>;
@@ -29,7 +31,10 @@ interface DataTableProps<TData extends RowData> {
 
 export function DataTable<TData extends RowData>({
    table,
-}: DataTableProps<TData>) {
+   expandedRender,
+}: DataTableProps<TData> & {
+   expandedRender?: (row: Row<typeof features, TData>) => ReactNode;
+}) {
    return (
       <div className="overflow-hidden">
          {table.getRowModel()?.rows.length ? (
@@ -60,10 +65,9 @@ export function DataTable<TData extends RowData>({
                   ))}
                </TableHeader>
                <TableBody>
-                  {table.getRowModel().rows?.length ? (
-                     table.getRowModel().rows.map((row) => (
+                  {table.getRowModel().rows.map((row) => (
+                     <Fragment key={row.id}>
                         <TableRow
-                           key={row.id}
                            data-state={row.getIsSelected() && 'selected'}
                         >
                            {row.getVisibleCells().map((cell) => (
@@ -78,17 +82,19 @@ export function DataTable<TData extends RowData>({
                               </TableCell>
                            ))}
                         </TableRow>
-                     ))
-                  ) : (
-                     <TableRow>
-                        <TableCell
-                           colSpan={table.getAllColumns().length}
-                           className="h-24 text-center first:ml-6 last:mr-6"
-                        >
-                           No results.
-                        </TableCell>
-                     </TableRow>
-                  )}
+
+                        {expandedRender && row.getIsExpanded() ? (
+                           <TableRow>
+                              <TableCell
+                                 className="px-0"
+                                 colSpan={row.getVisibleCells().length}
+                              >
+                                 {expandedRender(row)}
+                              </TableCell>
+                           </TableRow>
+                        ) : null}
+                     </Fragment>
+                  ))}
                </TableBody>
             </Table>
          ) : (

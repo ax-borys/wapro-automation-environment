@@ -61,6 +61,7 @@ export function useDataTable<TData extends RowData>(
          globalFilter,
          sorting,
       },
+      getRowCanExpand: () => true,
    });
 
    return {

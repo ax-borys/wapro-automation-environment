@@ -18,6 +18,7 @@ import { useDataTable } from '@/hooks/use-data-table';
 import { fetchFulfilledOrders } from '@/entities/order/api/fetch-fulfill-orders';
 import { useOrdersStore } from '@/entities/order';
 import { useShallow } from 'zustand/shallow';
+import { Order } from './order';
 
 export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
    const [date, setDate] = useState<DateRange | undefined>({
@@ -113,7 +114,10 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
          </Toolbar>
          <div className="flex flex-col h-full max-h-full shrink min-h-0">
             <div className="max-h-full min-h-0  overflow-auto shrink">
-               <DataTable table={table} />
+               <DataTable
+                  table={table}
+                  expandedRender={(row) => <Order id={row.original.id} />}
+               />
             </div>
             <div className="flex-1 shrink"></div>
             <Toolbar className="shrink-0 border-t border-border bg-background w-full">

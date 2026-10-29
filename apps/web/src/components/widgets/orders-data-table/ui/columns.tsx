@@ -23,6 +23,8 @@ import { Separator } from '@/components/ui/separator';
 import { OrderModel } from '@/entities/order';
 import {
    ArrowSquareOutIcon,
+   CaretDownIcon,
+   CaretRightIcon,
    CashRegisterIcon,
    LinkIcon,
    PenIcon,
@@ -52,29 +54,14 @@ const formatFullname = (
 
 export const columns = columnHelper.columns([
    columnHelper.display({
-      id: 'link',
+      id: 'expand',
       cell: ({ row: r }) => {
-         const value = r.original.original.externalId;
+         const isExpanded = r.getIsExpanded();
 
          return (
-            <div className="flex flex-col w-fit">
-               <Button
-                  variant={'ghost'}
-                  className="text-blue-700 dark:text-blue-300"
-                  asChild
-               >
-                  <Link
-                     className="underline flex items-center justify-center gap-1"
-                     href={
-                        'https://salescenter.allegro.com/orders?query=' + value
-                     }
-                     target="_blank"
-                     rel="noopener noreferrer"
-                  >
-                     <ArrowSquareOutIcon />
-                  </Link>
-               </Button>
-            </div>
+            <Button variant={'ghost'} onClick={r.getToggleExpandedHandler()}>
+               {isExpanded ? <CaretDownIcon /> : <CaretRightIcon />}
+            </Button>
          );
       },
       size: 36,
@@ -195,6 +182,36 @@ export const columns = columnHelper.columns([
          size: 600,
       },
    ),
+   columnHelper.display({
+      id: 'link',
+      cell: ({ row: r }) => {
+         const value = r.original.original.externalId;
+
+         return (
+            <div className="flex flex-col w-fit">
+               <Button
+                  variant={'ghost'}
+                  className="text-blue-700 dark:text-blue-300"
+                  asChild
+               >
+                  <Link
+                     className="underline flex items-center justify-center gap-1"
+                     href={
+                        'https://salescenter.allegro.com/orders?query=' + value
+                     }
+                     target="_blank"
+                     rel="noopener noreferrer"
+                  >
+                     <ArrowSquareOutIcon />
+                  </Link>
+               </Button>
+            </div>
+         );
+      },
+      size: 36,
+      minSize: 36,
+      maxSize: 36,
+   }),
    columnHelper.display({
       id: 'actions',
       cell: ({ row: r }) => {
