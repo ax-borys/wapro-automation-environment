@@ -39,7 +39,6 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
    );
 
    const orders = useOrdersStore((s) => s.orders);
-   console.log('Orders-list');
 
    const orderList = useMemo(
       () =>
@@ -63,8 +62,16 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
          },
       });
 
-      result.then((orders) => {
-         addOrders(orders);
+      result.then((freshOrders) => {
+         const preservedOrders = freshOrders.map((order) => ({
+            ...order,
+            isSelected:
+               orders[order.id] !== undefined
+                  ? orders[order.id].isSelected
+                  : order.isSelected,
+         }));
+
+         addOrders(preservedOrders);
       });
    }, [date]);
 
