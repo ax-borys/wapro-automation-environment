@@ -109,25 +109,28 @@ export const columns = columnHelper.columns([
       },
       size: 100,
    }),
-   columnHelper.accessor((r) => '', {
-      header: () => <div className="text-center">Number</div>,
-      id: 'number',
-      cell: ({ row: r }) => {
-         const receiptNumber = r.original.receipt.original?.number;
-         const invoiceNumber = r.original.invoice.original?.number;
+   columnHelper.accessor(
+      (r) => r.receipt.original?.number ?? r.invoice.original?.number ?? '---',
+      {
+         header: () => <div className="text-center">Number</div>,
+         id: 'number',
+         cell: ({ row: r }) => {
+            const receiptNumber = r.original.receipt.original?.number;
+            const invoiceNumber = r.original.invoice.original?.number;
 
-         return (
-            <div className="text-center">
-               {receiptNumber ? (
-                  <ReceiptNumberBadge value={receiptNumber} />
-               ) : (
-                  <InvoiceNumberBadge value={invoiceNumber ?? 'N/D'} />
-               )}
-            </div>
-         );
+            return (
+               <div className="text-center">
+                  {receiptNumber ? (
+                     <ReceiptNumberBadge value={receiptNumber} />
+                  ) : (
+                     <InvoiceNumberBadge value={invoiceNumber ?? 'N/D'} />
+                  )}
+               </div>
+            );
+         },
+         size: 150,
       },
-      size: 150,
-   }),
+   ),
    columnHelper.accessor('receipt.original.fiscalNumber', {
       header: () => <div className="text-center">Fiscal number</div>,
       cell: ({ row: r }) => {
