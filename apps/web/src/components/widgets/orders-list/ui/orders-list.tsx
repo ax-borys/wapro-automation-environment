@@ -51,12 +51,8 @@ export function OrdersList() {
 
    useEffect(() => {
       // Update only user refreshes page manually.
-      if (
-         Object.values(orders).filter(
-            (order) => order.original.status === 'READY_FOR_PROCESSING',
-         ).length
-      )
-         return;
+      if (sortedOrdersList.length) return;
+
       const promise = fetchPendingOrders();
 
       promise.then((pendingOrders) => {
