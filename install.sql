@@ -60,6 +60,7 @@ CREATE PROCEDURE dbo.MAGSRC_DodajParagon
     @IdKontrahenta      NUMERIC,               -- np. kontrahent "Sprzedaż detaliczna"
     @IdUzytkownika      NUMERIC,
     @IdKasy             INT,                   -- kasa, w której rejestrowana jest wpłata
+    @IdRachunku         INT,                   
     @SygnaturaTypuDok   VARCHAR(10) = 'PR',     -- sygnatura typu dok. handlowego dla paragonu
     @Miejsce            VARCHAR(50) = NULL,     -- NULL => pobrane z konfiguracji firmy
     @FormaPlatnosci     VARCHAR(20) = 'gotówka',
@@ -352,7 +353,7 @@ BEGIN
             @IdUzytkownika,
             @id_pracownika,
             0,                    -- tryb_rejestracji
-            0,                    -- id_rachunku
+            @IdRachunku,                    -- id_rachunku
             1, 1,                 -- potwierdzony_ue, trojstronny_ue
             0,                    -- id_fzal_org
             0;                    -- bez_errmsg
@@ -372,7 +373,7 @@ BEGIN
                 '',                   -- sym_wal
                 0,                    -- zaliczka
                 @IdKasy,
-                0,                    -- id_rachunku
+                @IdRachunku,          -- id_rachunku
                 @IdUzytkownika,
                 @id_pracownika,
                 2;                    -- znak_wn

@@ -44,6 +44,7 @@ async function convertImgSrcCommnd() {
 const config: WaproConfig = {
    companyId: 1,
    cashRegisterId: 1,
+   bankAccountNumber: 0,
    userId: 3000001,
    counterPartyId: 1,
    stockId: 1,

@@ -54,7 +54,14 @@ function shrinkNumbersList(numbers: number[]) {
 export function generateReceipts(
    receiptInputs: GenerateReceiptInput[],
    map: Mapping,
-   { companyId, userId, cashRegisterId, counterPartyId, stockId }: WaproConfig,
+   {
+      companyId,
+      userId,
+      cashRegisterId,
+      counterPartyId,
+      stockId,
+      bankAccountNumber,
+   }: WaproConfig,
 ): RecordReceiptInput[] {
    const receipts: RecordReceiptInput[] = [];
 
@@ -124,6 +131,7 @@ export function generateReceipts(
          companyId,
          userId,
          cashRegisterId,
+         bankAccountNumber,
          counterPartyId,
          deposit: 0,
          paymentDeadline: calculatePaymentDeadline(receiptInput.paymentMethod),

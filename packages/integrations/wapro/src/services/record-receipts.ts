@@ -23,6 +23,7 @@ export type CreateReceiptInput = {
    id: number;
    companyId: number;
    cashRegisterId: number;
+   bankAccountNumber: number;
    counterPartyId: number;
    userId: number;
    deposit: number;
@@ -42,6 +43,7 @@ export async function createReceipt(
       counterPartyId,
       userId,
       cashRegisterId,
+      bankAccountNumber,
       pricingType,
       paymentFormat,
       paymentDeadline,
@@ -69,6 +71,7 @@ export async function createReceipt(
                    @IdKontrahenta    = ${counterPartyId},
                    @IdUzytkownika    = ${userId},
                    @IdKasy           = ${cashRegisterId},
+                   @IdRachunku       = ${bankAccountNumber},
                    @SygnaturaTypuDok = 'PR',
                    @ObliczanieWg     = ${pricingType},
                    @FormaPlatnosci   = ${paymentFormat},

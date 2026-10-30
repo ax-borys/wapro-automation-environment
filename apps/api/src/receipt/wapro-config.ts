@@ -31,9 +31,18 @@ if (!process.env.WAPRO_STOCK_ID) {
    throw runtimeError('Failed to parse number from WAPRO_STOCK_ID.');
 }
 
+if (!process.env.WAPRO_BANK_ACCOUNT_NUMBER_ID) {
+   throw runtimeError('WAPRO_BANK_ACCOUNT_NUMBER_ID is not provided.');
+} else if (isNaN(Number(process.env.WAPRO_COMPANY_ID))) {
+   throw runtimeError(
+      'Failed to parse number from WAPRO_BANK_ACCOUNT_NUMBER_ID.',
+   );
+}
+
 export const waproConfig: WaproConfig = {
    companyId: Number(process.env.WAPRO_COMPANY_ID),
    cashRegisterId: Number(process.env.WAPRO_CASH_REGISTER_ID),
+   bankAccountNumber: Number(process.env.WAPRO_BANK_ACCOUNT_NUMBER_ID),
    userId: Number(process.env.WAPRO_USER_ID),
    counterPartyId: Number(process.env.WAPRO_COUNTER_PARTY_ID),
    stockId: Number(process.env.WAPRO_STOCK_ID),
