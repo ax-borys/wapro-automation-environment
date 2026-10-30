@@ -32,7 +32,7 @@ export function AppSidebar() {
    return (
       <Sidebar collapsible="icon">
          <SidebarHeader className="">
-            <div className="flex items-center h-8 w-full overflow-x-hidden">
+            <div className="flex items-center h-8 w-full overflow-hidden">
                <Button className="size-8 grow-0" asChild>
                   <Link href="/">
                      <Logo className="size-5" />
