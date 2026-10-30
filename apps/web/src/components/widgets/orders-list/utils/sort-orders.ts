@@ -1,7 +1,7 @@
 import { OrderModel } from '@/entities/order';
 
-const isRecorded = (order: OrderModel) =>
-   order.invoice.original || order.receipt.original;
+const isRecorded = (order: OrderModel): boolean =>
+   Boolean(order.invoice.original || order.receipt.original);
 
 export const sortOrders = (a: OrderModel, b: OrderModel) => {
    const aRecorded = isRecorded(a);
