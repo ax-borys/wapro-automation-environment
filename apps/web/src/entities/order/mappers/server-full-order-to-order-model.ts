@@ -1,9 +1,25 @@
 import { normilizeItems } from '@/entities/offer';
 import { normilizePositions } from '../orders.store';
-import { OrderModel, ServerFullOrder } from '../types';
+import {
+   InvoiceModel,
+   OrderModel,
+   ReceiptModel,
+   ServerFullOrder,
+} from '../types';
 
 export function serverFullOrderToOrderModel(
    order: ServerFullOrder,
+   state?: {
+      isSelected?: boolean;
+      invoice?: {
+         isRecording?: boolean;
+         draft?: { number: InvoiceModel['draft']['number'] };
+      };
+      receipt?: {
+         isRecording?: boolean;
+         draft?: { fiscalNumber: ReceiptModel['draft']['fiscalNumber'] };
+      };
+   },
 ): OrderModel {
    return {
       id: order.id,
@@ -17,17 +33,33 @@ export function serverFullOrderToOrderModel(
          original: order.invoice
             ? { ...order.invoice, createdAt: new Date(order.invoice.createdAt) }
             : null,
-         isRecording: false,
-         draft: { number: null },
+         isRecording:
+            state?.invoice?.isRecording !== undefined
+               ? state.invoice.isRecording
+               : false,
+         draft: {
+            number:
+               state?.invoice?.draft?.number !== undefined
+                  ? state.invoice.draft.number
+                  : null,
+         },
       },
       receipt: {
          original: order.receipt
             ? { ...order.receipt, createdAt: new Date(order.receipt.createdAt) }
             : null,
-         isRecording: false,
-         draft: { fiscalNumber: null },
+         isRecording:
+            state?.receipt?.isRecording !== undefined
+               ? state.receipt.isRecording
+               : false,
+         draft: {
+            fiscalNumber:
+               state?.receipt?.draft?.fiscalNumber !== undefined
+                  ? state.receipt.draft.fiscalNumber
+                  : null,
+         },
       },
-      isSelected: false,
+      isSelected: state?.isSelected !== undefined ? state.isSelected : false,
       requiredDocumentType: order.requiredDocumentType,
       positions: normilizePositions(
          order.positions.map((position) => ({

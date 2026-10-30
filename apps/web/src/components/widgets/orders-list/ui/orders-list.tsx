@@ -5,9 +5,12 @@ import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { ReceiptIcon } from '@phosphor-icons/react';
-import { OrderModel, useOrdersStore } from '@/entities/order';
+import {
+   OrderModel,
+   useFetchPendingOrders,
+   useOrdersStore,
+} from '@/entities/order';
 import { useEffect, useState } from 'react';
-import { fetchPendingOrders } from '@/entities/order/api/fetch-pending-orders';
 import { Order } from './order';
 import { sortOrders } from '../utils/sort-orders';
 import { normilizeItems } from '@/entities/offer';
@@ -46,6 +49,8 @@ export function OrdersList() {
    const fulfillOrders = useFulfillOrders(
       [...filtredOrdersIds].filter((id) => isFulfillable(orders[id])),
    );
+
+   const fetchPendingOrders = useFetchPendingOrders(orders);
 
    useGetAndStoreOffers();
 

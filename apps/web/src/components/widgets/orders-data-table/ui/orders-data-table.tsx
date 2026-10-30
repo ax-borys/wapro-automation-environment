@@ -11,13 +11,11 @@ import {
 } from '@/components/ui/toolbar';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
-import { addDays, endOfDay, formatISO, startOfDay } from 'date-fns';
+import { endOfDay, formatISO, startOfDay } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react';
 import { useDataTable } from '@/hooks/use-data-table';
-import { fetchFulfilledOrders } from '@/entities/order/api/fetch-fulfill-orders';
-import { useOrdersStore } from '@/entities/order';
-import { useShallow } from 'zustand/shallow';
+import { useFetchFulfilledOrders, useOrdersStore } from '@/entities/order';
 import { Order } from './order';
 
 export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
@@ -54,6 +52,8 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
 
    const addOrders = useOrdersStore((s) => s.addMany);
 
+   const fetchFulfilledOrders = useFetchFulfilledOrders(orders);
+
    useEffect(() => {
       const result = fetchFulfilledOrders({
          dateRange: {
@@ -62,16 +62,8 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
          },
       });
 
-      result.then((freshOrders) => {
-         const preservedOrders = freshOrders.map((order) => ({
-            ...order,
-            isSelected:
-               orders[order.id] !== undefined
-                  ? orders[order.id].isSelected
-                  : order.isSelected,
-         }));
-
-         addOrders(preservedOrders);
+      result.then((orders) => {
+         addOrders(orders);
       });
    }, [date]);
 
