@@ -44,3 +44,4 @@ local.spzoo.db
 **/storage.json
 out_api
 **/*.tar
+.vitest
