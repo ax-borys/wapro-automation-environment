@@ -1,27 +1,17 @@
-import dotenv from 'dotenv';
+import 'dotenv/config';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const envPath = path.resolve(__dirname, '../../.env');
-
-dotenv.config({
-   path: envPath,
-   quiet: true,
-});
 import { defineConfig } from 'drizzle-kit';
 
-const dbPath = 'file:' + path.resolve(__dirname, `${process.env.DB_FILENAME!}`);
+const dbFile = process.env.DB_FILE_PATH;
+if (!dbFile) throw new Error('DB_FILE_PATH is not set');
 
-console.log('Path', dbPath);
+const dbPath = path.resolve(dbFile);
 
 export default defineConfig({
    out: './drizzle',
    schema: './src/schemas/',
    dialect: 'sqlite',
    dbCredentials: {
-      url: dbPath,
+      url: `file:${dbPath}`,
    },
 });

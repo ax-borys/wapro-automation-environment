@@ -129,6 +129,8 @@ export const positionsTable = sqliteTable(
          .notNull()
          .references(() => offersTable.id),
 
+      title: text().notNull().default(''),
+      imgSrc: text('image_source').notNull().default(''),
       quantity: int().notNull(),
       price: int().notNull(),
       clientTag: text('client_tag'),
