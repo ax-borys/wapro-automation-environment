@@ -194,25 +194,29 @@ export async function addOrders(
    console.log('Building positions...');
    const positionsInput: PositionInput[] = [...inputMap.values()].flatMap(
       (order) =>
-         order.positions.map(
-            (position): PositionInput => ({
+         order.positions.map((position): PositionInput => {
+            const offer = v.parse(
+               offerSchema,
+               offers.find(
+                  (o) =>
+                     o.externalId === position.offer.externalId &&
+                     o.src === position.offer.src,
+               ),
+            );
+
+            return {
                orderId: v.parse(
                   orderSchema,
                   orders.find((o) => o.clientTag === order.clientTag),
                ).id,
-               offerId: v.parse(
-                  offerSchema,
-                  offers.find(
-                     (o) =>
-                        o.externalId === position.offer.externalId &&
-                        o.src === position.offer.src,
-                  ),
-               ).id,
+               offerId: offer.id,
+               title: offer.title,
+               imgSrc: offer.imgSrc,
                price: position.price,
                quantity: position.quantity,
                clientTag: position.clientTag,
-            }),
-         ),
+            };
+         }),
    );
 
    console.log('Validatig positions input...');
