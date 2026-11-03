@@ -7,7 +7,7 @@
       "build": "pnpm -r build",
       "dev:api": "pnpm --filter @wae/api dev",
       "dev:web": "pnpm --filter @wae/web dev",
-      "test": "echo \"Error: no test specified\" && exit 1"
+      "test": "vitest"
    },
    "keywords": [],
    "author": "Alex Borysiuk",
