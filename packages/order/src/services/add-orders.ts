@@ -210,11 +210,7 @@ export async function addOrders(
                   orders.find((o) => o.clientTag === order.clientTag),
                ).id,
                offerId: offer.id,
-               title: offer.title,
-               imgSrc: offer.imgSrc,
-               price: position.price,
-               quantity: position.quantity,
-               clientTag: position.clientTag,
+               ...position,
             };
          }),
    );

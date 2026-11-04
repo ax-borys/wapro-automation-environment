@@ -6,6 +6,7 @@ import { fetchOrders } from '../api/fetch-orders';
 import { RawOrder } from '../types';
 import { mapOrder, Order } from '../mappers/map-order';
 import { assertStore } from '../../assertions';
+import { getOffersById } from '../../offer';
 
 export async function getPendingOrders(): Promise<Order[]> {
    assertStore(store);
@@ -25,7 +26,15 @@ export async function getPendingOrders(): Promise<Order[]> {
       filteredOrders.push(order);
    }
 
-   const orders = filteredOrders.map(mapOrder);
+   const involvedOffers = await getOffersById([
+      ...new Set(
+         filteredOrders.flatMap((rawOrder) =>
+            rawOrder.lineItems.map((i) => i.offer.id),
+         ),
+      ),
+   ]);
+
+   const orders = filteredOrders.map((i) => mapOrder(i, involvedOffers));
 
    return orders;
 }

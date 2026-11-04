@@ -1,6 +1,6 @@
 export { getAllOffers } from './offer/';
 
-export { getPendingOrders, getPendingOrdersMock } from './order/';
+export { getPendingOrders } from './order/';
 
 export { originalImgSrcTos128b } from './utils/originalImgSrcTos128b';
 

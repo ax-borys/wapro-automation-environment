@@ -14,6 +14,7 @@ import {
 import { RawOrder } from '../types';
 import * as v from 'valibot';
 import currency from 'currency.js';
+import { Offer } from '../../offer';
 
 const customerSchema = v.union([
    v.object({
@@ -72,7 +73,21 @@ export const orderValidationSchema = v.object({
 
 export type Order = v.InferOutput<typeof orderValidationSchema>;
 
-export function mapOrder(order: RawOrder): Order {
+export function mapOrder(order: RawOrder, offers: Offer[]): Order {
+   const involvedOffersByExternalId: Record<string, Offer> = {};
+
+   for (const incomeOffer of order.lineItems.map((i) => i.offer)) {
+      const offer = offers.find((offer) => offer.externalId === incomeOffer.id);
+
+      if (!offer) {
+         throw new Error(
+            `Failed to match offer with name "${incomeOffer.name}"`,
+         );
+      }
+
+      involvedOffersByExternalId[offer.externalId] = offer;
+   }
+
    const customerAddress = {
       city: order.buyer.address?.city || null,
       street: order.buyer.address?.street || null,
@@ -93,9 +108,6 @@ export function mapOrder(order: RawOrder): Order {
    ) {
       throw new Error("CompanyName and Customer's names cannot be null");
    }
-
-   console.log('Login: ', order.buyer.login);
-   console.log('Id: ', order.buyer.id);
 
    const customer: Order['customer'] = {
       firstName: order.buyer.firstName,
@@ -205,6 +217,8 @@ export function mapOrder(order: RawOrder): Order {
                src: 'allegro',
                externalId: i.offer.id,
             },
+            title: involvedOffersByExternalId[i.offer.id].title,
+            imgSrc: involvedOffersByExternalId[i.offer.id].imgSrc,
          })),
          ...[
             currency(order.delivery.cost.amount).intValue !== 0
@@ -212,6 +226,8 @@ export function mapOrder(order: RawOrder): Order {
                     quantity: 1,
                     price: currency(order.delivery.cost.amount).intValue,
                     offer: { src: 'allegro', externalId: 'delivery' },
+                    title: 'Delivery',
+                    imgSrc: 'https://placehold.co/128x128',
                  }
                : null,
          ].filter((v): v is NonNullable<typeof v> => v !== null),

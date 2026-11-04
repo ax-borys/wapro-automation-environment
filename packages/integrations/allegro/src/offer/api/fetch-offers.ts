@@ -21,9 +21,31 @@ export type QueryParams = {
    'publication.status'?: 'INACTIVE' | 'ACTIVE' | 'ACTIVATING' | 'ENDED';
    limit?: string;
    offset?: string;
+   'offer.id'?: string[];
 };
 
 type ApiResponseRawOffer = v.InferOutput<typeof apiResponseRawOffersSchema>;
+
+const buildQueryParams = (queryParams: QueryParams): URLSearchParams => {
+   const params = new URLSearchParams();
+
+   for (const [key, value] of Object.entries(queryParams) as [
+      keyof QueryParams,
+      QueryParams[keyof QueryParams],
+   ][]) {
+      if (value === undefined) continue;
+
+      if (Array.isArray(value)) {
+         for (const item of value) {
+            params.append(key, item);
+         }
+      } else {
+         params.append(key, value);
+      }
+   }
+
+   return params;
+};
 
 export async function fetchOffers(
    accessToken: string,
@@ -32,12 +54,13 @@ export async function fetchOffers(
    assertStore(store);
 
    const { userAgent } = store.getState();
-   const params = new URLSearchParams(queryParams);
+   const params = queryParams ? buildQueryParams(queryParams) : '';
+   const url = `https://api.allegro.pl/sale/offers?${params.toString()}`;
 
    const result = await fetchWithValidation(
       apiResponseRawOffersSchema,
       v.any(),
-      `https://api.allegro.pl/sale/offers?${params.toString()}`,
+      url,
       {
          headers: {
             Authorization: `Bearer ${accessToken}`,
