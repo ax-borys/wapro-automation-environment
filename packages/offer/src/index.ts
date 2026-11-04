@@ -30,3 +30,5 @@ export {
 } from './services/get-all-offers-with-items';
 
 export { getAllProducts } from './services/get-all-products';
+
+export * from './services/sync-offers';

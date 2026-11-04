@@ -48,6 +48,7 @@ import { valibotJsonMiddleware } from '../helpers/valibot-middleware';
 import { createReceiptInputSchema, createReceipts } from '@wae/receipt';
 import { approveInvoiceInputSchema, approveInvoices } from '@wae/invoice';
 import { waproConfig } from '../receipt/wapro-config';
+import { syncOffers } from '@wae/offer';
 
 const generateId = customAlphabet('0123456789', 10);
 
@@ -165,6 +166,11 @@ export const order = new Hono()
          });
       }
       const result = await db.transaction(async (tx) => {
+         console.log('Synchronizating offers...');
+         const involvedOffers = allegro.retrieveInvolvedOffers(allegroOrders);
+
+         await syncOffers(tx, involvedOffers);
+         console.log('Synchronization succeeded.');
          console.log("Obtaining customers' addresses...");
          const customerAddresses = await obtainAddresses(
             tx,

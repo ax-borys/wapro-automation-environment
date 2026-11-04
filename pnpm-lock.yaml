@@ -613,6 +613,12 @@ importers:
       '@wae/db':
         specifier: workspace:*
         version: link:../db
+      '@wae/error':
+        specifier: workspace:*
+        version: link:../error
+      '@wae/kernel':
+        specifier: workspace:*
+        version: link:../kernel
       '@wae/types':
         specifier: workspace:*
         version: link:../types

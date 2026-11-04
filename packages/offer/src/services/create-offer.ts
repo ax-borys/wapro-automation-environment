@@ -1,15 +1,13 @@
 import { db, offersTable } from '@wae/db';
-import { CreateOfferInput, CreateOfferOutput } from '../schemas';
+import { Offer, OfferInput, Tx } from '@wae/types';
 
-export type CreateOfferReturn = Promise<CreateOfferOutput>;
+export type CreateOfferInput = OfferInput;
+export type CreateOfferReturn = Promise<Offer>;
 
-export async function createOffer(offer: CreateOfferInput): CreateOfferReturn {
-   const result = await db.transaction(async (tx) => {
-      const result = (
-         await tx.insert(offersTable).values(offer).returning()
-      )[0];
-      return result;
-   });
-
-   return result;
+export async function createOffer(
+   tx: Tx,
+   offerInput: CreateOfferInput,
+): CreateOfferReturn {
+   const [offer] = await tx.insert(offersTable).values(offerInput).returning();
+   return offer;
 }
