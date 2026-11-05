@@ -10,6 +10,7 @@ import { Offer, offerInputSchema, offerSchema, Tx } from '@wae/types';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
 import { createOffer } from './create-offer';
+import { updateAndUnlinkItems } from './update-and-unlink-items';
 
 const syncableOfferInputSchema = v.pick(offerSchema, [
    'imgSrc',
@@ -59,20 +60,25 @@ export async function syncOffers(
 
    const updatedOffers: Offer[] = [];
 
-   for (const offer of input) {
+   for (const offerInput of input) {
       const storedOffer = storedOffersBySrcExternalId.get(
-         mapKey(offer.src, offer.externalId),
+         mapKey(offerInput.src, offerInput.externalId),
       );
 
       if (!storedOffer) {
-         const createdOffer = await createOffer(tx, offer);
+         const createdOffer = await createOffer(tx, offerInput);
 
          updatedOffers.push(createdOffer);
       } else {
-         const isSimilar = compareOffer(offer, storedOffer);
+         const isSimilar = compareOffer(offerInput, storedOffer);
 
          if (!isSimilar) {
-            const updatedOffer = await updateOfferData(tx, offer);
+            const updatedOffer = await updateOfferData(tx, offerInput);
+
+            await updateAndUnlinkItems(tx, {
+               offerId: updatedOffer.id,
+               items: [],
+            });
 
             updatedOffers.push(updatedOffer);
          }

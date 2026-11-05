@@ -22,7 +22,9 @@ export const offer = new Hono()
    .post('/', valibotJsonMiddleware(createOfferInputSchema), async (c) => {
       const offer = c.req.valid('json');
 
-      const result = await createOffer(offer);
+      const result = await db.transaction(
+         async (tx) => await createOffer(tx, offer),
+      );
 
       return c.json<ApiResponse<CreateOfferOutput>>({
          data: result,
@@ -51,7 +53,9 @@ export const offer = new Hono()
       async (c) => {
          const itemsInput = c.req.valid('json');
 
-         const updatedItems = await updateAndUnlinkItems(itemsInput);
+         const updatedItems = await db.transaction(
+            async (tx) => await updateAndUnlinkItems(tx, itemsInput),
+         );
 
          return c.json<ApiResponse<UpdateAndUnlinkItemsOutput>>(
             {
@@ -62,33 +66,11 @@ export const offer = new Hono()
          );
       },
    )
-   .get('/sync-offers', async (c) => {
-      const data = await syncOffers();
-
-      return c.json<ApiResponse<typeof data>>({ data, error: null });
-   })
    .get('/normalize-images', async (c) => {
       const data = await convertImgSrcToS128b();
 
       return c.json<ApiResponse<typeof data>>({ data, error: null });
    });
-
-async function syncOffers() {
-   const offers = await allegro.getAllOffers();
-
-   const createdOffers: CreateOfferOutput[] = [];
-
-   const existingOffers = await getAllOffers();
-
-   for (const offer of offers) {
-      if (existingOffers.map((i) => i.externalId).includes(offer.externalId))
-         return;
-      const ret = await createOffer(offer);
-      createdOffers.push(ret);
-   }
-
-   return createdOffers;
-}
 
 export async function convertImgSrcToS128b() {
    const offers = await getAllOffers();

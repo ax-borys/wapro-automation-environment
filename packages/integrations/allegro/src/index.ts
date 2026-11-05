@@ -1,6 +1,6 @@
 export { getAllOffers } from './offer/';
 
-export { getPendingOrders, retrieveInvolvedOffers } from './order/';
+export { getPendingOrders, extractInvolvedOffersFromOrders } from './order/';
 
 export { originalImgSrcTos128b } from './utils/originalImgSrcTos128b';
 

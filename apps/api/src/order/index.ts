@@ -167,7 +167,8 @@ export const order = new Hono()
       }
       const result = await db.transaction(async (tx) => {
          console.log('Synchronizating offers...');
-         const involvedOffers = allegro.retrieveInvolvedOffers(allegroOrders);
+         const involvedOffers =
+            allegro.extractInvolvedOffersFromOrders(allegroOrders);
 
          await syncOffers(tx, involvedOffers);
          console.log('Synchronization succeeded.');

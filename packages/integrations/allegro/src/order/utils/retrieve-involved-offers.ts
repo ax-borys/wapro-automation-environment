@@ -3,7 +3,7 @@ import { Order } from '../mappers/map-order';
 
 type OfferData = Pick<Offer, 'externalId' | 'title' | 'imgSrc' | 'src'>;
 
-export function retrieveInvolvedOffers(orders: Order[]): OfferData[] {
+export function extractInvolvedOffersFromOrders(orders: Order[]): OfferData[] {
    const offers: OfferData[] = orders.flatMap((order) =>
       order.positions.flatMap(
          (position): OfferData => ({

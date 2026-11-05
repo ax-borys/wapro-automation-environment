@@ -4,4 +4,4 @@ export { getPendingOrders } from './services/get-pending-orders';
 
 export type RawOrderSchema = typeof rawOrderSchema;
 
-export { retrieveInvolvedOffers } from './utils/retrieve-involved-offers';
+export { extractInvolvedOffersFromOrders } from './utils/retrieve-involved-offers';
