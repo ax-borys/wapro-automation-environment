@@ -290,14 +290,14 @@ export function OrderCardTablePosition({
                            <TruckIcon className="size-6 mx-0.75" />
                         ) : (
                            <Image
-                              src={offer.imgSrc}
+                              src={position.imgSrc}
                               alt="Product preview"
                               width={30}
                               height={30}
                               className="rounded-sm"
                            />
                         )}
-                        <div className="overflow-auto">{offer.title}</div>
+                        <div className="overflow-auto">{position.title}</div>
                      </Link>
                      {editOfferComp}
                   </>
