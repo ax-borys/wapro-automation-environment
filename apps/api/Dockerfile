@@ -40,7 +40,7 @@ COPY . .
 
 ENV NODE_ENV=production
 
-RUN corepack enable pnpm && corepack use pnpm@12.9.1 && pnpm --filter @wae/web... build && pnpm --filter @wae/api --frozen-lockfile --prod deploy ./out
+RUN corepack enable pnpm && corepack use pnpm@12.9.1 && pnpm --filter @wae/api... build && pnpm --filter @wae/api --frozen-lockfile --prod deploy ./out
 
 FROM node:${NODE_VERSION} AS runtime
 
