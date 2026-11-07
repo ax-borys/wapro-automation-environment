@@ -1,12 +1,10 @@
 import { offersTable } from '@wae/db';
-import { invalidReference } from '@wae/error';
 import {
    buildSrcExternalIdQueryCondition,
    compareOffer,
    mapBySrcExternalId,
-   mapOffersById,
 } from '@wae/kernel';
-import { Offer, offerInputSchema, offerSchema, Tx } from '@wae/types';
+import { Offer, offerSchema, Tx } from '@wae/types';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
 import { createOffer } from './create-offer';
@@ -21,7 +19,7 @@ const syncableOfferInputSchema = v.pick(offerSchema, [
 
 type SyncableOffer = v.InferOutput<typeof syncableOfferInputSchema>;
 
-const syncOffersInputSchema = v.array(syncableOfferInputSchema);
+const syncOffersInputSchema = v.pipe(v.array(syncableOfferInputSchema));
 
 type SyncOffersInput = v.InferOutput<typeof syncOffersInputSchema>;
 
@@ -49,6 +47,8 @@ export async function syncOffers(
    tx: Tx,
    input: SyncOffersInput,
 ): Promise<SyncOffersReturn> {
+   if (!input.length) return [];
+
    const condition = buildSrcExternalIdQueryCondition(input);
 
    const storedOffers = await tx.query.offersTable.findMany({
@@ -58,7 +58,7 @@ export async function syncOffers(
    const [storedOffersBySrcExternalId, mapKey] =
       mapBySrcExternalId(storedOffers);
 
-   const updatedOffers: Offer[] = [];
+   const upsertedOffers: Offer[] = [];
 
    for (const offerInput of input) {
       const storedOffer = storedOffersBySrcExternalId.get(
@@ -68,7 +68,7 @@ export async function syncOffers(
       if (!storedOffer) {
          const createdOffer = await createOffer(tx, offerInput);
 
-         updatedOffers.push(createdOffer);
+         upsertedOffers.push(createdOffer);
       } else {
          const isSimilar = compareOffer(offerInput, storedOffer);
 
@@ -80,10 +80,10 @@ export async function syncOffers(
                items: [],
             });
 
-            updatedOffers.push(updatedOffer);
+            upsertedOffers.push(updatedOffer);
          }
       }
    }
 
-   return updatedOffers;
+   return upsertedOffers;
 }

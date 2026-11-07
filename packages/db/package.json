@@ -9,10 +9,11 @@
    },
    "dependencies": {
       "@libsql/client": "^0.17.4",
-      "drizzle-orm": "1.0.0-rc.4"
+      "drizzle-orm": "1.0.0-rc.4",
+      "drizzle-seed": "^1.0.0-rc.5"
    },
    "devDependencies": {
-      "drizzle-kit": "rc",
-      "@types/mssql": "^12.3.0"
+      "@types/mssql": "^12.3.0",
+      "drizzle-kit": "rc"
    }
 }

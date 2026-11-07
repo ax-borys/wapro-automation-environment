@@ -5,5 +5,6 @@ export default defineConfig({
       exclude: [...configDefaults.exclude],
       // ... Specify options here.
       globals: true,
+      projects: ['packages/*'],
    },
 });
