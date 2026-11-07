@@ -3,7 +3,6 @@ import { recordReceipt, dbWapro as db } from '@wae/wapro';
 import { closeConnection } from '@wae/wapro';
 import { WaproConfig, Mapping, Order } from '@wae/types';
 import { getAllOffers } from './commands/get-all-offers';
-import { syncOffers } from './commands/sync-offers';
 import { getPendingOrders } from '@wae/allegro';
 import { syncProducts } from './commands/sync-products';
 import { convertImgSrcToS128b } from './commands/convertImgSrcToS128b';
@@ -14,7 +13,6 @@ import path from 'path';
 const commands: Record<string, (...args: string[]) => void | Promise<void>> = {
    'create-receipts': createReceiptsCommand,
    'get-all-offers': getAllOffersCommand,
-   'sync-offers': syncOffersCommand,
    'get-pending-orders': getPendingOrdersCommand,
    'sync-products': syncProductsCommand,
    'convert-imgs': convertImgSrcCommnd,
@@ -85,12 +83,6 @@ async function createReceiptsCommand(arg: string) {
 
 async function getAllOffersCommand() {
    const offers = await getAllOffers();
-   process.stdout.write(JSON.stringify(offers, null, 3));
-}
-
-async function syncOffersCommand() {
-   const offers = await syncOffers();
-   console.log(offers);
    process.stdout.write(JSON.stringify(offers, null, 3));
 }
 
