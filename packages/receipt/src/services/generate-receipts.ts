@@ -10,29 +10,26 @@ import {
 } from './../errors';
 import { GenerateReceiptInput } from '../schema';
 
-function calculatePaymentDeadline(paymentMethod: 'PREPAID' | 'POSTPAID'): Date {
-   const today = new Date();
+const MS_PER_DAY = 86_400_000;
+const CYCLE_DAYS = 14;
+const CYCLE_START = Date.UTC(2026, 7, 12); // Aug 12. Check it's the date you intend.
 
-   if (paymentMethod === 'POSTPAID') {
-      const weekAhead = new Date(today);
-      weekAhead.setDate(today.getDate() + 7);
+function addDays(date: Date, days: number): Date {
+   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
 
-      return weekAhead;
-   }
+function calculatePaymentDeadline(
+   paymentMethod: 'PREPAID' | 'POSTPAID',
+   now: Date,
+): Date {
+   if (paymentMethod === 'POSTPAID') return addDays(now, 7);
 
-   const interval = 14;
-   const initialDate = new Date('2026-08-12');
-   const term =
-      interval -
-      (Math.floor(
-         (today.getTime() - initialDate.getTime()) / (1000 * 60 * 60 * 24),
-      ) %
-         interval);
+   const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+   const daysSinceStart = (today - CYCLE_START) / MS_PER_DAY;
+   const daysIntoCycle =
+      ((daysSinceStart % CYCLE_DAYS) + CYCLE_DAYS) % CYCLE_DAYS;
 
-   const deadlineDate = new Date();
-   deadlineDate.setDate(today.getDate() + term);
-
-   return deadlineDate;
+   return addDays(now, CYCLE_DAYS - daysIntoCycle);
 }
 
 function shrinkNumbersList(numbers: number[]) {
@@ -51,6 +48,12 @@ function shrinkNumbersList(numbers: number[]) {
    return uniqueNumbers;
 }
 
+const vatCodes: Record<RecordReceiptWaproPosition['vatCode'], number> = {
+   '0': 0,
+   '8': 8,
+   '23': 23,
+} as const;
+
 export function generateReceipts(
    receiptInputs: GenerateReceiptInput[],
    map: Mapping,
@@ -63,6 +66,8 @@ export function generateReceipts(
       bankAccountNumber,
    }: WaproConfig,
 ): RecordReceiptInput[] {
+   const now = new Date();
+
    const receipts: RecordReceiptInput[] = [];
 
    // Order beggining
@@ -98,7 +103,7 @@ export function generateReceipts(
                   productId: product.sid,
                   priceBrutto: currency(price.value, { fromCents: true }).value,
                   priceNetto: currency(price.value, { fromCents: true }).divide(
-                     1.23,
+                     (100 + vatCodes[product.vat]) / 100,
                   ).value,
                   quantity: price.times * item.quantity,
                   discount: 0,
@@ -134,7 +139,10 @@ export function generateReceipts(
          bankAccountNumber,
          counterPartyId,
          deposit: 0,
-         paymentDeadline: calculatePaymentDeadline(receiptInput.paymentMethod),
+         paymentDeadline: calculatePaymentDeadline(
+            receiptInput.paymentMethod,
+            now,
+         ),
          paymentFormat: paymentMethod === 'PREPAID' ? 'przedpłata' : 'pobranie',
          pricingType: 'Brutto',
          stockId,
