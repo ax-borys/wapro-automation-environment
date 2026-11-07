@@ -3,6 +3,7 @@ import { db, itemsTable, offersTable } from '@wae/db';
 import * as v from 'valibot';
 import { and, eq } from 'drizzle-orm';
 import { Tx } from '@wae/types';
+import { invalidReference } from '@wae/error';
 
 const offerInputSchema = createInsertSchema(offersTable);
 const itemInputSchema = createInsertSchema(itemsTable);
@@ -25,19 +26,32 @@ export async function updateAndUnlinkItems(
    tx: Tx,
    itemsInput: UpdateAndUnlinkItemsInput,
 ): Promise<Item[]> {
+   const offer = await tx
+      .select()
+      .from(offersTable)
+      .where(eq(offersTable.id, itemsInput.offerId));
+
+   if (!offer) {
+      throw invalidReference(
+         `Offer with id=${itemsInput.offerId} does not exist`,
+      );
+   }
+
+   const inputItemsByProductId = new Map(
+      itemsInput.items.map((i) => [i.productId, i]),
+   );
+
    const currentOfferItems = await tx
       .select()
       .from(itemsTable)
       .where(eq(itemsTable.offerId, itemsInput.offerId));
 
-   const newOfferItems: Item[] = [];
+   const newOfferItemsByProductId: Map<Item['productId'], Item> = new Map();
 
    for (const item of currentOfferItems) {
-      if (itemsInput.items.map((i) => i.productId).includes(item.productId)) {
-         const itemInput = {
-            ...itemsInput.items.find((i) => i.productId === item.productId)!,
-         };
+      const itemInput = inputItemsByProductId.get(item.productId);
 
+      if (itemInput) {
          const [newItem] = await tx
             .update(itemsTable)
             .set({ quantity: itemInput.quantity })
@@ -49,7 +63,7 @@ export async function updateAndUnlinkItems(
             )
             .returning();
 
-         newOfferItems.push(newItem);
+         newOfferItemsByProductId.set(newItem.productId, newItem);
       } else {
          await tx
             .delete(itemsTable)
@@ -63,9 +77,7 @@ export async function updateAndUnlinkItems(
    }
 
    const notAddedItems = itemsInput.items
-      .filter(
-         (i) => !newOfferItems.map((j) => j.productId).includes(i.productId),
-      )
+      .filter((i) => !newOfferItemsByProductId.has(i.productId))
       .map((i) => ({ ...i, offerId: itemsInput.offerId }));
 
    if (notAddedItems.length) {
@@ -73,8 +85,11 @@ export async function updateAndUnlinkItems(
          .insert(itemsTable)
          .values(notAddedItems)
          .returning();
-      newItems.forEach((i) => newOfferItems.push(i));
+
+      newItems.forEach((newItem) =>
+         newOfferItemsByProductId.set(newItem.productId, newItem),
+      );
    }
 
-   return newOfferItems;
+   return [...newOfferItemsByProductId.values()];
 }
