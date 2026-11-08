@@ -26,7 +26,7 @@ import { useEffect, useState } from 'react';
 
 type ProductData = Pick<
    ProductModel,
-   'name' | 'id' | 'externalId' | 'stock' | 'imgSrc' | 'tax'
+   'name' | 'id' | 'externalId' | 'stock' | 'imgSrc' | 'tax' | 'src'
 >;
 
 type OfferData = Pick<
