@@ -6,19 +6,17 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 
-COPY apps/web/package.json apps/web/package.json
 COPY apps/api/package.json apps/api/package.json
-COPY apps/wae-cli/package.json apps/wae-cli/package.json
 
 COPY packages/types/package.json packages/types/package.json
 COPY packages/error/package.json packages/error/package.json
+COPY packages/product/package.json packages/product/package.json
 COPY packages/address/package.json packages/address/package.json
 COPY packages/customer/package.json packages/customer/package.json
 COPY packages/order/package.json packages/order/package.json
 COPY packages/offer/package.json packages/offer/package.json
 COPY packages/receipt/package.json packages/receipt/package.json
 COPY packages/invoice/package.json packages/invoice/package.json
-COPY packages/api-types/package.json packages/api-types/package.json
 
 COPY packages/core/package.json packages/core/package.json
 COPY packages/kernel/package.json packages/kernel/package.json
@@ -28,7 +26,7 @@ COPY packages/integrations/wapro/package.json packages/integrations/wapro/packag
 COPY packages/integrations/allegro/package.json packages/integrations/allegro/package.json
 
 RUN  --mount=type=cache,target=/root/.local/share/pnpm/store \
-    corepack enable pnpm && corepack use pnpm@12.9.1 && pnpm install --frozen-lockfile --filter @wae/api...
+    corepack enable pnpm && corepack use pnpm@latest && pnpm install --frozen-lockfile --filter @wae/api...
 
 FROM node:${NODE_VERSION} AS builder
 

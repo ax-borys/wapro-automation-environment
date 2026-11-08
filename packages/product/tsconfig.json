@@ -9,8 +9,8 @@
    },
    "references": [
       { "path": "../db" },
-      { "path": "../types//" },
-      { "path": "../error//" },
+      { "path": "../types/" },
+      { "path": "../error/" },
       { "path": "../kernel/" }
    ],
    "include": ["src"]

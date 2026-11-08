@@ -12,17 +12,9 @@
    "keywords": [],
    "author": "Alex Borysiuk",
    "license": "ISC",
-   "devEngines": {
-      "packageManager": {
-         "name": "pnpm",
-         "version": "^12.18.0",
-         "onFail": "download"
-      }
-   },
    "type": "module",
    "devDependencies": {
       "@types/node": "^26.2.0",
-      "@wae/cli": "workspace:*",
       "tsdown": "^0.22.14",
       "tsx": "^4.23.11",
       "typescript": "^7.0.2",
