@@ -7,6 +7,11 @@
       "emitDeclarationOnly": true,
       "declarationMap": true
    },
-   "references": [],
+   "references": [
+      { "path": "../db" },
+      { "path": "../types//" },
+      { "path": "../error//" },
+      { "path": "../kernel/" }
+   ],
    "include": ["src"]
 }
