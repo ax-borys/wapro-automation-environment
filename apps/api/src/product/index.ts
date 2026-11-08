@@ -1,51 +1,43 @@
-import { addProductInputSchema, addProducts, getAllProducts } from '@wae/offer';
+import { getAllProducts } from '@wae/offer';
 import { ApiResponse } from '@wae/types';
 import { Hono } from 'hono';
 
 import * as wapro from '@wae/wapro';
 import * as v from 'valibot';
+import {
+   syncProducts,
+   SyncProductsInput,
+   syncProductsInputSchema,
+} from '@wae/product';
+import { db } from '@wae/db';
 
-export const product = new Hono()
-   .get('/', async (c) => {
-      const products = await getAllProducts();
-
-      return c.json<ApiResponse<typeof products>>({
-         data: products,
-         error: null,
-      });
-   })
-   .get('/sync-products', async (c) => {
-      const data = await syncProducts();
-
-      return c.json<ApiResponse<typeof data>>({ data, error: null });
-   });
-
-export async function syncProducts() {
+export const product = new Hono().get('/', async (c) => {
    const waproProducts = await wapro.getProducts();
 
-   const filteredWaproProducts = waproProducts.filter(
-      (p) => !Number.isNaN(Number.parseInt(p.tax || '')),
+   const syncProductsInput: SyncProductsInput = waproProducts.map(
+      (product): SyncProductsInput[number] => ({
+         externalId: String(product.id),
+         src: 'wapro',
+         name: product.name,
+         imgSrc: 'absent',
+         tax: Number(product.tax) as 0 | 8 | 23,
+         stock: product.stock,
+      }),
    );
 
-   const productsInput = filteredWaproProducts.map((wp) => ({
-      externalId: wp.id.toString(),
-      name: wp.name,
-      tax: Number.parseInt(wp.tax || ''),
-      stock: Number.parseInt(String(wp.stock)),
-   }));
-
-   const validatedProductsInput = v.parse(
-      v.array(addProductInputSchema),
-      productsInput,
+   const validatedSyncProductsInput = v.parse(
+      syncProductsInputSchema,
+      syncProductsInput,
    );
 
-   const existingProducts = await getAllProducts();
-
-   const notExistingProductsInput = validatedProductsInput.filter(
-      (i) => !existingProducts.map((j) => j.externalId).includes(i.externalId),
+   await db.transaction((tx) =>
+      syncProducts(tx, validatedSyncProductsInput, { scope: ['wapro'] }),
    );
 
-   const products = await addProducts(notExistingProductsInput);
+   const products = await getAllProducts();
 
-   return products;
-}
+   return c.json<ApiResponse<typeof products>>({
+      data: products,
+      error: null,
+   });
+});

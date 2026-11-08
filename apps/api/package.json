@@ -22,6 +22,7 @@
       "@wae/invoice": "workspace:*",
       "@wae/offer": "workspace:*",
       "@wae/order": "workspace:*",
+      "@wae/product": "workspace:*",
       "@wae/receipt": "workspace:*",
       "@wae/wapro": "workspace:*",
       "dotenv": "^18.0.4",

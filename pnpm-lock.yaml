@@ -227,6 +227,9 @@ importers:
       '@wae/order':
         specifier: workspace:*
         version: link:../../packages/order
+      '@wae/product':
+        specifier: workspace:*
+        version: link:../../packages/product
       '@wae/receipt':
         specifier: workspace:*
         version: link:../../packages/receipt

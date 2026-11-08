@@ -138,14 +138,19 @@ export const positionsTable = sqliteTable(
    (t) => [primaryKey({ columns: [t.receiptId, t.orderId, t.offerId] })],
 );
 
-export const productsTable = sqliteTable('products', {
-   id: int().primaryKey({ autoIncrement: true }),
-   externalId: text('external_id').notNull().unique(),
-   name: text().notNull(),
-   imgSrc: text('image_source'),
-   tax: int().$type<0 | 8 | 23>().notNull(),
-   stock: int().notNull().default(0),
-});
+export const productsTable = sqliteTable(
+   'products',
+   {
+      id: int().primaryKey({ autoIncrement: true }),
+      externalId: text('external_id').notNull(),
+      src: text('source').notNull(),
+      name: text().notNull(),
+      imgSrc: text('image_source'),
+      tax: int().$type<0 | 8 | 23>().notNull(),
+      stock: int().notNull().default(0),
+   },
+   (t) => [unique('source_external_id').on(t.src, t.externalId)],
+);
 
 export const offersTable = sqliteTable(
    'offers',
@@ -292,6 +297,7 @@ export const relations = defineRelations(
       },
       productsTable: {
          offers: r.many.offersTable(),
+         items: r.many.itemsTable(),
       },
       itemsTable: {
          offer: r.one.offersTable({

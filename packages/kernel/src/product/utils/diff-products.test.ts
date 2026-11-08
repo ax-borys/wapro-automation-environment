@@ -5,6 +5,7 @@ describe('diff-products.ts: diffProducts()', () => {
    it('should detect no difference with the same products input', () => {
       const product: Product = {
          id: 1,
+         src: 'test',
          imgSrc: 'placeholder',
          stock: 1000,
          name: 'Name of product',
@@ -20,6 +21,7 @@ describe('diff-products.ts: diffProducts()', () => {
    it('should detect no difference with the same fields', () => {
       const product: Product = {
          id: 1,
+         src: 'test',
          imgSrc: 'placeholder',
          stock: 1000,
          name: 'Name of product',
@@ -38,6 +40,7 @@ describe('diff-products.ts: diffProducts()', () => {
    it('should detect no difference with empty object', () => {
       const product: Product = {
          id: 1,
+         src: 'test',
          imgSrc: 'placeholder',
          stock: 1000,
          name: 'Name of product',
@@ -53,6 +56,7 @@ describe('diff-products.ts: diffProducts()', () => {
    it('should return difference by all fields', () => {
       const product: Product = {
          id: 1,
+         src: 'test',
          imgSrc: 'placeholder',
          stock: 1000,
          name: 'Name of product',
@@ -62,6 +66,7 @@ describe('diff-products.ts: diffProducts()', () => {
 
       const anotherProduct: Product = {
          id: 2,
+         src: 'test',
          imgSrc: 'placeholder-2',
          stock: 2000,
          name: 'Name of another product',
@@ -80,6 +85,7 @@ describe('diff-products.ts: diffProducts()', () => {
    it('should return difference by few fields', () => {
       const product: Product = {
          id: 1,
+         src: 'test',
          imgSrc: 'placeholder',
          stock: 1000,
          name: 'Name of product',
@@ -103,6 +109,7 @@ describe('diff-products.ts: diffProducts()', () => {
    it('should return difference with mixed fields', () => {
       const product: Product = {
          id: 1,
+         src: 'test',
          imgSrc: 'placeholder',
          stock: 1000,
          name: 'Name of product',
