@@ -7,11 +7,13 @@ export const createDb = (pathToDbFile: string) =>
 export type Db = ReturnType<typeof createDb>;
 
 let instance: Db | null = null;
+export let filePath: string | null;
 
 export const initDb = (pathToDbFile: string) => {
    if (instance) return instance;
 
    instance = createDb(pathToDbFile);
+   filePath = pathToDbFile;
 
    return instance;
 };

@@ -1,5 +1,5 @@
 import { mkdtempSync, rmSync } from 'node:fs';
-import { initDb } from '..';
+import { filePath, initDb } from '..';
 import { join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { migrate } from 'drizzle-orm/libsql/migrator';
@@ -15,16 +15,32 @@ const migrationsFolder = resolve(import.meta.dirname, '../drizzle/');
 export function useTestDb() {
    let dir: string | null = null;
    let db: ReturnType<typeof initDb> | null = null;
+   let testFilePath: string | null;
 
    beforeAll(async () => {
       dir = mkdtempSync(join(tmpdir(), 'vitest-test-db-'));
-      db = initDb(join(dir, DB_FILENAME));
+      testFilePath = join(dir, DB_FILENAME);
+
+      db = initDb(testFilePath);
+
+      if (filePath !== testFilePath) {
+         throw new Error(
+            'Refuse to perform actions on non-testing database. Database has been initialized before.',
+         );
+      }
 
       await migrate(db, { migrationsFolder });
    });
 
    beforeEach(async () => {
-      if (!db) throw new Error('Database is not initialized. (reset)');
+      if (!db) throw new Error('Database is not initialized.');
+
+      if (filePath !== testFilePath) {
+         throw new Error(
+            'Refuse to perform actions on non-testing database. Database has been initialized before.',
+         );
+      }
+
       await reset(db, tables);
    });
 
