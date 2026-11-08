@@ -10,4 +10,4 @@ export const productInputSchema = createInsertSchema(productsTable, {
 });
 
 export type Product = v.InferOutput<typeof productSchema>;
-export type ProductInput = v.InferInput<typeof productInputSchema>;
+export type ProductInput = v.InferOutput<typeof productInputSchema>;

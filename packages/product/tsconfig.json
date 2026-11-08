@@ -1,0 +1,17 @@
+{
+   "extends": "../../tsconfig.base.json",
+   "compilerOptions": {
+      "outDir": "dist",
+      "rootDir": "src",
+      "tsBuildInfoFile": "dist/.tsbuildinfo",
+      "emitDeclarationOnly": true,
+      "declarationMap": true
+   },
+   "references": [
+      { "path": "../db" },
+      { "path": "../types//" },
+      { "path": "../error//" },
+      { "path": "../kernel/" }
+   ],
+   "include": ["src"]
+}

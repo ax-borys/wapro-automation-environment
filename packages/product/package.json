@@ -1,0 +1,19 @@
+{
+   "name": "@wae/product",
+   "private": true,
+   "main": "./dist/index.mjs",
+   "types": "./dist/index.d.ts",
+   "type": "module",
+   "scripts": {
+      "build": "tsc -b && tsdown",
+      "test": "vitest"
+   },
+   "dependencies": {
+      "@wae/db": "workspace:*",
+      "@wae/error": "workspace:*",
+      "@wae/kernel": "workspace:*",
+      "@wae/types": "workspace:*",
+      "drizzle-orm": "1.0.0-rc.4",
+      "valibot": "^1.4.2"
+   }
+}

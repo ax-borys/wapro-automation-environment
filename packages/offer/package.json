@@ -5,9 +5,9 @@
    "types": "./dist/index.d.ts",
    "type": "module",
    "scripts": {
-      "build": "tsc -b && tsdown"
+      "build": "tsc -b && tsdown",
+      "test": "vitest"
    },
-   "packageManager": "pnpm@10.33.0",
    "dependencies": {
       "@wae/core": "workspace:*",
       "@wae/db": "workspace:*",
