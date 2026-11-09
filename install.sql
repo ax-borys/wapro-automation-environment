@@ -4,7 +4,7 @@
 -- =====================================================================
 -- MAGSRC_DodajParagon
 -- Procedura zakładająca i zatwierdzająca dokument PARAGON (sprzedaż
--- detaliczna) wraz z powiązanym dokumentem magazynowym WZ.
+-- detaliczna) wraz z powiązanym dokumentem magazynowym WZ/SU.
 --
 -- Zbudowana na bazie procedur API opisanych w dokumencie:
 -- "Procedury SQL obsługi dokumentów w WAPRO Mag. Poradnik wdrożeniowca."
@@ -77,9 +77,15 @@ BEGIN
     DECLARE @errmsg              VARCHAR(500),
             @data                INT,
             @id_typu_han         INT,
-            @id_typu_mag         INT,
             @id_pracownika       NUMERIC,
-            @id_powst_dok_mag    NUMERIC,
+
+            @id_typu_wz          INT,
+            @id_typu_su          INT,
+            @id_dok_mag_wz       NUMERIC = NULL,
+            @id_dok_mag_su       NUMERIC = NULL,
+            @id_dok_mag_biezacy  NUMERIC,
+            @ostrzegaj_stan_zero TINYINT,
+            @rodzaj_dok_su       VARCHAR(3) = 'WZ',
 
             @IdArtykulu          NUMERIC,
             @Ilosc               DECIMAL(16,4),
@@ -128,15 +134,11 @@ BEGIN
         END
 
         -- typ dokumentu magazynowego = WZ (rozchód wewnętrzny paragonu)
-        SELECT @id_typu_mag = id_typu
-        FROM dbo.typ_dokumentu_magazynowego WITH (NOLOCK)
+        SELECT @id_typu_wz = id_typu FROM dbo.typ_dokumentu_magazynowego WITH (NOLOCK)
         WHERE sygnatura = 'WZ' AND id_firmy = @IdFirmy;
 
-        IF @id_typu_mag IS NULL
-        BEGIN
-            SET @errmsg = 'Nie znaleziono typu dokumentu magazynowego WZ.';
-            RAISERROR(@errmsg, 16, 1);
-        END
+        SELECT @id_typu_su = id_typu FROM dbo.typ_dokumentu_magazynowego WITH (NOLOCK)
+        WHERE sygnatura = 'SU' AND id_firmy = @IdFirmy;
 
         -- pracownik przypisany do użytkownika (jak w przykładach dokumentacji)
         IF EXISTS (SELECT 1 FROM dbo.pracownik WHERE id_uzytkownika = @IdUzytkownika AND ID_FIRMY = @IdFirmy)
@@ -170,33 +172,9 @@ BEGIN
             RAISERROR(@errmsg, 16, 1);
         END
 
-        -- =================================================================
-        -- 2. Automatyczne utworzenie powiązanego dokumentu WZ - pkt 2.1.3
-        -- =================================================================
-        EXEC dbo.AP_DodajWTleDokMag_Server
-            @IdFirmy,
-            @IdDokHandlowego,
-            @IdMagazynu,
-            @data,
-            @id_typu_mag,
-            @IdKontrahenta,
-            0,          -- @przychod
-            1,          -- @rozchod
-            'WZ',       -- @rodzaj
-            'S',        -- @wycena wg cen sprzedaży
-            @ObliczanieWg,  -- @brutto_netto
-            @IdUzytkownika,
-            @id_powst_dok_mag OUTPUT;
-
-        IF @id_powst_dok_mag IS NULL OR @id_powst_dok_mag = 0
-        BEGIN
-            SET @errmsg = 'Błąd tworzenia dokumentu magazynowego WZ (AP_DodajWTleDokMag_Server).';
-            RAISERROR(@errmsg, 16, 1);
-        END
 
         -- =================================================================
-        -- 3. Dodanie pozycji paragonu jednocześnie do dok. mag. i handl.
-        --    (pkt 2.2 - JL_ZatwierdzPozycje_Server), pętla po @Pozycje
+        -- 2. Dodanie pozycji paragonu jednocześnie do dok. mag. i handl.
         -- =================================================================
         DECLARE PozycjeParagonu CURSOR LOCAL FAST_FORWARD FOR
             SELECT Id_Artykulu, Ilosc, Cena_Netto, Cena_Brutto, Kod_Vat, ISNULL(Rabat, 0)
@@ -205,14 +183,17 @@ BEGIN
         OPEN PozycjeParagonu;
         FETCH NEXT FROM PozycjeParagonu INTO @IdArtykulu, @Ilosc, @CenaNetto, @CenaBrutto, @KodVat, @Rabat;
 
-        WHILE @@FETCH_STATUS = 0
+        WHILE @@FETCH_STATUS  = 0
         BEGIN
+            SET @RodzajArtykulu   = NULL;
+            SET @SkrotJedn        = NULL;
+            SET @Przelicznik      = 1;
+
             -- pobranie tylko rodzaju artykułu i jednostki magazynowania
             -- (cena i VAT przychodzą ręcznie z parametru @Pozycje - patrz TVP)
             SELECT
                 @RodzajArtykulu = UPPER(SUBSTRING(a.rodzaj, 1, 1)),
-                @SkrotJedn      = j.skrot,
-                @Przelicznik    = 1
+                @SkrotJedn      = j.skrot
             FROM dbo.ARTYKUL a WITH (NOLOCK)
             INNER JOIN dbo.jednostka j WITH (NOLOCK) ON a.id_jednostki = j.id_jednostki
             WHERE a.id_artykulu = @IdArtykulu AND a.ID_MAGAZYNU = @IdMagazynu;
@@ -223,8 +204,57 @@ BEGIN
                 RAISERROR(@errmsg, 16, 1);
             END
 
+            IF @RodzajArtykulu = 'U'
+            BEGIN
+               IF @id_dok_mag_su IS NULL
+               BEGIN
+                  IF @id_typu_su IS NULL
+                  BEGIN
+                     SET @errmsg = 'Brak typu dokumentu magazynowego SU.';
+                     RAISERROR(@errmsg, 16, 1);
+                  END
+
+                  EXEC dbo.AP_DodajWTleDokMag_Server
+                     @IdFirmy, @IdDokHandlowego, @IdMagazynu, @data, @id_typu_su,
+                     @IdKontrahenta, 0, 1, @rodzaj_dok_su, 'S', @ObliczanieWg,
+                     @IdUzytkownika, @id_dok_mag_su OUTPUT;
+
+                  IF @id_dok_mag_su IS NULL OR @id_dok_mag_su = 0
+                  BEGIN
+                     SET @errmsg = 'Błąd tworzenia dokumentu SU.';
+                     RAISERROR(@errmsg, 16, 1);
+                  END
+               END
+               SET @id_dok_mag_biezacy    = @id_dok_mag_su;
+               SET @ostrzegaj_stan_zero   = 0;
+            END
+            ELSE
+            BEGIN
+               IF @id_dok_mag_wz IS NULL
+               BEGIN
+                  IF @id_typu_wz IS NULL
+                  BEGIN
+                     SET @errmsg = 'Brak typu dokumentu magazynowego WZ.';
+                     RAISERROR(@errmsg, 16, 1);
+                  END
+
+                  EXEC dbo.AP_DodajWTleDokMag_Server
+                     @IdFirmy, @IdDokHandlowego, @IdMagazynu, @data, @id_typu_wz,
+                     @IdKontrahenta, 0, 1, 'WZ', 'S', @ObliczanieWg,
+                     @IdUzytkownika, @id_dok_mag_wz OUTPUT;
+
+                  IF @id_dok_mag_wz IS NULL OR @id_dok_mag_wz = 0
+                  BEGIN
+                     SET @errmsg = 'Błąd tworzenia dokumentu WZ.';
+                     RAISERROR(@errmsg, 16, 1);
+                  END
+               END
+               SET @id_dok_mag_biezacy    = @id_dok_mag_wz;
+               SET @ostrzegaj_stan_zero   = 1;
+            END
+
             EXEC @ret = dbo.JL_ZatwierdzPozycje_Server
-                @id_powst_dok_mag,
+                @id_dok_mag_biezacy,
                 @IdDokHandlowego,
                 @IdArtykulu,
                 'R',                 -- rodzaj_pozycji: rozchód
@@ -239,7 +269,7 @@ BEGIN
                 @Rabat, 0,           -- rabat, znak rabatu
                 0, 0,                -- rabat2, znak2
                 'FIFO',
-                1,                   -- ostrzegaj_stan_zero
+                @ostrzegaj_stan_zero,                   -- ostrzegaj_stan_zero
                 @data,
                 'S',                 -- wycena wg cen sprzedaży
                 0, 0,                -- opakowania wydano/przyjęto
@@ -274,6 +304,12 @@ BEGIN
 
         CLOSE PozycjeParagonu;
         DEALLOCATE PozycjeParagonu;
+        
+        IF @id_dok_mag_wz IS NULL AND @id_dok_mag_su IS NULL
+        BEGIN
+            SET @errmsg = 'Paragon nie zawiera żadnych pozycji.';
+            RAISERROR(@errmsg, 16, 1);
+        END
 
         -- =================================================================
         -- 4. Sumowanie dokumentu handlowego - pkt 2.3.1
@@ -339,7 +375,7 @@ BEGIN
             @suma_brutto,
             0,                    -- dok_wal (dokument złotówkowy)
             '',                   -- sym_wal
-            1,                    -- przelicznik_wal
+            0,                    -- przelicznik_wal
             0,                    -- data_kursu_wal
             0,                    -- wartosc_netto_wal
             0,                    -- wartosc_brutto_wal
