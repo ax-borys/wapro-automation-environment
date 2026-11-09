@@ -173,9 +173,6 @@ importers:
       '@types/node':
         specifier: ^26.2.0
         version: 26.2.0
-      '@wae/cli':
-        specifier: workspace:*
-        version: link:apps/wae-cli
       tsdown:
         specifier: ^0.22.14
         version: 0.22.14(tsx@4.23.11)(typescript@7.0.2)
@@ -475,14 +472,14 @@ importers:
         version: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
       drizzle-seed:
         specifier: ^1.0.0-rc.5
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3))
+        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3))
     devDependencies:
       '@types/mssql':
         specifier: ^12.3.0
         version: 12.3.0(supports-color@7.2.0)
       drizzle-kit:
         specifier: rc
-        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3))
+        version: 1.0.0-rc.5(drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3))
 
   packages/error:
     dependencies:
@@ -6938,7 +6935,7 @@ snapshots:
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.5
+      '@jridgewell/sourcemap-codec': 1.6.0
       '@jridgewell/trace-mapping': 0.3.31
 
   '@jridgewell/remapping@2.3.5':
@@ -7025,7 +7022,7 @@ snapshots:
     dependencies:
       '@hono/node-server': 2.1.0(hono@4.13.2)
       ajv: 8.20.0
-      ajv-formats: 3.0.1
+      ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 1.0.5
       cors: 2.8.6
       cross-spawn: 7.0.6
@@ -8450,12 +8447,12 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ajv-formats@2.1.1:
-    dependencies:
+  ajv-formats@2.1.1(ajv@8.20.0):
+    optionalDependencies:
       ajv: 8.20.0
 
-  ajv-formats@3.0.1:
-    dependencies:
+  ajv-formats@3.0.1(ajv@8.20.0):
+    optionalDependencies:
       ajv: 8.20.0
 
   ajv@6.15.0:
@@ -8707,7 +8704,7 @@ snapshots:
   conf@10.2.0:
     dependencies:
       ajv: 8.20.0
-      ajv-formats: 2.1.1
+      ajv-formats: 2.1.1(ajv@8.20.0)
       atomically: 1.7.0
       debounce-fn: 4.0.0
       dot-prop: 6.0.1
@@ -8867,7 +8864,7 @@ snapshots:
       get-tsconfig: 4.14.1
       jiti: 2.7.0
 
-  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)):
+  drizzle-kit@1.0.0-rc.5(drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)):
     optionalDependencies:
       drizzle-orm: 1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)
 
@@ -8879,7 +8876,7 @@ snapshots:
       valibot: 1.4.2(typescript@7.0.2)
       zod: 4.4.3
 
-  drizzle-seed@1.0.0-rc.5(drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(mssql@12.7.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)):
+  drizzle-seed@1.0.0-rc.5(drizzle-orm@1.0.0-rc.4(@libsql/client@0.17.4)(@types/mssql@12.3.0(supports-color@7.2.0))(valibot@1.4.2(typescript@7.0.2))(zod@4.4.3)):
     dependencies:
       pure-rand: 6.1.0
     optionalDependencies:
