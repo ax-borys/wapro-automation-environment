@@ -1,5 +1,10 @@
 import { defineRelations } from 'drizzle-orm';
-import { AnySQLiteColumn, primaryKey, unique } from 'drizzle-orm/sqlite-core';
+import {
+   AnySQLiteColumn,
+   primaryKey,
+   real,
+   unique,
+} from 'drizzle-orm/sqlite-core';
 import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const addressesTable = sqliteTable('addresses', {
@@ -147,7 +152,7 @@ export const productsTable = sqliteTable(
       name: text().notNull(),
       imgSrc: text('image_source'),
       tax: int().$type<0 | 8 | 23>().notNull(),
-      stock: int().notNull().default(0),
+      stock: real().notNull().default(0),
    },
    (t) => [unique('source_external_id').on(t.src, t.externalId)],
 );
