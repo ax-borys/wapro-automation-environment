@@ -17,17 +17,32 @@ type QueryParams = {
 };
 
 const ORDERS_TO_FETCH = 300;
-const MAX_PAGE_SIZE = 100; // Allegro's maximum page size
+
+type Options = {
+   pagesLimit?: number;
+   pageSize?: number;
+   sort?:
+      | 'updatedAt'
+      | '-updatedAt'
+      | 'lineItems.boughtAt'
+      | '-lineItems.boughtAt';
+   updatedAtGte?: Date;
+   updatedAtLte?: Date;
+};
 
 export async function fetchOrders(
    accessToken: string,
    userAgent: string,
+   options?: Options,
 ): Promise<ApiResponseRawOrder> {
    const allOrders: ApiResponseRawOrder['checkoutForms'] = [];
    let totalCount = 0;
 
-   while (allOrders.length < ORDERS_TO_FETCH) {
-      const limit = Math.min(MAX_PAGE_SIZE, ORDERS_TO_FETCH - allOrders.length);
+   const pagesLimit = options?.pagesLimit ?? Infinity;
+   const pageSize = options?.pageSize ?? 100;
+
+   while (allOrders.length < pagesLimit * pageSize) {
+      const limit = pageSize;
 
       const queryParams = new URLSearchParams({
          'fulfillment.status': 'SENT',
@@ -53,7 +68,6 @@ export async function fetchOrders(
       allOrders.push(...page.checkoutForms);
       totalCount = page.totalCount;
 
-      // Stop if the page was short (no more orders) or we've reached everything available
       if (page.checkoutForms.length < limit || allOrders.length >= totalCount) {
          break;
       }
