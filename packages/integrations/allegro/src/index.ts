@@ -1,6 +1,9 @@
 export { getAllOffers } from './offer/';
 
-export { getPendingOrders, extractInvolvedOffersFromOrders } from './order/';
+export {
+   pullReadyForProcessingOrdersSince,
+   extractInvolvedOffersFromOrders,
+} from './order/';
 
 export { originalImgSrcTos128b } from './utils/originalImgSrcTos128b';
 
@@ -11,3 +14,6 @@ export {
    type StateStorage,
    type AppStore,
 } from './store/store';
+
+export * from './core/cursors';
+export * from './utils/cursor-actions';

@@ -11,29 +11,36 @@ const apiResponseRawOrderSchema = v.object({
 type ApiResponseRawOrder = v.InferOutput<typeof apiResponseRawOrderSchema>;
 
 type QueryParams = {
-   'fulfillment.status': 'NEW' | 'PROCESSING' | 'SENT';
+   'fulfillment.status'?: 'NEW' | 'PROCESSING' | 'SENT';
    limit: string;
    offset: string;
-};
-
-const ORDERS_TO_FETCH = 300;
-
-type Options = {
-   pagesLimit?: number;
-   pageSize?: number;
+   status?: 'READY_FOR_PROCESSING';
    sort?:
       | 'updatedAt'
       | '-updatedAt'
       | 'lineItems.boughtAt'
       | '-lineItems.boughtAt';
+   'updatedAt.lte'?: string;
+   'updatedAt.gte'?: string;
+};
+
+type FetchOrdersOptions = {
+   pagesLimit?: number;
+   pageSize?: number;
+   sort?: QueryParams['sort'];
    updatedAtGte?: Date;
    updatedAtLte?: Date;
+   status?: QueryParams['status'];
+};
+
+type AuthOptions = {
+   userAgent: string;
+   accessToken: string;
 };
 
 export async function fetchOrders(
-   accessToken: string,
-   userAgent: string,
-   options?: Options,
+   auth: AuthOptions,
+   options?: FetchOrdersOptions,
 ): Promise<ApiResponseRawOrder> {
    const allOrders: ApiResponseRawOrder['checkoutForms'] = [];
    let totalCount = 0;
@@ -42,13 +49,22 @@ export async function fetchOrders(
    const pageSize = options?.pageSize ?? 100;
 
    while (allOrders.length < pagesLimit * pageSize) {
-      const limit = pageSize;
-
-      const queryParams = new URLSearchParams({
-         'fulfillment.status': 'SENT',
-         limit: String(limit),
+      const params: QueryParams = {
+         limit: String(pageSize),
          offset: String(allOrders.length),
-      } satisfies QueryParams);
+         ...(options?.sort && { sort: options.sort }),
+         ...(options?.updatedAtGte && {
+            'updatedAt.gte': options.updatedAtGte.toISOString(),
+         }),
+         ...(options?.updatedAtLte && {
+            'updatedAt.lte': options.updatedAtLte.toISOString(),
+         }),
+         ...(options?.status && {
+            status: options.status,
+         }),
+      };
+
+      const queryParams = new URLSearchParams(params);
 
       const page = await fetchWithValidation(
          apiResponseRawOrderSchema,
@@ -56,10 +72,10 @@ export async function fetchOrders(
          `https://api.allegro.pl/order/checkout-forms?${queryParams.toString()}`,
          {
             headers: {
-               Authorization: `Bearer ${accessToken}`,
+               Authorization: `Bearer ${auth.accessToken}`,
                Accept: 'application/vnd.allegro.public.v1+json',
                'Content-Type': 'application/vnd.allegro.public.v1+json',
-               'User-Agent': `${userAgent}`,
+               'User-Agent': `${auth.userAgent}`,
             },
          },
          'Failed to obtain orders.',
@@ -68,7 +84,10 @@ export async function fetchOrders(
       allOrders.push(...page.checkoutForms);
       totalCount = page.totalCount;
 
-      if (page.checkoutForms.length < limit || allOrders.length >= totalCount) {
+      if (
+         page.checkoutForms.length < pageSize ||
+         allOrders.length >= totalCount
+      ) {
          break;
       }
    }
