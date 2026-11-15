@@ -18,6 +18,7 @@ type Config = {
 
 export type SyncCursors = {
    readyForProcessingOrders: SerializedSyncCursor;
+   processingOrders: SerializedSyncCursor;
 };
 
 type AppState = {
@@ -51,6 +52,9 @@ export const createPersistentStore = ({
                readyForProcessingOrders: {
                   lastSyncUpdatedAt: config.initialCursorUpdatedAtIsoDate,
                },
+               processingOrders: {
+                  lastSyncUpdatedAt: config.initialCursorUpdatedAtIsoDate,
+               },
             },
             refreshToken: null,
             accessToken: null,
@@ -73,11 +77,7 @@ export const createPersistentStore = ({
                }),
             setCursor: (name, cursor) =>
                set((draft) => {
-                  if (draft.cursors) {
-                     draft.cursors[name] = cursor;
-                  } else {
-                     draft.cursors = { [name]: cursor };
-                  }
+                  draft.cursors[name] = cursor;
                }),
          })),
          {

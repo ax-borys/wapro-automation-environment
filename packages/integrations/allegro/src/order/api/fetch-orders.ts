@@ -24,13 +24,14 @@ type QueryParams = {
    'updatedAt.gte'?: string;
 };
 
-type FetchOrdersOptions = {
+export type FetchOrdersOptions = {
    pagesLimit?: number;
    pageSize?: number;
    sort?: QueryParams['sort'];
    updatedAtGte?: Date;
    updatedAtLte?: Date;
    status?: QueryParams['status'];
+   fulfillmentStatus?: QueryParams['fulfillment.status'];
 };
 
 type AuthOptions = {
@@ -61,6 +62,9 @@ export async function fetchOrders(
          }),
          ...(options?.status && {
             status: options.status,
+         }),
+         ...(options?.fulfillmentStatus && {
+            'fulfillment.status': options.fulfillmentStatus,
          }),
       };
 

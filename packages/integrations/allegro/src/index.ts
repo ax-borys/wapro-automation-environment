@@ -3,6 +3,7 @@ export { getAllOffers } from './offer/';
 export {
    pullReadyForProcessingOrdersSince,
    extractInvolvedOffersFromOrders,
+   pullProcessingOrdersSince,
 } from './order/';
 
 export { originalImgSrcTos128b } from './utils/originalImgSrcTos128b';

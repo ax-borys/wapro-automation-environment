@@ -1,4 +1,3 @@
-import { assertStore } from '../../assertions';
 import { obtainAuthTokens } from '../../auth';
 import { SyncCursor } from '../../core';
 import { getOffersById } from '../../offer';
@@ -11,8 +10,6 @@ type PullOrdersResult = { orders: Order[]; cursor: SyncCursor };
 export async function pullReadyForProcessingOrdersSince(
    cursor: SyncCursor,
 ): Promise<PullOrdersResult> {
-   assertStore(store);
-
    const { userAgent } = store.getState();
    const { accessToken } = await obtainAuthTokens();
 

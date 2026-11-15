@@ -130,11 +130,13 @@ export const order = new Hono()
       },
    )
    .get('/orders/pending', async (c) => {
-      const cursor = allegro.fetchCursor('readyForProcessingOrders');
+      const cursorName: Parameters<typeof allegro.fetchCursor>[0] =
+         'processingOrders';
+      const cursor = allegro.fetchCursor(cursorName);
 
       console.log('Fetching allegro orders...');
       const { orders: allegroOrders, cursor: newCursor } =
-         await allegro.pullReadyForProcessingOrdersSince(cursor);
+         await allegro.pullProcessingOrdersSince(cursor);
       console.log('Fetching succeeded.');
 
       console.log(allegroOrders);
@@ -272,7 +274,7 @@ export const order = new Hono()
          console.log('Obtaining succeeded.');
 
          const fetchOrdersFilter = v.parse(fetchOrdersFilterSchema, {
-            status: 'READY_FOR_PROCESSING',
+            status: 'PROCESSING',
             createdAtGte:
                process.env.ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE!, // it can be like this because there's validation in src/init-allegro-store.ts
          } satisfies FetchOrdersFilterInput);
@@ -286,7 +288,7 @@ export const order = new Hono()
          return validatedOrders;
       });
 
-      allegro.saveCursor('readyForProcessingOrders', newCursor);
+      allegro.saveCursor(cursorName, newCursor);
 
       return c.json<ApiResponse<FullOrder[]>>({
          data: result,

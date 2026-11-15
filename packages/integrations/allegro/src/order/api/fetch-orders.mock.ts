@@ -1,6 +1,7 @@
 import * as v from 'valibot';
 import { rawOrderSchema } from '../schema';
 import { MOCK_OFFERS } from '../../offer/api/'; // adjust path to your mock offers file
+import { FetchOrdersOptions } from './fetch-orders';
 
 type RawOrder = v.InferOutput<typeof rawOrderSchema>;
 
@@ -8,19 +9,6 @@ type ApiResponseRawOrder = {
    checkoutForms: RawOrder[];
    count: number;
    totalCount: number;
-};
-
-type FetchOrdersOptions = {
-   pagesLimit?: number;
-   pageSize?: number;
-   sort?:
-      | 'updatedAt'
-      | '-updatedAt'
-      | 'lineItems.boughtAt'
-      | '-lineItems.boughtAt';
-   updatedAtGte?: Date;
-   updatedAtLte?: Date;
-   status?: 'READY_FOR_PROCESSING';
 };
 
 type AuthOptions = {
@@ -187,6 +175,11 @@ export async function fetchOrders(
    if (options?.updatedAtLte) {
       const lte = options.updatedAtLte.getTime();
       orders = orders.filter((o) => new Date(o.updatedAt).getTime() <= lte);
+   }
+   if (options?.fulfillmentStatus) {
+      orders = orders.filter(
+         (o) => o.fulfillment.status === options.fulfillmentStatus,
+      );
    }
 
    if (options?.sort) {

@@ -200,9 +200,14 @@ export function mapOrder(order: RawOrder, offers: Offer[]): Order {
 
    const validatedDelivery = v.parse(deliveryWithAddressSchema, delivery);
 
+   const status: Order['status'] =
+      order.fulfillment.status === 'SENT'
+         ? 'PROCESSING'
+         : 'READY_FOR_PROCESSING';
+
    const mappedOrder: Order = {
       externalId: order.id,
-      status: 'READY_FOR_PROCESSING' as const,
+      status,
       totalPaid: currency(order.payment.paidAmount?.amount || 0).intValue,
       totalToPay: currency(order.summary.totalToPay.amount).intValue,
       customer: validatedCustomer,
