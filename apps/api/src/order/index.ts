@@ -274,7 +274,7 @@ export const order = new Hono()
          console.log('Obtaining succeeded.');
 
          const fetchOrdersFilter = v.parse(fetchOrdersFilterSchema, {
-            status: 'PROCESSING',
+            status: 'READY_FOR_PROCESSING',
             createdAtGte:
                process.env.ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE!, // it can be like this because there's validation in src/init-allegro-store.ts
          } satisfies FetchOrdersFilterInput);

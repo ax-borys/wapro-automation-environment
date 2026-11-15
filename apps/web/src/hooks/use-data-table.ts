@@ -3,6 +3,7 @@ import type { DataTableFeatures } from '@/components/ui/data-table/data-table-fe
 import {
    ColumnDef,
    ColumnVisibilityState,
+   PaginationState,
    RowData,
    SortingState,
    useTable,
@@ -15,11 +16,13 @@ export function useDataTable<TData extends RowData>(
    columns: ColumnDef<DataTableFeatures, TData>[],
    options?: {
       initialSortingState?: SortingState;
+      autoResetPageIndex?: boolean;
       pagination?: {
          pageIndex?: number;
          pageSize?: number;
       };
       columnVisibility?: ColumnVisibilityState;
+      resetPaginationDeps?: any[];
    },
 ) {
    const [date, setDate] = useState<DateRange | undefined>();
@@ -42,24 +45,32 @@ export function useDataTable<TData extends RowData>(
          : [{ id: 'title', desc: false }],
    );
 
+   const [pagination, setPagination] = useState<PaginationState>({
+      pageIndex: options?.pagination?.pageIndex ?? 0,
+      pageSize: options?.pagination?.pageSize ?? 10,
+   });
+
+   useEffect(() => {
+      setPagination((s) => ({ ...s, pageIndex: 0 }));
+   }, [globalFilter, date, ...(options?.resetPaginationDeps ?? [])]);
+
    const table = useTable<DataTableFeatures, TData>({
       columns,
       data,
       features,
       onColumnVisibilityChange: setColumnVisibility,
-      onGlobalFilterChange: setGlobalFilter,
-      globalFilterFn: 'fuzzy',
+      onPaginationChange: setPagination,
       onSortingChange: setSorting,
-      initialState: {
-         pagination: {
-            pageIndex: options?.pagination?.pageIndex ?? 0,
-            pageSize: options?.pagination?.pageSize ?? 10,
-         },
-      },
+      autoResetPageIndex: options?.autoResetPageIndex ?? false,
+      globalFilterFn: 'fuzzy',
       state: {
          columnVisibility,
          globalFilter,
          sorting,
+         pagination,
+      },
+      initialState: {
+         pagination,
       },
       getRowCanExpand: () => true,
    });

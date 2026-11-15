@@ -10,6 +10,7 @@ export {
 
 export * from './types';
 export * from './utils/is-fulfillable';
+export * from './utils/format-fullname';
 
 export { useOrder } from './hooks/use-order';
 

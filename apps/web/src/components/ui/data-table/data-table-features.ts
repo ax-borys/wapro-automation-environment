@@ -1,6 +1,7 @@
 import {
    compareItems,
    RankingInfo,
+   rankings,
    rankItem,
 } from '@tanstack/match-sorter-utils';
 import {
@@ -40,7 +41,9 @@ export const fuzzyFilter: FilterFn<FuzzyFeatures, RowData> = (
    value,
    addMeta,
 ) => {
-   const itemRank = rankItem(row.getValue(columnId), value);
+   const itemRank = rankItem(row.getValue(columnId), value, {
+      threshold: rankings.CONTAINS,
+   });
    addMeta?.({ itemRank });
    return itemRank.passed;
 };

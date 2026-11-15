@@ -20,7 +20,7 @@ import {
    BadgeReceiptNumber,
 } from '@/components/ui/receipt-card';
 import { Separator } from '@/components/ui/separator';
-import { OrderModel } from '@/entities/order';
+import { formatFullname, OrderModel } from '@/entities/order';
 import {
    ArrowSquareOutIcon,
    CaretDownIcon,
@@ -41,16 +41,6 @@ import { useState } from 'react';
 export type OrderData = OrderModel;
 
 const columnHelper = createColumnHelper<DataTableFeatures, OrderData>();
-
-const formatFullname = (
-   firstName?: string | null,
-   lastName?: string | null,
-   companyName?: string | null,
-): string => {
-   if (firstName && lastName) return `${firstName} ${lastName}`;
-   else if (companyName) return companyName;
-   else return 'NAME WAS NOT PROVIDED';
-};
 
 export const columns = columnHelper.columns([
    columnHelper.display({

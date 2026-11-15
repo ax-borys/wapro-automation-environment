@@ -5,6 +5,7 @@ import {
    Toolbar,
    ToolbarDatePickerWithRange,
    ToolbarGroup,
+   ToolbarPaginationPanel,
    ToolbarSearchbar,
    ToolbarSelectMenu,
    ToolbarSelectMenuCheckboxItem,
@@ -12,8 +13,6 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { endOfDay, formatISO, startOfDay } from 'date-fns';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Ellipsis } from 'lucide-react';
 import { useDataTable } from '@/hooks/use-data-table';
 import { useFetchFulfilledOrders, useOrdersStore } from '@/entities/order';
 import { Order } from './order';
@@ -72,6 +71,7 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
       columns,
       {
          pagination: { pageSize: 20 },
+         autoResetPageIndex: false,
          initialSortingState: [{ id: 'preparedAt', desc: false }],
          columnVisibility: { preparedAt: false },
       },
@@ -79,16 +79,14 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
 
    return (
       <div className="flex flex-col h-full max-h-full shrink min-h-0">
-         <Toolbar className="flex shrink-0 min-h-0">
+         <Toolbar>
             <ToolbarGroup>
                <ToolbarDatePickerWithRange date={date} onDateSelect={setDate} />
             </ToolbarGroup>
             <ToolbarGroup className="mx-auto">
                <ToolbarSearchbar
                   value={globalFilter}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                     setGlobalFilter(e.target.value)
-                  }
+                  onSearch={(value) => setGlobalFilter(value)}
                />
             </ToolbarGroup>
             <ToolbarGroup>
@@ -120,63 +118,17 @@ export function OrdersDataTable({ initialData }: { initialData: OrderData[] }) {
             </div>
             <div className="flex-1 shrink"></div>
             <Toolbar className="shrink-0 border-t border-border bg-background w-full">
-               <ToolbarGroup className="mx-auto gap-2">
-                  <Button
-                     variant={'ghost'}
-                     disabled={
-                        isMounted ? !table.getCanPreviousPage() : undefined
-                     }
-                     onClick={table.previousPage}
-                  >
-                     <ChevronLeft />
-                     Previous
-                  </Button>
-                  {table.state.pagination.pageIndex + 1 > 1 ? (
-                     <>
-                        <Button
-                           variant={'ghost'}
-                           className="w-9"
-                           onClick={() => table.setPageIndex(0)}
-                        >
-                           1
-                        </Button>
-                     </>
-                  ) : (
-                     <div className="flex justify-center items-center w-9">
-                        <Ellipsis className="text-muted-foreground size-4" />
-                     </div>
-                  )}
-
-                  <Button variant={'outline'} className="w-9">
-                     {table.state.pagination.pageIndex + 1}
-                  </Button>
-                  {table.state.pagination.pageIndex + 1 <
-                  table.getPageCount() ? (
-                     <>
-                        <Button
-                           variant={'ghost'}
-                           className="w-9"
-                           onClick={() =>
-                              table.setPageIndex(table.getPageCount() - 1)
-                           }
-                        >
-                           {table.getPageCount()}
-                        </Button>
-                     </>
-                  ) : (
-                     <div className="flex justify-center items-center w-9">
-                        <Ellipsis className="text-muted-foreground size-4" />
-                     </div>
-                  )}
-                  <Button
-                     variant={'ghost'}
-                     disabled={isMounted ? !table.getCanNextPage() : undefined}
-                     onClick={table.nextPage}
-                  >
-                     Next
-                     <ChevronRight />
-                  </Button>
-               </ToolbarGroup>
+               <ToolbarPaginationPanel
+                  className="mx-auto gap-2"
+                  onNext={() => table.nextPage()}
+                  onPrevious={() => table.previousPage()}
+                  isNextPageAvailable={table.getCanNextPage()}
+                  isPreviousPageAvailable={table.getCanPreviousPage()}
+                  onPage={(index) => table.setPageIndex(index)}
+                  totalPageCount={table.getPageCount()}
+                  currentPageIndex={table.state.pagination.pageIndex}
+                  onReset={() => table.resetPagination()}
+               />
             </Toolbar>
          </div>
       </div>
