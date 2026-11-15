@@ -3,7 +3,7 @@ import { createJSONStorage, persist } from 'zustand/middleware';
 import type { StateStorage } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { assertStore } from '../assertions';
-import { SerializedSyncCursor, SyncCursor } from '../core';
+import { SerializedSyncCursor } from '../core';
 
 type Token = string;
 
@@ -13,6 +13,7 @@ type Config = {
    deviceCode: string;
    userAgent: string;
    sellerId: string;
+   initialCursorUpdatedAtIsoDate: string;
 };
 
 export type SyncCursors = {
@@ -27,7 +28,7 @@ type AppState = {
    clientSecret: Config['clientSecret'];
    sellerId: Config['sellerId'];
    userAgent: Config['userAgent'];
-   cursors: SyncCursors | null;
+   cursors: SyncCursors;
    setAccessToken: (token: Token) => void;
    setRefreshToken: (token: Token) => void;
    setDeviceId: (id: string) => void;
@@ -46,7 +47,11 @@ export const createPersistentStore = ({
    createStore<AppState>()(
       persist(
          immer((set) => ({
-            cursors: null,
+            cursors: {
+               readyForProcessingOrders: {
+                  lastSyncUpdatedAt: config.initialCursorUpdatedAtIsoDate,
+               },
+            },
             refreshToken: null,
             accessToken: null,
             clientId: config.clientId,

@@ -7,8 +7,8 @@ export function saveCursor(name: keyof SyncCursors, cursor: SyncCursor) {
    setCursor(name, serializeSyncCursor(cursor));
 }
 
-export function fetchCursor(name: keyof SyncCursors): SyncCursor | null {
+export function fetchCursor(name: keyof SyncCursors): SyncCursor {
    const { cursors } = store.getState();
 
-   return cursors ? parseSyncCursor(cursors[name]) : null;
+   return parseSyncCursor(cursors[name]);
 }

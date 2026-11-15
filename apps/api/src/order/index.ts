@@ -7,23 +7,17 @@ import {
    customerSchema,
    deliverySchema,
    FullOrder,
-   FullOrderInput,
-   fullOrderInputShema,
    fullOrderShema,
    invoiceSchema,
-   Offer,
-   orderWithPositionsWithOfferSchema,
-   Product,
-   ReceiptPosition,
    receiptSchema,
    recipientSchema,
 } from '@wae/types';
-import { customAlphabet } from 'nanoid';
 import {
-   addOrderInputSchema,
-   addOrders,
    changeRequiredDocumentType,
    changeRequiredDocumentTypeInputSchema,
+   fetchOrders,
+   FetchOrdersFilterInput,
+   fetchOrdersFilterSchema,
    fulfillOrders,
    getFulfilledOrdersByFilter,
    getFulfilledOrdersByFilterInputSchema,
@@ -32,16 +26,7 @@ import {
    obtainOrders,
    obtainRecipients,
 } from '@wae/order';
-import {
-   addressesTable,
-   customersTable,
-   db,
-   deliveriesTable,
-   invoicesTable,
-   ordersTable,
-   positionsTable,
-   receiptsTable,
-} from '@wae/db';
+import { db } from '@wae/db';
 import { obtainAddresses } from '@wae/address';
 import { obtainCustomers } from '@wae/customer';
 import { valibotJsonMiddleware } from '../helpers/valibot-middleware';
@@ -50,14 +35,6 @@ import { approveInvoiceInputSchema, approveInvoices } from '@wae/invoice';
 import { waproConfig } from '../receipt/wapro-config';
 import { syncOffers } from '@wae/offer';
 
-const generateId = customAlphabet('0123456789', 10);
-
-async function wipeOrders() {
-   await db.delete(positionsTable);
-   await db.delete(receiptsTable);
-   await db.delete(invoicesTable);
-   await db.delete(ordersTable);
-}
 export const order = new Hono()
    .put(
       '/required-document-type',
@@ -153,8 +130,11 @@ export const order = new Hono()
       },
    )
    .get('/orders/pending', async (c) => {
+      const cursor = allegro.fetchCursor('readyForProcessingOrders');
+
       console.log('Fetching allegro orders...');
-      const allegroOrders = await allegro.getPendingOrders();
+      const { orders: allegroOrders, cursor: newCursor } =
+         await allegro.pullReadyForProcessingOrdersSince(cursor);
       console.log('Fetching succeeded.');
 
       console.log(allegroOrders);
@@ -287,64 +267,26 @@ export const order = new Hono()
             }),
          );
 
-         const orders = await obtainOrders(tx, validatedObtainOrdersInput);
-
-         const fullOrders = orders.map((order): FullOrder => {
-            const customer = v.parse(
-               customerSchema,
-               customers.find((customer) => customer.id === order.customerId),
-            );
-
-            const customerAddress = customerAddresses.find(
-               (address) => address.id === customer.addressId,
-            );
-
-            const recipient = v.parse(
-               recipientSchema,
-               recipients.find(
-                  (recipient) => recipient.id === order.recepientId,
-               ),
-            );
-
-            const recipientAddress = v.parse(
-               addressSchema,
-               recipientAddresses.find(
-                  (address) => address.id === recipient.addressId,
-               ),
-            );
-
-            const delivery = v.parse(
-               deliverySchema,
-               deliveries.find((delivery) => delivery.id === order.deliveryId),
-            );
-
-            const deliveryAddress = v.parse(
-               addressSchema,
-               deliveryAddresses.find(
-                  (address) => address.id === delivery.addressId,
-               ),
-            );
-
-            return {
-               ...order,
-               customer: {
-                  ...customer,
-                  address: customerAddress ?? recipientAddress,
-               },
-               recipient: { ...recipient, address: recipientAddress },
-               delivery: {
-                  ...delivery,
-                  address: deliveryAddress,
-               },
-            };
-         });
-
-         const validatedOrders = v.parse(v.array(fullOrderShema), fullOrders);
+         await obtainOrders(tx, validatedObtainOrdersInput);
 
          console.log('Obtaining succeeded.');
 
+         const fetchOrdersFilter = v.parse(fetchOrdersFilterSchema, {
+            status: 'READY_FOR_PROCESSING',
+            createdAtGte:
+               process.env.ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE!, // it can be like this because there's validation in src/init-allegro-store.ts
+         } satisfies FetchOrdersFilterInput);
+
+         const orders = await fetchOrders(tx, fetchOrdersFilter);
+
+         console.log('Validating orders....');
+         const validatedOrders = v.parse(v.array(fullOrderShema), orders);
+         console.log('Validation succeeded');
+
          return validatedOrders;
       });
+
+      allegro.saveCursor('readyForProcessingOrders', newCursor);
 
       return c.json<ApiResponse<FullOrder[]>>({
          data: result,

@@ -30,6 +30,25 @@ if (!process.env.ALLEGRO_STORE_PATH) {
    throw runtimeError('ALLEGRO_STORE_PATH is not provided.');
 }
 
+// =====================================================
+// VALIDATION ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE
+// =====================================================
+if (!process.env.ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE) {
+   throw runtimeError(
+      'ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE not provided.',
+   );
+}
+
+const date = new Date(process.env.ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE);
+
+if (date.toString() === 'Invalid Date') {
+   throw runtimeError(
+      'ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE is invalid date format',
+   );
+}
+// =====================================================
+// =====================================================
+
 const fileStorage: StateStorage = {
    getItem: (name: string): string | null => {
       if (!existsSync(name)) return null;
@@ -52,6 +71,8 @@ const store = createPersistentStore({
       deviceCode: process.env.ALLEGRO_DEVICE_ID,
       sellerId: process.env.ALLEGRO_SELLER_ID,
       userAgent: process.env.ALLEGRO_USER_AGENT,
+      initialCursorUpdatedAtIsoDate:
+         process.env.ALLEGRO_INITIAL_CURSOR_UPDATED_AT_ISO_DATE,
    },
 });
 

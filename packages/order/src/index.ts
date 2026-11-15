@@ -11,3 +11,4 @@ export * from './services/obtain-deliveries';
 export * from './services/fulfill-orders';
 export * from './services/get-fulfilled-orders-by-filter';
 export * from './services/change-required-document-type';
+export * from './application';
