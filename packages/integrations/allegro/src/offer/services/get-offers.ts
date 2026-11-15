@@ -1,5 +1,5 @@
 import { CreateOfferInput } from '@wae/offer';
-import { fetchOffers, QueryParams } from '../api/fetch-offers';
+import { fetchOffers, QueryParams } from '../api';
 import { obtainAuthTokens } from '../../auth/obtain-auth-tokens';
 import { mapOffer } from '../mappers/map-offer';
 

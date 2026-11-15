@@ -3,7 +3,7 @@ import { obtainAuthTokens } from '../../auth';
 import { SyncCursor } from '../../core';
 import { getOffersById } from '../../offer';
 import { store } from '../../store/store';
-import { fetchOrders } from '../api/fetch-orders';
+import { fetchOrders } from '../api';
 import { mapOrder, type Order } from '../mappers/map-order';
 
 type PullOrdersResult = { orders: Order[]; cursor: SyncCursor };

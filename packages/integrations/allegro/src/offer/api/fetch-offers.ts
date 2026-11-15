@@ -1,21 +1,8 @@
-import dotenv from 'dotenv';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { apiResponseRawOffersSchema } from '../offer';
 import * as v from 'valibot';
 import { fetchWithValidation } from '../../core';
 import { store } from '../../store/store';
 import { assertStore } from '../../assertions';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const envPath = path.resolve(__dirname, '../../../../.env');
-
-dotenv.config({
-   path: envPath,
-   quiet: true,
-});
 
 export type QueryParams = {
    'publication.status'?: 'INACTIVE' | 'ACTIVE' | 'ACTIVATING' | 'ENDED';

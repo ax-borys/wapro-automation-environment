@@ -3,7 +3,7 @@ export function originalImgSrcTos128b(imgSrc: string) {
 
    const originalIndex = parts.findIndex((p) => p === 'original');
 
-   if (originalIndex === -1) return 'https://placehold.co/128x128';
+   if (originalIndex === -1) return imgSrc;
 
    parts[originalIndex] = 's128b';
 

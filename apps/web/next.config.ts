@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
             pathname: '/public/**',
             port: '8082',
          },
+         {
+            protocol: 'https',
+            hostname: 'placeholder.com',
+         },
       ],
       dangerouslyAllowLocalIP: true,
    },
