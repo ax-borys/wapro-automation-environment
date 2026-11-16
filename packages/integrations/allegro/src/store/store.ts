@@ -83,10 +83,11 @@ export const createPersistentStore = ({
          {
             name,
             storage: createJSONStorage(() => storage),
-            partialize: ({ accessToken, refreshToken, deviceId }) => ({
+            partialize: ({ accessToken, refreshToken, deviceId, cursors }) => ({
                accessToken,
                refreshToken,
                deviceId,
+               cursors,
             }),
             version: 1,
          },

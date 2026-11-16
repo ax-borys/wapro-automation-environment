@@ -73,6 +73,33 @@ export const orderValidationSchema = v.object({
 
 export type Order = v.InferOutput<typeof orderValidationSchema>;
 
+function mapOrderStatus(
+   rawOrderFulfillmentStatus: RawOrder['fulfillment']['status'],
+): Order['status'] {
+   switch (rawOrderFulfillmentStatus) {
+      case 'NEW':
+         return 'READY_FOR_PROCESSING';
+      case 'PROCESSING':
+         return 'READY_FOR_PROCESSING';
+      case 'READY_FOR_SHIPMENT':
+         return 'PROCESSING';
+      case 'SENT':
+         return 'PROCESSING';
+      case 'READY_FOR_PICKUP':
+         return 'PROCESSING';
+      case 'RETURNED':
+         return 'PROCESSING';
+      case 'PICKED_UP':
+         return 'PROCESSING';
+      case 'SUSPENDED':
+         return 'PROCESSING';
+      case 'CANCELLED':
+         return 'CANCELLED';
+      default:
+         return 'PROCESSING';
+   }
+}
+
 export function mapOrder(order: RawOrder, offers: Offer[]): Order {
    const involvedOffersByExternalId: Record<string, Offer> = {};
 
@@ -200,10 +227,7 @@ export function mapOrder(order: RawOrder, offers: Offer[]): Order {
 
    const validatedDelivery = v.parse(deliveryWithAddressSchema, delivery);
 
-   const status: Order['status'] =
-      order.fulfillment.status === 'SENT'
-         ? 'PROCESSING'
-         : 'READY_FOR_PROCESSING';
+   const status: Order['status'] = mapOrderStatus(order.fulfillment.status);
 
    const mappedOrder: Order = {
       externalId: order.id,

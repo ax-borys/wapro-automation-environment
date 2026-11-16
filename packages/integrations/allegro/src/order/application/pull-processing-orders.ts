@@ -18,29 +18,38 @@ export async function pullProcessingOrdersSince(
       {
          sort: 'updatedAt',
          status: 'READY_FOR_PROCESSING',
-         fulfillmentStatus: 'SENT',
          updatedAtGte: cursor.lastSyncUpdatedAt,
          pageSize: 100,
       },
    );
 
+   // handle possibility that order might be cancelled manually
+   const filteredRawOrders = rawOrders.filter(
+      (rawOrder) => rawOrder.fulfillment.status !== 'CANCELLED',
+   );
+
    const involvedOffers = await getOffersById([
       ...new Set(
-         rawOrders.flatMap((rawOrder) =>
+         filteredRawOrders.flatMap((rawOrder) =>
             rawOrder.lineItems.map((i) => i.offer.id),
          ),
       ),
    ]);
 
-   const orders = rawOrders.map((i) => mapOrder(i, involvedOffers));
+   // only processing orders
+   const orders = filteredRawOrders
+      .map((i) => mapOrder(i, involvedOffers))
+      .filter((order) => order.status === 'PROCESSING');
 
-   const lastRawOrder = rawOrders.at(-1);
+   const lastRawOrder = filteredRawOrders.at(-1);
 
-   const newCursor: SyncCursor = lastRawOrder
-      ? {
-           lastSyncUpdatedAt: new Date(lastRawOrder.updatedAt),
-        }
-      : { ...cursor };
+   // create new cursor with new date only if there're no left not processing orders and minimum one order was returned
+   const newCursor: SyncCursor =
+      lastRawOrder && filteredRawOrders.length === orders.length
+         ? {
+              lastSyncUpdatedAt: new Date(lastRawOrder.updatedAt),
+           }
+         : { ...cursor };
 
    return {
       orders,

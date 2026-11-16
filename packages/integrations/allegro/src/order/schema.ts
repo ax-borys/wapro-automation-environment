@@ -59,7 +59,17 @@ export const rawOrderSchema = v.object({
    ]),
 
    fulfillment: v.object({
-      status: v.picklist(['NEW', 'PROCESSING', 'SENT', 'READY_FOR_SHIPMENT']),
+      status: v.picklist([
+         'NEW',
+         'PROCESSING',
+         'SENT',
+         'READY_FOR_SHIPMENT',
+         'READY_FOR_PICKUP',
+         'PICKED_UP',
+         'CANCELLED',
+         'SUSPENDED',
+         'RETURNED',
+      ]),
    }),
 
    delivery: v.object({
