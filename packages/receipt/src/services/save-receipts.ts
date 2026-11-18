@@ -121,6 +121,12 @@ export async function saveReceipts(
          const [updatedPosition] = await tx
             .update(positionsTable)
             .set({ receiptId: receipt.id })
+            .where(
+               and(
+                  eq(positionsTable.offerId, position.offerId),
+                  eq(positionsTable.orderId, position.orderId),
+               ),
+            )
             .returning();
 
          updatedPositions.push(updatedPosition);
