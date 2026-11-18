@@ -23,17 +23,27 @@ export async function pullReadyForProcessingOrdersSince(
       },
    );
 
+   // handle possibility that order might be cancelled manually
+   const filteredRawOrders = rawOrders.filter(
+      (rawOrder) => rawOrder.fulfillment.status !== 'CANCELLED',
+   );
+
    const involvedOffers = await getOffersById([
       ...new Set(
-         rawOrders.flatMap((rawOrder) =>
+         filteredRawOrders.flatMap((rawOrder) =>
             rawOrder.lineItems.map((i) => i.offer.id),
          ),
       ),
    ]);
 
-   const orders = rawOrders.map((i) => mapOrder(i, involvedOffers));
+   const orders = filteredRawOrders
+      .map((i) => mapOrder(i, involvedOffers))
+      .filter(
+         (order): order is typeof order & { status: 'READY_FOR_PROCESSING' } =>
+            order.status === 'READY_FOR_PROCESSING',
+      );
 
-   const lastRawOrder = rawOrders.at(-1);
+   const lastRawOrder = filteredRawOrders.at(-1);
 
    const newCursor: SyncCursor = lastRawOrder
       ? {
