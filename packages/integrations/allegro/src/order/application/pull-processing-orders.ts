@@ -1,11 +1,42 @@
 import { obtainAuthTokens } from '../../auth';
 import { SyncCursor } from '../../core';
+import { errorOccured } from '../../error';
 import { getOffersById } from '../../offer';
 import { store } from '../../store/store';
 import { fetchOrders } from '../api';
 import { mapOrder, type Order } from '../mappers/map-order';
 
 type PullOrdersResult = { orders: Order[]; cursor: SyncCursor };
+
+function pickLowestDate(dates: Date[]): Date {
+   if (!dates.length) {
+      throw errorOccured(
+         'UNPROCESSABLE',
+         'pickLowestDate argument must be not empty array.',
+      );
+   }
+
+   const lowestTimestamp = Math.min(...dates.map((date) => date.getTime()));
+
+   const lowestDate = new Date(lowestTimestamp);
+
+   return lowestDate;
+}
+
+function pickHighestDate(dates: Date[]): Date {
+   if (!dates.length) {
+      throw errorOccured(
+         'UNPROCESSABLE',
+         'pickHighestDate argument must be not empty array.',
+      );
+   }
+
+   const highestTimestamp = Math.max(...dates.map((date) => date.getTime()));
+
+   const highestDate = new Date(highestTimestamp);
+
+   return highestDate;
+}
 
 export async function pullProcessingOrdersSince(
    cursor: SyncCursor,
@@ -36,23 +67,36 @@ export async function pullProcessingOrdersSince(
       ),
    ]);
 
-   // only processing orders
-   const orders = filteredRawOrders
-      .map((i) => mapOrder(i, involvedOffers))
-      .filter((order) => order.status === 'PROCESSING');
+   const orders = filteredRawOrders.map((i) => mapOrder(i, involvedOffers));
+   const processingOrders = orders.filter(
+      (order): order is typeof order & { status: 'PROCESSING' } =>
+         order.status === 'PROCESSING',
+   );
 
-   const lastRawOrder = filteredRawOrders.at(-1);
+   const notProcessingOrders = orders.filter(
+      (
+         order,
+      ): order is typeof order & {
+         status: Exclude<(typeof order)['status'], 'PROCESSING'>;
+      } => order.status !== 'PROCESSING',
+   );
 
-   // create new cursor with new date only if there're no left not processing orders and minimum one order was returned
-   const newCursor: SyncCursor =
-      lastRawOrder && filteredRawOrders.length === orders.length
-         ? {
-              lastSyncUpdatedAt: new Date(lastRawOrder.updatedAt),
-           }
-         : { ...cursor };
+   const newCursor: SyncCursor = notProcessingOrders.length
+      ? {
+           lastSyncUpdatedAt: pickLowestDate(
+              notProcessingOrders.map((order) => order.preparedAt),
+           ),
+        }
+      : processingOrders.length
+        ? {
+             lastSyncUpdatedAt: pickHighestDate(
+                processingOrders.map((order) => order.preparedAt),
+             ),
+          }
+        : { ...cursor };
 
    return {
-      orders,
+      orders: processingOrders,
       cursor: newCursor,
    };
 }

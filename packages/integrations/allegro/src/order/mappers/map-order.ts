@@ -54,6 +54,11 @@ export const deliveryWithAddressSchema = v.object({
 export const orderValidationSchema = v.object({
    ...v.omit(orderSchema, ['id', 'customerId', 'recepientId', 'deliveryId'])
       .entries,
+   status: v.picklist([
+      'READY_FOR_PROCESSING',
+      'PROCESSING',
+      'CANCELLED',
+   ] satisfies v.InferOutput<typeof orderSchema>['status'][]),
    customer: customerSchema,
    recipient: recipientSchema,
    delivery: deliveryWithAddressSchema,
