@@ -1,3 +1,3 @@
-export default function Layout({ children }: LayoutProps<'/receipts/pending'>) {
+export default function Layout({ children }: LayoutProps<'/orders/pending'>) {
    return <>{children}</>;
 }
