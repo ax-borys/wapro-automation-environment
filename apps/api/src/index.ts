@@ -44,7 +44,11 @@ const app = new Hono()
    .use(
       '*',
       cors({
-         origin: ['http://localhost:8081', 'http://localhost:3000'],
+         origin: [
+            'http://localhost:8081',
+            'http://localhost:3000',
+            'https://salescenter.allegro.com',
+         ],
       }),
    )
    .use(
