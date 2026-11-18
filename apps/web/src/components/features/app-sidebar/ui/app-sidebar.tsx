@@ -15,15 +15,14 @@ import {
    SidebarGroupLabel,
    SidebarHeader,
    SidebarMenu,
-   SidebarMenuAction,
    SidebarMenuButton,
    SidebarMenuItem,
    SidebarMenuSub,
    SidebarMenuSubButton,
    SidebarMenuSubItem,
 } from '@/components/ui/sidebar';
-import { MoonIcon, PlugsIcon, SunIcon } from '@phosphor-icons/react';
-import { AtomIcon, ChevronLeft, ChevronRight, Notebook } from 'lucide-react';
+import { NotebookIcon, PlugsIcon, SunIcon } from '@phosphor-icons/react';
+import { ChevronRight } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 
@@ -68,8 +67,8 @@ export function AppSidebar() {
                         <SidebarMenuItem>
                            <CollapsibleTrigger asChild>
                               <SidebarMenuButton className="flex">
-                                 <Notebook />
-                                 <span>Receipts</span>
+                                 <NotebookIcon />
+                                 <span>Orders</span>
                                  <ChevronRight className="ml-auto" />
                               </SidebarMenuButton>
                            </CollapsibleTrigger>
@@ -77,14 +76,14 @@ export function AppSidebar() {
                               <SidebarMenuSub>
                                  <SidebarMenuSubItem>
                                     <SidebarMenuSubButton asChild>
-                                       <Link href="/receipts/pending">
+                                       <Link href="/orders/pending">
                                           Pending
                                        </Link>
                                     </SidebarMenuSubButton>
                                  </SidebarMenuSubItem>
                                  <SidebarMenuSubItem>
                                     <SidebarMenuSubButton asChild>
-                                       <Link href="/receipts/repository">
+                                       <Link href="/orders/repository">
                                           Repository
                                        </Link>
                                     </SidebarMenuSubButton>

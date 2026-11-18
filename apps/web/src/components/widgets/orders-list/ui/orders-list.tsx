@@ -4,7 +4,13 @@ import { Fragment } from 'react/jsx-runtime';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { FileTextIcon, ReceiptIcon } from '@phosphor-icons/react';
+import {
+   BookIcon,
+   FileTextIcon,
+   NotebookIcon,
+   ReceiptIcon,
+   SmileyIcon,
+} from '@phosphor-icons/react';
 import {
    OrderModel,
    useFetchPendingOrders,
@@ -35,6 +41,8 @@ import {
    ToolbarPaginationPanel,
    ToolbarSearchbar,
 } from '@/components/ui/toolbar';
+import { Spinner } from '@/components/ui/spinner';
+import { ListOrderedIcon } from 'lucide-react';
 
 export function OrdersList() {
    const {
@@ -58,7 +66,7 @@ export function OrdersList() {
 
    const ordersList = useMemo(() => filtredOrders, [orders, currentFilters]);
 
-   const { table, isMounted, globalFilter, setGlobalFilter } = useDataTable(
+   const { table, globalFilter, setGlobalFilter } = useDataTable(
       ordersList,
       columns,
       {
@@ -76,9 +84,13 @@ export function OrdersList() {
 
    useGetAndStoreOffers();
 
+   const [fetched, setFetched] = useState(false);
+   const isFetching = !fetched;
+   const isEmpty = !sortedOrdersList.length;
+
    useEffect(() => {
       // Update only user refreshes page manually.
-      if (sortedOrdersList.length) return;
+      if (!isFetching) return;
 
       const promise = fetchPendingOrders();
 
@@ -90,8 +102,9 @@ export function OrdersList() {
          setSortedOrderIds(
             new Set(orders.sort(sortOrders).map((order) => order.id)),
          );
+         setFetched(true);
       });
-   }, []);
+   }, [isFetching]);
 
    const generateBulkFiscalNumber = (
       orderId: OrderModel['id'],
@@ -161,20 +174,6 @@ export function OrdersList() {
       await fulfillOrders([...selectedOrdersIds]);
    };
 
-   console.log(
-      typeof window === 'undefined' ? 'SERVER' : 'CLIENT',
-      JSON.stringify(table.state.pagination),
-      table.getRowModel().rows.length,
-      table.getPageCount(),
-      'canNext=',
-      table.getCanNextPage(),
-   );
-
-   const [hasHydrated, setHasHydrated] = useState(false);
-   useEffect(() => {
-      setHasHydrated(true);
-   }, []);
-
    return (
       <div className="flex-1 min-h-0 flex flex-col">
          <Toolbar>
@@ -237,7 +236,36 @@ export function OrdersList() {
             cacheKey={`pending-orders-${currentFilters.requiredDocumentType}`}
             className="overflow-y-scroll min-h-0 flex-1"
          >
-            {ordersOfCurrentPage.length ? (
+            {isFetching ? (
+               <Empty className="w-full">
+                  <EmptyHeader>
+                     <EmptyMedia variant="icon">
+                        <Spinner />
+                     </EmptyMedia>
+                     <EmptyTitle className="shimmer">
+                        Loading orders...
+                     </EmptyTitle>
+                     <EmptyDescription>
+                        Please wait while orders are being fetched from
+                        connected providers. Do not refresh the page.
+                     </EmptyDescription>
+                  </EmptyHeader>
+               </Empty>
+            ) : fetched && isEmpty ? (
+               <Empty className="w-full">
+                  <EmptyHeader>
+                     <EmptyMedia variant="icon">
+                        <SmileyIcon />
+                     </EmptyMedia>
+                     <EmptyTitle>Orders completed. Congrats! 🎉</EmptyTitle>
+                     <EmptyDescription>
+                        All pending orders were processed and fulfilled. Refresh
+                        page in order to try to fetch another ones if they're
+                        exist.
+                     </EmptyDescription>
+                  </EmptyHeader>
+               </Empty>
+            ) : ordersOfCurrentPage.length ? (
                ordersOfCurrentPage.map((order, i) => (
                   <Fragment key={order.id}>
                      <Order
@@ -257,11 +285,11 @@ export function OrdersList() {
                <Empty>
                   <EmptyHeader>
                      <EmptyMedia variant={'icon'}>
-                        <FileTextIcon />
+                        <NotebookIcon />
                      </EmptyMedia>
-                     <EmptyTitle>No records found</EmptyTitle>
+                     <EmptyTitle>No orders found</EmptyTitle>
                      <EmptyDescription>
-                        Unfortunatly, no records matched filters.
+                        Unfortunatly, no orders matched filters.
                      </EmptyDescription>
                   </EmptyHeader>
                </Empty>
