@@ -1,5 +1,4 @@
 import { normilizeItems } from '@/entities/offer';
-import { normilizePositions } from '../orders.store';
 import {
    InvoiceModel,
    OrderModel,
@@ -61,19 +60,17 @@ export function serverFullOrderToOrderModel(
       },
       isSelected: state?.isSelected !== undefined ? state.isSelected : false,
       requiredDocumentType: order.requiredDocumentType,
-      positions: normilizePositions(
-         order.positions.map((position) => ({
-            ...position,
-            offer: {
-               ...position.offer,
-               items: normilizeItems(
-                  position.offer.items.flatMap((item) => ({
-                     ...item.product,
-                     quantity: item.quantity,
-                  })),
-               ),
-            },
-         })),
-      ),
+      positions: order.positions.map((position) => ({
+         ...position,
+         offer: {
+            ...position.offer,
+            items: normilizeItems(
+               position.offer.items.flatMap((item) => ({
+                  ...item.product,
+                  quantity: item.quantity,
+               })),
+            ),
+         },
+      })),
    };
 }

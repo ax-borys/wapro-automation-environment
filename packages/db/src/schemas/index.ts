@@ -122,26 +122,22 @@ export const invoicesTable = sqliteTable('invoices', {
       .$defaultFn(() => new Date()),
 });
 
-export const positionsTable = sqliteTable(
-   'positions',
-   {
-      receiptId: int('receipt_id').references(() => receiptsTable.id),
-      invoiceId: int('invoice_id').references(() => invoicesTable.id),
-      orderId: int('order_id')
-         .notNull()
-         .references(() => ordersTable.id),
-      offerId: int('offer_id')
-         .notNull()
-         .references(() => offersTable.id),
+export const positionsTable = sqliteTable('positions', {
+   receiptId: int('receipt_id').references(() => receiptsTable.id),
+   invoiceId: int('invoice_id').references(() => invoicesTable.id),
+   orderId: int('order_id')
+      .notNull()
+      .references(() => ordersTable.id),
+   offerId: int('offer_id')
+      .notNull()
+      .references(() => offersTable.id),
 
-      title: text().notNull(),
-      imgSrc: text('image_source').notNull(),
-      quantity: int().notNull(),
-      price: int().notNull(),
-      clientTag: text('client_tag'),
-   },
-   (t) => [primaryKey({ columns: [t.receiptId, t.orderId, t.offerId] })],
-);
+   title: text().notNull(),
+   imgSrc: text('image_source').notNull(),
+   quantity: int().notNull(),
+   price: int().notNull(),
+   clientTag: text('client_tag'),
+});
 
 export const productsTable = sqliteTable(
    'products',

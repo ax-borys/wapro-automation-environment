@@ -69,16 +69,6 @@ export type OrdersStore = {
    ) => OrderModel | undefined;
 };
 
-export function normilizePositions(
-   positionsArr: PositionModel[],
-): Record<PositionModel['offer']['id'], PositionModel> {
-   const position: Record<PositionModel['offer']['id'], PositionModel> = {};
-
-   positionsArr.forEach((p) => (position[p.offer.id] = p));
-
-   return position;
-}
-
 export const useOrdersStore = create<OrdersStore>()(
    immer((set, get) => ({
       orders: {},

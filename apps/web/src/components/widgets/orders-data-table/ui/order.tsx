@@ -1,18 +1,9 @@
 'use client';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
-   BadgeFiskalNumber,
-   BadgePaid,
-   BadgePickup,
    OrderCard,
-   OrderCardActionButton,
    OrderCardBody,
    OrderCardDeliveryCard,
    OrderCardFooter,
-   OrderCardFooterActions,
-   OrderCardHeader,
-   OrderCardPackage,
-   OrderCardRecipient,
    OrderCardTable,
    OrderCardTableBody,
    OrderCardTableFooter,
@@ -21,37 +12,13 @@ import {
 } from '@/components/ui/order-card';
 import currency from 'currency.js';
 import { Button } from '@/components/ui/button';
-import {
-   FloppyDiskIcon,
-   InvoiceIcon,
-   ReceiptIcon,
-   SealCheckIcon,
-   SpinnerIcon,
-   WarningIcon,
-} from '@phosphor-icons/react';
-import {
-   useOrder,
-   useFulfillOrders,
-   type OrderModel,
-   useFiscalNumber,
-   useInvoiceNumber,
-   useReceiptNumber,
-} from '@/entities/order';
-import { Badge } from '@/components/ui/badge';
+import { WarningIcon } from '@phosphor-icons/react';
+import { useOrder, type OrderModel } from '@/entities/order';
 import { useOffersStore } from '@/entities/offer';
-import Link from 'next/link';
-import { InvoiceNumberBadge, ReceiptNumberBadge } from '@/components/ui/badges';
-import { OrderActions } from '@/components/features/order-actions';
 import { EditOffer } from '@/components/features/edit-offer';
-import { SetInvoiceNumber } from '@/components/features/set-invoice-number';
-import { SetFiscalNumber } from '@/components/features/set-fiscal-number';
 
 export function Order({ id }: { id: OrderModel['id'] }) {
-   const { order, status } = useOrder(id);
-
-   const receiptNumber = useReceiptNumber(order.id);
-   const fiscalNumber = useFiscalNumber(order.id);
-   const invoiceNumber = useInvoiceNumber(order.id);
+   const { order } = useOrder(id);
 
    const { offers } = useOffersStore();
 
@@ -61,7 +28,8 @@ export function Order({ id }: { id: OrderModel['id'] }) {
             <OrderCardTable>
                <OrderCardTableHeader />
                <OrderCardTableBody>
-                  {Object.values(order.positions).map((position, i) => {
+                  {order.positions.map((position, i) => {
+                     ``;
                      const offer = offers[position.offerId] ?? position.offer;
 
                      return (

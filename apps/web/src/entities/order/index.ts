@@ -1,5 +1,4 @@
 export {
-   normilizePositions,
    useOrdersStore,
    useFiscalNumber,
    useInvoice,

@@ -51,7 +51,7 @@ export type OrderModel = {
    original: OrderServer;
    receipt: ReceiptModel;
    invoice: InvoiceModel;
-   positions: Record<PositionModel['offer']['id'], PositionModel>;
+   positions: PositionModel[];
    isSelected: boolean;
    requiredDocumentType: Order['requiredDocumentType'];
 };

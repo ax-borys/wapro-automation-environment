@@ -111,7 +111,7 @@ export function Order({
             <OrderCardTable>
                <OrderCardTableHeader />
                <OrderCardTableBody>
-                  {Object.values(order.positions).map((position, i) => {
+                  {order.positions.map((position, i) => {
                      const offer = offers[position.offerId] ?? position.offer;
 
                      return (
