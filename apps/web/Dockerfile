@@ -43,7 +43,7 @@ COPY . .
 ENV NODE_ENV=production
 ENV API_URL=http://api:8082
 
-RUN corepack enable pnpm && corepack use pnpm@12.9.1 && pnpm --filter @wae/web... build
+RUN corepack enable pnpm && corepack use pnpm@latest && pnpm --filter @wae/web... build
 
 FROM node:${NODE_VERSION} AS runner
 
