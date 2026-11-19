@@ -84,9 +84,9 @@ export function OrdersList() {
 
    useGetAndStoreOffers();
 
-   const [fetched, setFetched] = useState(false);
-   const isFetching = !fetched;
    const isEmpty = !sortedOrdersList.length;
+   const [fetched, setFetched] = useState(!isEmpty);
+   const isFetching = !fetched;
 
    useEffect(() => {
       // Update only user refreshes page manually.
@@ -257,11 +257,10 @@ export function OrdersList() {
                      <EmptyMedia variant="icon">
                         <SmileyIcon />
                      </EmptyMedia>
-                     <EmptyTitle>Orders completed. Congrats! 🎉</EmptyTitle>
+                     <EmptyTitle>Orders are completed. Congrats! 🎉</EmptyTitle>
                      <EmptyDescription>
                         All pending orders were processed and fulfilled. Refresh
-                        page in order to try to fetch another ones if they're
-                        exist.
+                        page in order to try to fetch new ones if they exist.
                      </EmptyDescription>
                   </EmptyHeader>
                </Empty>
