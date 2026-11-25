@@ -15,6 +15,7 @@
       "@tanstack/react-table": "^9.1.2",
       "@wae/api-types": "workspace:*",
       "@wae/error": "workspace:*",
+      "@wae/kernel": "workspace:*",
       "@wae/offer": "workspace:*",
       "@wae/receipt": "workspace:*",
       "class-variance-authority": "^0.7.1",

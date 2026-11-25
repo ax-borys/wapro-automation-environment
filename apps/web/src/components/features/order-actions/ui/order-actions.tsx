@@ -6,17 +6,24 @@ import {
    DropdownMenuTrigger,
    DropdownMenuLabel,
    DropdownMenuItem,
+   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import {
    OrderModel,
+   useCancelOrders,
    useChangeRequiredDocumentType,
    useOrdersStore,
 } from '@/entities/order';
-import { InvoiceIcon, ReceiptIcon } from '@phosphor-icons/react';
+import { InvoiceIcon, ReceiptIcon, TrashIcon } from '@phosphor-icons/react';
+import { ProhibitIcon } from '@phosphor-icons/react/dist/ssr';
+import { isCancellable } from '@wae/kernel';
 import { EllipsisVerticalIcon } from 'lucide-react';
 
 export function OrderActions({ orderId }: { orderId: OrderModel['id'] }) {
-   const { requiredDocumentType } = useOrdersStore((s) => s.orders[orderId]);
+   const { requiredDocumentType, original } = useOrdersStore(
+      (s) => s.orders[orderId],
+   );
+   const cancelOrders = useCancelOrders();
    const changeRequiredDocumentType = useChangeRequiredDocumentType(orderId);
 
    return (
@@ -49,6 +56,19 @@ export function OrderActions({ orderId }: { orderId: OrderModel['id'] }) {
                      Require invoice
                   </DropdownMenuItem>
                )}
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+               <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() =>
+                     isCancellable({ status: original.status }) &&
+                     cancelOrders([orderId])
+                  }
+               >
+                  <ProhibitIcon />
+                  Cancel
+               </DropdownMenuItem>
             </DropdownMenuGroup>
          </DropdownMenuContent>
       </DropdownMenu>

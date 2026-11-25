@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button';
 import {
    FloppyDiskIcon,
    InvoiceIcon,
+   ProhibitIcon,
    ReceiptIcon,
    SealCheckIcon,
    SpinnerIcon,
@@ -54,6 +55,7 @@ export function Order({
    onChangeFiscalNumber?: (value: number | null) => void;
 }) {
    const { order, selectToggle, status } = useOrder(id);
+   const isCancelled = order.original.status === 'CANCELLED';
 
    const receiptNumber = useReceiptNumber(order.id);
    const fiscalNumber = useFiscalNumber(order.id);
@@ -172,7 +174,11 @@ export function Order({
                <OrderCardPackage numberOfPackages={order.original.packages} />
             </div>
             <OrderCardFooterActions>
-               {order.requiredDocumentType === 'INVOICE' ? (
+               {isCancelled ? (
+                  <Button variant={'destructive'}>
+                     <ProhibitIcon /> Cancelled
+                  </Button>
+               ) : order.requiredDocumentType === 'INVOICE' ? (
                   <>
                      {status !== 'RECORDED' ? (
                         <SetInvoiceNumber orderId={order.id} />

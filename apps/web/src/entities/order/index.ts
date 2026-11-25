@@ -18,3 +18,4 @@ export * from './hooks/use-change-required-document-type';
 export * from './hooks/use-update-fiscal-number';
 export * from './hooks/use-fetch-fulfilled-orders';
 export * from './hooks/use-fetch-pending-orders';
+export * from './hooks/use-cancel-orders';

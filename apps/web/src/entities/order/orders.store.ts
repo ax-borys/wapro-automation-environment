@@ -28,6 +28,7 @@ import {
    getReceiptStatus,
 } from './utils/get-document-status';
 import { formatFiscalNumber } from './utils/format-fiscal-number';
+import { assignKey } from '@wae/kernel';
 
 export type OrdersStore = {
    orders: Record<OrderModel['id'], OrderModel>;
@@ -67,6 +68,9 @@ export type OrdersStore = {
    getOrderByReceiptId: (
       receiptId: OriginalReceipt['id'],
    ) => OrderModel | undefined;
+   patchOrder: (
+      patchingOrder: Partial<OrderModel['original']> & { id: OrderModel['id'] },
+   ) => void;
 };
 
 export const useOrdersStore = create<OrdersStore>()(
@@ -220,6 +224,16 @@ export const useOrdersStore = create<OrdersStore>()(
 
          return order;
       },
+      patchOrder: (patchingOrder) =>
+         set((draft) => {
+            for (const key of Object.keys(
+               patchingOrder,
+            ) as (keyof typeof patchingOrder)[]) {
+               const order = draft.orders[patchingOrder.id];
+
+               assignKey(order.original, patchingOrder, key);
+            }
+         }),
    })),
 );
 
