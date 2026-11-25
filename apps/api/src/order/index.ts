@@ -25,6 +25,8 @@ import {
    obtainOrderInputSchema,
    obtainOrders,
    obtainRecipients,
+   cancelOrders,
+   cancelOrdersInputSchema,
 } from '@wae/order';
 import { db } from '@wae/db';
 import { obtainAddresses } from '@wae/address';
@@ -289,6 +291,22 @@ export const order = new Hono()
          error: null,
       });
    })
+   .post(
+      '/orders/cancel',
+      valibotJsonMiddleware(cancelOrdersInputSchema),
+      async (c) => {
+         const cancelOrdersInput = c.req.valid('json');
+
+         const cancelledOrders = await db.transaction((tx) =>
+            cancelOrders(tx, cancelOrdersInput),
+         );
+
+         return c.json<ApiResponse<typeof cancelledOrders>>({
+            data: cancelledOrders,
+            error: null,
+         });
+      },
+   )
    .get('/mock/orders/peinding', async (c) => {
       const orders = [
          {
