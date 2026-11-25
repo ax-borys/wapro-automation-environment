@@ -5,7 +5,7 @@ import { Order, orderSchema, type Tx } from '@wae/types';
 import { inArray } from 'drizzle-orm';
 import * as v from 'valibot';
 
-const cancelOrdersInputSchema = v.pipe(
+export const cancelOrdersInputSchema = v.pipe(
    v.array(orderSchema.entries.id),
    v.nonEmpty(),
 );
