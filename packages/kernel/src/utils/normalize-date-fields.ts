@@ -1,14 +1,33 @@
+type DateInput = string | number;
+
+type DateKeys<T> = {
+   [K in keyof T]-?: [NonNullable<T[K]>] extends [never]
+      ? never
+      : NonNullable<T[K]> extends DateInput
+        ? K
+        : never;
+}[keyof T];
+
+type ToDate<V> = V extends DateInput ? Date : V;
+
+type NormalizedDates<T, TKey extends keyof T> = {
+   [K in keyof T]: K extends TKey ? ToDate<T[K]> : T[K];
+};
+
 export function normalizeDateFields<
    T extends Record<string, any>,
-   TKey extends keyof T,
->(obj: T, keys: TKey[]) {
-   const result: Record<keyof T, any | Date> = { ...obj };
+   TKey extends DateKeys<T>,
+>(obj: T, keys: TKey[]): NormalizedDates<T, TKey> {
+   const result: Record<keyof T, unknown> = { ...obj };
 
    for (const key of keys) {
-      const date = new Date(obj[key]);
+      const value = obj[key];
 
-      result[key] = date;
+      result[key] =
+         typeof value === 'string' || typeof value === 'number'
+            ? new Date(value)
+            : value;
    }
 
-   return result as Omit<T, TKey> & Record<TKey, Date>;
+   return result as NormalizedDates<T, TKey>;
 }
