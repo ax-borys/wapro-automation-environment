@@ -61,10 +61,7 @@ export function OrderActions({ orderId }: { orderId: OrderModel['id'] }) {
             <DropdownMenuGroup>
                <DropdownMenuItem
                   variant="destructive"
-                  onSelect={() =>
-                     isCancellable({ status: original.status }) &&
-                     cancelOrders([orderId])
-                  }
+                  onSelect={() => cancelOrders([orderId])}
                >
                   <ProhibitIcon />
                   Cancel

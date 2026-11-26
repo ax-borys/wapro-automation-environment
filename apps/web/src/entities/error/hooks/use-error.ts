@@ -5,7 +5,7 @@ export function useError() {
    const error = useContext(errorContext);
    const setError = useContext(setErrorContext);
 
-   const raiseError = (error: ErrorModel) => {
+   const raiseError = (error: any) => {
       setError?.(error);
    };
 
