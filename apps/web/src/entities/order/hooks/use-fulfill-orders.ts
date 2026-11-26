@@ -26,6 +26,7 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
 
    const attachReceipt = useOrdersStore((s) => s.attachReceipt);
    const attachInvoice = useOrdersStore((s) => s.attachInvoice);
+   const patchOrder = useOrdersStore((s) => s.patchOrder);
 
    const fulfillOrders = async (orderIdsOverride?: typeof orderIds) => {
       const finalOrderIds = new Set(orderIdsOverride ?? orderIds);
@@ -73,6 +74,13 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
 
                clearDraftInvoiceNumber(receiptOrInvoice.orderId);
             }
+
+            //TODO+FIX: return FullOrder from endpoing and pass it to patchOrder.
+            patchOrder({
+               id: receiptOrInvoice.orderId,
+               status: 'FULFILLED',
+               fulfilledAt: new Date(),
+            });
          });
       } catch (error) {
          const parsedError = v.safeParse(errorModelSchema, error);
