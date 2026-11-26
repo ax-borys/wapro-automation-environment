@@ -68,7 +68,7 @@ export type OrdersStore = {
    getOrderByReceiptId: (
       receiptId: OriginalReceipt['id'],
    ) => OrderModel | undefined;
-   patchOrder: (
+   shallowPatchOrder: (
       patchingOrder: Partial<OrderModel['original']> & { id: OrderModel['id'] },
    ) => void;
 };
@@ -224,7 +224,7 @@ export const useOrdersStore = create<OrdersStore>()(
 
          return order;
       },
-      patchOrder: (patchingOrder) =>
+      shallowPatchOrder: (patchingOrder) =>
          set((draft) => {
             for (const key of Object.keys(
                patchingOrder,

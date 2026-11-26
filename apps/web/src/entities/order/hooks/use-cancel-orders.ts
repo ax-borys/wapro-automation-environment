@@ -5,7 +5,7 @@ import { OrderModel } from '../types';
 import { normalizeDateFields } from '@wae/kernel';
 
 export function useCancelOrders() {
-   const { patchOrder } = useOrdersStore();
+   const { shallowPatchOrder } = useOrdersStore();
    const { raiseError } = useError();
 
    return async (ids: OrderModel['id'][]) => {
@@ -18,7 +18,7 @@ export function useCancelOrders() {
       if (!cancelledOrders) return;
 
       for (const order of cancelledOrders) {
-         patchOrder(
+         shallowPatchOrder(
             normalizeDateFields(order, [
                'createdAt',
                'preparedAt',

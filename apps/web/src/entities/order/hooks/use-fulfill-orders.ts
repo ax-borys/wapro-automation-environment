@@ -26,7 +26,7 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
 
    const attachReceipt = useOrdersStore((s) => s.attachReceipt);
    const attachInvoice = useOrdersStore((s) => s.attachInvoice);
-   const patchOrder = useOrdersStore((s) => s.patchOrder);
+   const shallowPatchOrder = useOrdersStore((s) => s.shallowPatchOrder);
 
    const fulfillOrders = async (orderIdsOverride?: typeof orderIds) => {
       const finalOrderIds = new Set(orderIdsOverride ?? orderIds);
@@ -76,7 +76,7 @@ export function useFulfillOrders(orderIds: OrderModel['id'][]) {
             }
 
             //TODO+FIX: return FullOrder from endpoing and pass it to patchOrder.
-            patchOrder({
+            shallowPatchOrder({
                id: receiptOrInvoice.orderId,
                status: 'FULFILLED',
                fulfilledAt: new Date(),
