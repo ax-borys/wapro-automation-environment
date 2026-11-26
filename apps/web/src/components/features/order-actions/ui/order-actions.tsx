@@ -43,6 +43,10 @@ export function OrderActions({ orderId }: { orderId: OrderModel['id'] }) {
                </DropdownMenuLabel>
                {requiredDocumentType === 'INVOICE' ? (
                   <DropdownMenuItem
+                     disabled={
+                        original.status === 'FULFILLED' ||
+                        original.status === 'CANCELLED'
+                     }
                      onSelect={() => changeRequiredDocumentType('RECEIPT')}
                   >
                      <ReceiptIcon />
@@ -50,6 +54,10 @@ export function OrderActions({ orderId }: { orderId: OrderModel['id'] }) {
                   </DropdownMenuItem>
                ) : (
                   <DropdownMenuItem
+                     disabled={
+                        original.status === 'FULFILLED' ||
+                        original.status === 'CANCELLED'
+                     }
                      onSelect={() => changeRequiredDocumentType('INVOICE')}
                   >
                      <InvoiceIcon />
