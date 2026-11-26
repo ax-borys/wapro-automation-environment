@@ -7,3 +7,4 @@ export * from './order';
 export * from './utils/src-external-id-utils';
 export * from './utils/normalize-text';
 export * from './utils/assign-key';
+export * from './utils/normalize-date-fields';
